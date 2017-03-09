@@ -1,2 +1,1 @@
-# trading-network
-Scout/Ethereum Trading Network Demo
+# Scout/Ethereum Trading Network Demo
