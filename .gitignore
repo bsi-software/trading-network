@@ -11,9 +11,9 @@ log/
 target/
 
 # Eclipse
-.classpath
-.project
-.settings/
+#.classpath
+#.project
+#.settings/
 .metadata/
 
 # Intellij
