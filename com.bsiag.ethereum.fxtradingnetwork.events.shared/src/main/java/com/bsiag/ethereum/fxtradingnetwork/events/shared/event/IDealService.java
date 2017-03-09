@@ -33,4 +33,6 @@ public interface IDealService {
   DealFormData prepareCreate(DealFormData formData);
 
   DealFormData store(DealFormData formData);
+
+  boolean publish(String dealId);
 }

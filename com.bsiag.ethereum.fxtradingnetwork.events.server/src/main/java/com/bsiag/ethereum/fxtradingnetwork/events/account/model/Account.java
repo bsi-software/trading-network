@@ -34,7 +34,7 @@ public class Account {
     this.password = password;
 
     try {
-      fileName = WalletUtils.generateNewWalletFile(password, new File(pathToFile));
+      fileName = WalletUtils.generateFullNewWalletFile(password, new File(pathToFile));
       credentials = getCredentials();
 
       if (credentials == null) {

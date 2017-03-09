@@ -46,7 +46,7 @@ public class Transaction {
       data = "";
     }
 
-    tx = RawTransaction.createFunctionCallTransaction(nonce, gasPrice, gasLimit, to, amountWei, data);
+    tx = RawTransaction.createEtherTransaction(nonce, gasPrice, gasLimit, to, amountWei);
     setCreated(new Date());
     status = UNDEFINED;
   }

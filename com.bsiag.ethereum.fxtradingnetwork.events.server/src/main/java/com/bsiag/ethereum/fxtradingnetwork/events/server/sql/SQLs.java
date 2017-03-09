@@ -68,7 +68,8 @@ public interface SQLs {
       + "WHERE        deal_id = :dealId";
 
   String DEAL_SELECT = ""
-      + "SELECT       deal_nr, "
+      + "SELECT       deal_nr,"
+      + "			  organization_id, "
       + "             amount, "
       + "             exchange_rate, "
       + "             order_book_type, "
@@ -77,6 +78,7 @@ public interface SQLs {
       + "FROM         DEAL "
       + "WHERE        deal_id = :dealId "
       + "INTO         :dealNr, "
+      + "			  :organizationId, "
       + "             :amount, "
       + "             :exchangeRate, "
       + "             :orderBookType, "

@@ -11,6 +11,7 @@ import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.form.FormEvent;
 import org.eclipse.scout.rt.client.ui.form.FormListener;
+import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.exception.ProcessingException;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
@@ -90,12 +91,14 @@ public abstract class AbstractDealsTablePage<T extends AbstractDealsTablePage<T>
 
       @Override
       protected Set<? extends IMenuType> getConfiguredMenuTypes() {
-        return CollectionUtility.hashSet(TableMenuType.SingleSelection, TableMenuType.MultiSelection);
+        return CollectionUtility.hashSet(TableMenuType.SingleSelection);
       }
 
       @Override
       protected void execAction() {
-        // TODO [xyz] send data to SmartContract and update Database
+    	  String dealId = getDealIdColumn().getSelectedValue();
+    	  BEANS.get(IDealService.class).publish(dealId);
+    	  reloadPage();
       }
     }
 
