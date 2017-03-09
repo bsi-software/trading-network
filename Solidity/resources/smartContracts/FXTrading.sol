@@ -54,6 +54,7 @@ contract FXTrading {
                 if (i < arrayToRemove.length -1) {
                     arrayToRemove[i] = arrayToRemove[i+1];
                 } else {
+                    // WARN: this does not remove an element, it just sets all values to default!!! check unit test an array state printing!
                     delete arrayToRemove[i];
                 }
             }

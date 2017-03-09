@@ -31,7 +31,6 @@ public class TestFXTradingContract {
 	private static final String CLIENT_PORT = "8545";
 	
 	private static final BigInteger GAS_PRICE_DEFAULT = BigInteger.valueOf(20_000_000_000L);
-	private static final BigInteger GAS_LIMIT_DEFAULT = BigInteger.valueOf(500_000L);
 	private static final BigInteger INITIAL_VALUE_DEFAULT = BigInteger.valueOf(2_000_000L);
 	
 	private static final Uint256 QUANTITY_100 = new Uint256(BigInteger.valueOf(100));
@@ -40,6 +39,8 @@ public class TestFXTradingContract {
 	private static final Uint256 PRICE_2020 = new Uint256(BigInteger.valueOf(2020));
 	private static final Uint256 PRICE_2025 = new Uint256(BigInteger.valueOf(2025));
 	private static final Uint256 PRICE_2030 = new Uint256(BigInteger.valueOf(2030));
+	
+	private static final Uint256 DEAL_NR_1 = new Uint256(BigInteger.ONE);
 	
 	private static final Utf8String CONTRACT_SYMBOL = new Utf8String("CHFEUR");
 	
@@ -83,11 +84,7 @@ public class TestFXTradingContract {
 	@Test
 	public void testDealOrdering() {
 		try {
-			FXTrading contract = FXTrading.deploy(web3j, Alice.CREDENTIALS, GAS_PRICE_DEFAULT, INITIAL_VALUE_DEFAULT,
-					BigInteger.ZERO, CONTRACT_SYMBOL).get();
-			System.out.println(String.format("Contract deployed at addess %s", contract.getContractAddress()));
-
-			assertEquals(CONTRACT_SYMBOL, contract.currencyPair().get());
+			FXTrading contract = deployFXTradingContract();
 
 			contract.createDeal(QUANTITY_100, PRICE_2030, SELL, COMPANY_1).get();
 			contract.createDeal(QUANTITY_100, PRICE_2025, SELL, COMPANY_1).get();
@@ -109,6 +106,55 @@ public class TestFXTradingContract {
 		}
 	}
 
+	@Test
+	public void testDealRemoving() {
+		try {
+			FXTrading contract = deployFXTradingContract();
+			
+			contract.createDeal(QUANTITY_100, PRICE_2025, SELL, COMPANY_1).get();
+			contract.createDeal(QUANTITY_100, PRICE_2030, SELL, COMPANY_1).get();
+			contract.createDeal(QUANTITY_200, PRICE_2015, SELL, COMPANY_1).get();
+			
+			printQueueStatus(contract, false);
+			
+			System.out.println("Remove deal 1");
+			contract.revokeDeal(DEAL_NR_1, SELL).get();
+			
+			printQueueStatus(contract, false);
+			
+			assertEquals(PRICE_2025, readDeal(false, 0, contract).price);
+			assertEquals(PRICE_2015, readDeal(false, 1, contract).price);
+			
+			// FIXME: fix smart contract so index 2 throws an ExecuteException and test it
+			assertEquals(PRICE_2015, readDeal(false, 2, contract).price);
+		} catch (Exception e) {
+			throw new RuntimeException("Exception during unit test", e);
+		}
+
+	}
+
+	private void printQueueStatus(FXTrading contract, boolean buy) throws InterruptedException, ExecutionException {
+		int i = 0;
+		System.out.println("Queue status");
+		while (true) {
+			try {
+				System.out.println(String.format("Deal at index %s = %s", i, readDeal(buy, i++, contract)));
+			} catch (ExecutionException e) {
+				System.out.println("End of queue");
+				return;
+			}
+		}
+	}
+
+	private FXTrading deployFXTradingContract() throws InterruptedException, ExecutionException {
+		FXTrading contract = FXTrading.deploy(web3j, Alice.CREDENTIALS, GAS_PRICE_DEFAULT, INITIAL_VALUE_DEFAULT,
+				BigInteger.ZERO, CONTRACT_SYMBOL).get();
+		System.out.println(String.format("Contract deployed at addess %s", contract.getContractAddress()));
+
+		assertEquals(CONTRACT_SYMBOL, contract.currencyPair().get());
+		return contract;
+	}
+
 	private P_Deal readDeal(boolean buy, int index, FXTrading contract) throws InterruptedException, ExecutionException {
 		return buy ? new P_Deal(contract.buyDeals(new Uint256(BigInteger.valueOf(index))).get())
 				: new P_Deal(contract.sellDeals(new Uint256(BigInteger.valueOf(index))).get());
@@ -128,6 +174,16 @@ public class TestFXTradingContract {
 			buy = (Bool) list.get(2);
 			company = (Utf8String) list.get(3);
 			dealNr = (Uint256) list.get(4);
+		}
+		
+		@Override
+		public String toString() {
+			return P_Deal.class.getSimpleName() +
+					"[quantity=" + quantity.getValue() +
+					" price=" + price.getValue() +
+					" buy=" + buy.getValue() +
+					" company=" + company.getValue() + 
+					" dealNr=" + dealNr.getValue() + "]";
 		}
 	}
 
