@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
+    <artifactId>com.bsiag.ethereum.fxtradingnetwork</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <relativePath>../com.bsiag.ethereum.fxtradingnetwork</relativePath>
+  </parent>
+
+  <artifactId>com.bsiag.ethereum.fxtradingnetwork.ui.html.app.dev</artifactId>
+  <packaging>war</packaging>
+
+  <dependencies>
+    <!-- FX Trading Network Application -->
+    <dependency>
+      <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
+      <artifactId>com.bsiag.ethereum.fxtradingnetwork.ui.html</artifactId>
+    </dependency>
+    <!-- Events module -->
+    <dependency>
+      <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
+      <artifactId>com.bsiag.ethereum.fxtradingnetwork.events.client</artifactId>
+    </dependency>
+
+    <!-- Jetty Server -->
+    <dependency>
+      <groupId>org.eclipse.scout.rt</groupId>
+      <artifactId>org.eclipse.scout.dev.jetty</artifactId>
+    </dependency>
+
+    <!-- Logging -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+    </dependency>
+  </dependencies>
+  <build>
+  	<pluginManagement>
+  		<plugins>
+  			<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+  			<plugin>
+  				<groupId>org.eclipse.m2e</groupId>
+  				<artifactId>lifecycle-mapping</artifactId>
+  				<version>1.0.0</version>
+  				<configuration>
+  					<lifecycleMappingMetadata>
+  						<pluginExecutions>
+  							<pluginExecution>
+  								<pluginExecutionFilter>
+  									<groupId>
+  										org.apache.maven.plugins
+  									</groupId>
+  									<artifactId>
+  										maven-compiler-plugin
+  									</artifactId>
+  									<versionRange>
+  										[3.3,)
+  									</versionRange>
+  									<goals>
+  										<goal>testCompile</goal>
+  									</goals>
+  								</pluginExecutionFilter>
+  								<action>
+  									<ignore></ignore>
+  								</action>
+  							</pluginExecution>
+  							<pluginExecution>
+  								<pluginExecutionFilter>
+  									<groupId>
+  										org.codehaus.mojo
+  									</groupId>
+  									<artifactId>
+  										build-helper-maven-plugin
+  									</artifactId>
+  									<versionRange>
+  										[1.9.1,)
+  									</versionRange>
+  									<goals>
+  										<goal>add-resource</goal>
+  									</goals>
+  								</pluginExecutionFilter>
+  								<action>
+  									<ignore></ignore>
+  								</action>
+  							</pluginExecution>
+  						</pluginExecutions>
+  					</lifecycleMappingMetadata>
+  				</configuration>
+  			</plugin>
+  		</plugins>
+  	</pluginManagement>
+  </build>
+</project>

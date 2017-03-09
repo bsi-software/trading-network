@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2015 BSI Business Systems Integration AG.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Distribution License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/org/documents/edl-v10.html
+
+    Contributors:
+        BSI Business Systems Integration AG - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.eclipse.scout</groupId>
+    <artifactId>maven_rt_plugin_config-master</artifactId>
+    <version>2.0.4</version>
+    <relativePath></relativePath>
+  </parent>
+
+  <properties>
+    <jdk.source.version>1.8</jdk.source.version>
+    <org.eclipse.scout.rt.version>6.0.200-SNAPSHOT</org.eclipse.scout.rt.version>
+  </properties>
+
+  <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
+  <artifactId>com.bsiag.ethereum.fxtradingnetwork</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>FX Trading Network Application</name>
+
+  <modules>
+    <!-- FX Trading Network Application -->
+    <module>../com.bsiag.ethereum.fxtradingnetwork.client</module>
+    <module>../com.bsiag.ethereum.fxtradingnetwork.shared</module>
+    <module>../com.bsiag.ethereum.fxtradingnetwork.server</module>
+    <module>../com.bsiag.ethereum.fxtradingnetwork.server.app.war</module>
+    <module>../com.bsiag.ethereum.fxtradingnetwork.ui.html</module>
+    <module>../com.bsiag.ethereum.fxtradingnetwork.ui.html.app.war</module>
+
+    <!-- Events module -->
+    <module>../com.bsiag.ethereum.fxtradingnetwork.events.client</module>
+    <module>../com.bsiag.ethereum.fxtradingnetwork.events.shared</module>
+    <module>../com.bsiag.ethereum.fxtradingnetwork.events.server</module>
+    <module>../com.bsiag.ethereum.fxtradingnetwork.all.app.dev</module>
+
+    <!-- Specific settings for the contact application -->
+    <module>../com.bsiag.ethereum.fxtradingnetwork.settings_java8</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.eclipse.scout.rt</groupId>
+        <artifactId>org.eclipse.scout.rt</artifactId>
+        <version>${org.eclipse.scout.rt.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- FX Trading Network Application -->
+      <dependency>
+        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
+        <artifactId>com.bsiag.ethereum.fxtradingnetwork.client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
+        <artifactId>com.bsiag.ethereum.fxtradingnetwork.shared</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
+        <artifactId>com.bsiag.ethereum.fxtradingnetwork.server</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
+        <artifactId>com.bsiag.ethereum.fxtradingnetwork.ui.html</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!-- Events module -->
+      <dependency>
+        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
+        <artifactId>com.bsiag.ethereum.fxtradingnetwork.events.client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
+        <artifactId>com.bsiag.ethereum.fxtradingnetwork.events.shared</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
+        <artifactId>com.bsiag.ethereum.fxtradingnetwork.events.server</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>com.mycila</groupId>
+          <artifactId>license-maven-plugin</artifactId>
+          <configuration>
+            <header>${project.basedir}/../../../license_files/copyright.txt</header>
+            <headerDefinitions>
+              <headerDefinition>${project.basedir}/../../../license_files/scoutLicenceHeaderJava.xml</headerDefinition>
+            </headerDefinitions>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.eclipse.scout</groupId>
+          <artifactId>eclipse-settings-maven-plugin</artifactId>
+          <dependencies>
+            <dependency>
+              <groupId>org.eclipse.scout.rt</groupId>
+              <artifactId>org.eclipse.scout.rt-settings</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
+              <artifactId>com.bsiag.ethereum.fxtradingnetwork-settings_java8</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+          </dependencies>
+          <configuration>
+            <additionalConfig>
+              <!-- Java 8 setting files-->
+              <file>
+                <name>.settings/org.eclipse.jdt.core.prefs</name>
+                <location>/java8/org.eclipse.jdt.core.prefs</location>
+              </file>
+              <!-- default setting files -->
+              <file>
+                <name>.settings/.jsdtscope</name>
+                <location>/.jsdtscope</location>
+              </file>
+              <file>
+                <name>.settings/com.eclipsesource.jshint.ui.prefs</name>
+                <location>/com.eclipsesource.jshint.ui.prefs</location>
+              </file>
+              <file>
+                <name>.settings/de.loskutov.anyedit.AnyEditTools.prefs</name>
+                <location>/de.loskutov.anyedit.AnyEditTools.prefs</location>
+              </file>
+              <file>
+                <name>.settings/org.eclipse.core.resources.prefs</name>
+                <location>/org.eclipse.core.resources.prefs</location>
+              </file>
+              <file>
+                <name>.settings/org.eclipse.core.runtime.prefs</name>
+                <location>/org.eclipse.core.runtime.prefs</location>
+              </file>
+              <file>
+                <name>.settings/org.eclipse.jdt.ui.prefs</name>
+                <location>/org.eclipse.jdt.ui.prefs</location>
+              </file>
+              <file>
+                <name>.settings/org.eclipse.m2e.core.prefs</name>
+                <location>/org.eclipse.m2e.core.prefs</location>
+              </file>
+              <file>
+                <name>.settings/org.eclipse.wst.jsdt.core.prefs</name>
+                <location>/org.eclipse.wst.jsdt.core.prefs</location>
+              </file>
+              <file>
+                <name>.settings/org.eclipse.wst.jsdt.ui.prefs</name>
+                <location>/org.eclipse.wst.jsdt.ui.prefs</location>
+              </file>
+              <file>
+                <name>.settings/org.eclipse.wst.jsdt.ui.superType.container</name>
+                <location>/org.eclipse.wst.jsdt.ui.superType.container</location>
+              </file>
+              <file>
+                <name>.settings/org.eclipse.wst.jsdt.ui.superType.name</name>
+                <location>/org.eclipse.wst.jsdt.ui.superType.name</location>
+              </file>
+            </additionalConfig>
+          </configuration>
+        </plugin>
+        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <plugin>
+        	<groupId>org.eclipse.m2e</groupId>
+        	<artifactId>lifecycle-mapping</artifactId>
+        	<version>1.0.0</version>
+        	<configuration>
+        		<lifecycleMappingMetadata>
+        			<pluginExecutions>
+        				<pluginExecution>
+        					<pluginExecutionFilter>
+        						<groupId>
+        							org.apache.maven.plugins
+        						</groupId>
+        						<artifactId>
+        							maven-compiler-plugin
+        						</artifactId>
+        						<versionRange>[3.3,)</versionRange>
+        						<goals>
+        							<goal>compile</goal>
+        						</goals>
+        					</pluginExecutionFilter>
+        					<action>
+        						<ignore></ignore>
+        					</action>
+        				</pluginExecution>
+        			</pluginExecutions>
+        		</lifecycleMappingMetadata>
+        	</configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <repositories>
+    <repository>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>eclipse.release</id>
+      <name>eclipse-release-repo</name>
+      <url>https://repo.eclipse.org/content/groups/releases/</url>
+    </repository>
+    <repository>
+      <snapshots></snapshots>
+      <id>eclipse.snapshot</id>
+      <name>eclipse-snapshot-repo</name>
+      <url>https://repo.eclipse.org/content/groups/snapshots/</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>eclipse.release</id>
+      <name>eclipse-release-repo</name>
+      <url>https://repo.eclipse.org/content/groups/releases/</url>
+    </pluginRepository>
+    <pluginRepository>
+      <snapshots></snapshots>
+      <id>eclipse.snapshot</id>
+      <name>eclipse-snapshot-repo</name>
+      <url>https://repo.eclipse.org/content/groups/snapshots/</url>
+    </pluginRepository>
+  </pluginRepositories>
+</project>

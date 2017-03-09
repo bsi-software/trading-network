@@ -1,0 +1,19 @@
+/*******************************************************************************
+ * Copyright (c) 2015 BSI Business Systems Integration AG.
+ * All rights reserved. 
+ *
+ * Contributors:
+ *     BSI Business Systems Integration AG - initial API and implementation
+ ******************************************************************************/
+.fxtradingnetwork-user-form img {
+  float: left;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 0px;
+  height: 130px;
+  margin-right: 10px;
+}
+
+.fxtradingnetwork-user-form .app-link {
+  outline-style: none;
+}
