@@ -71,29 +71,41 @@ contract FXTrading {
         deal memory myDeal = deal({quantity:_quantity, price:_price, buy:_buy, company:_company, dealNr:_dealNrReturn});
        if (_buy) {
            buyDeals.push(myDeal);
+           sortDeals(true);
        } else {
            sellDeals.push(myDeal);
+           sortDeals(false);
        }
     }
 
-    function sortDeals(deal[] _deals) private {
-        uint256 arrayLength = _deals.length;
+    function sortDeals(bool _buy) private {
+        uint256 arrayLength;
+        deal memory tmp;
+        uint256 i;
+        
+        if(_buy) {
+         arrayLength = buyDeals.length;
 
-        for (uint i = arrayLength - 1; i > 0; i--) {
-            bool swap = false;
-
-            if(_deals[i].buy && _deals[i].price < _deals[i-1].price) { swap = true; }
-            if(!_deals[i].buy && _deals[i].price > _deals[i-1].price) { swap = true; }
-
-            if(swap) {
-                 deal memory tmp = _deals[i-1];
-                _deals[i-1] = _deals[i];
-                _deals[i] = tmp;
+        for (i = arrayLength - 1; i > 0; i--) {
+             if(buyDeals[i].price < buyDeals[i-1].price) {
+                tmp = buyDeals[i-1];
+                buyDeals[i-1] = buyDeals[i];
+                buyDeals[i] = tmp;
             }
          }
+        }
+        else {
+        arrayLength = sellDeals.length;
+
+        for (i = arrayLength - 1; i > 0; i--) {
+            if(sellDeals[i].price > sellDeals[i-1].price) {
+                 tmp = sellDeals[i-1];
+                sellDeals[i-1] = sellDeals[i];
+                sellDeals[i] = tmp;
+            }
+         }
+        }
      }
-
-
 
 //  function orderArray() private
   // priority queue, order book, buyer has to confirm

@@ -1,12 +1,16 @@
 package org.eclipse.scout.trading.network;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.web3j.abi.datatypes.Bool;
+import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.request.Transaction;
@@ -16,10 +20,12 @@ import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.utils.Convert;
 
 public class TestFXTradingContract {
 	
+	private static final Utf8String FIRMA1 = new Utf8String("Firma1");
+	private static final Bool BUY = new Bool(true);	
+	private static final Bool SELL = new Bool(false);
 	// TODO use localhost if a local geth client is running or replace with the docker container IP: docker inspect <containerId> | grep IPAddress
 	public static final String CLIENT_IP = "172.17.0.2";
 	public static final String CLIENT_PORT = "8545";
@@ -40,6 +46,18 @@ public class TestFXTradingContract {
 		}
 	}
 	
+	/** 
+	 * Test class to check the scenario described here
+	 * http://stackoverflow.com/questions/13112062/which-are-the-order-matching-algorithms-most-commonly-used-by-electronic-financi
+
+	Id   Side    Time   Qty   Price   Qty    Time   Side  
+	---+------+-------+-----+-------+-----+-------+------
+	#3                        20.30   200   09:05   SELL  
+	#1                        20.30   100   09:01   SELL  
+	#2                        20.25   100   09:03   SELL  
+	#5   BUY    09:08   200   20.20                       
+	#4   BUY    09:06   100   20.15                       
+	#6   BUY    09:09   200   20.15     */
 	@Test
 	public void deployFXTrading() {
 		try {
@@ -48,13 +66,13 @@ public class TestFXTradingContract {
 			String contractOwnerAdress = Alice.ADDRESS;
 			String coinbase = getAccount(0);
 			
-			getBalance(contractOwnerAdress);
-			getBalance(coinbase);
-
-			transferEther(coinbase, contractOwnerAdress, Convert.toWei("90", Convert.Unit.ETHER).toBigInteger());
-
-			getBalance(contractOwnerAdress);
-			getBalance(coinbase);
+//			getBalance(contractOwnerAdress);
+//			getBalance(coinbase);
+//
+//			transferEther(coinbase, contractOwnerAdress, Convert.toWei("90", Convert.Unit.ETHER).toBigInteger());
+//
+//			getBalance(contractOwnerAdress);
+//			getBalance(coinbase);
 			
 			System.out.println(versionResponse.getResult());
 			Future<FXTrading> deploy = FXTrading.deploy(web3, Alice.CREDENTIALS, GAS_PRICE_DEFAULT, BigInteger.valueOf(2_000_000L), BigInteger.valueOf(0), new Utf8String("CHFEUR"));
@@ -63,13 +81,54 @@ public class TestFXTradingContract {
 			Utf8String x = contract.currencyPair().get();
 			System.out.println(x.getValue());
 			
-//			contract.createDeal(_quantity, _price, _buy, _company);
+			contract.createDeal(new Uint256(BigInteger.valueOf(100)), new Uint256(BigInteger.valueOf(2030)), SELL, FIRMA1).get();
+			contract.createDeal(new Uint256(BigInteger.valueOf(100)), new Uint256(BigInteger.valueOf(2025)), SELL, FIRMA1).get();
+			contract.createDeal(new Uint256(BigInteger.valueOf(200)), new Uint256(BigInteger.valueOf(2030)), SELL, FIRMA1).get();
+			
+			Assert.assertEquals(BigInteger.valueOf(2030), readDeal(false, 0, contract).price);
+			Assert.assertEquals(BigInteger.valueOf(2030), readDeal(false, 1, contract).price);
+			Assert.assertEquals(BigInteger.valueOf(2025), readDeal(false, 2, contract).price);
+			
+			contract.createDeal(new Uint256(BigInteger.valueOf(100)), new Uint256(BigInteger.valueOf(2015)), BUY, FIRMA1).get();
+			contract.createDeal(new Uint256(BigInteger.valueOf(200)), new Uint256(BigInteger.valueOf(2020)), BUY, FIRMA1).get();
+			contract.createDeal(new Uint256(BigInteger.valueOf(200)), new Uint256(BigInteger.valueOf(2015)), BUY, FIRMA1).get();
+			
+			Assert.assertEquals(BigInteger.valueOf(2015), readDeal(true, 0, contract).price);
+			Assert.assertEquals(BigInteger.valueOf(2015), readDeal(true, 1, contract).price);
+			Assert.assertEquals(BigInteger.valueOf(2020), readDeal(true, 2, contract).price);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
+	private P_Deal readDeal(boolean buy, int index, FXTrading contract) throws InterruptedException, ExecutionException {
+		List<Type> list;
+		if (buy) {
+			list = contract.buyDeals(new Uint256(BigInteger.valueOf(index))).get();
+		} else {
+			list = contract.sellDeals(new Uint256(BigInteger.valueOf(index))).get();
+		}
+		return new P_Deal(list);
+				//buy ? new P_Deal(contract.buyDeals(new Uint256(BigInteger.valueOf(index))).get()) : new P_Deal(contract.sellDeals(new Uint256(BigInteger.valueOf(index))).get());
+	}
+	
+	class P_Deal {
+		public BigInteger quantity;
+		public BigInteger price;
+		public Boolean buy;
+		public String company;
+		public BigInteger dealNr;
+
+		P_Deal(List<Type> list) {
+			quantity = ((Uint256) list.get(0)).getValue();
+			price = ((Uint256) list.get(1)).getValue();
+			buy = ((Bool) list.get(2)).getValue();
+			// TODO check whats wrong here
+//			company = ((UTF8String) list.get(3)).get();// toString();
+			dealNr = ((Uint256) list.get(4)).getValue();
+		}
+	}
+
 	private String transferEther(String from, String to, BigInteger amount) throws Exception {
 		BigInteger nonce = getNonce(from);
 
@@ -127,3 +186,4 @@ public class TestFXTradingContract {
 	}
 
 }
+
