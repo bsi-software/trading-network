@@ -1,10 +1,12 @@
 package org.eclipse.scout.trading.network;
+
+import static org.junit.Assert.assertEquals;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.web3j.abi.datatypes.Bool;
@@ -12,37 +14,57 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.DefaultBlockParameterName;
-import org.web3j.protocol.core.methods.request.Transaction;
-import org.web3j.protocol.core.methods.response.EthAccounts;
-import org.web3j.protocol.core.methods.response.EthGetBalance;
-import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
-import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.Web3ClientVersion;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.utils.Convert.Unit;
 
+/**
+ * unit test for the {@link FXTrading} smart contract
+ */
 public class TestFXTradingContract {
 	
-	private static final Utf8String FIRMA1 = new Utf8String("Firma1");
+	private static final Utf8String COMPANY_1 = new Utf8String("Firma1");
 	private static final Bool BUY = new Bool(true);	
 	private static final Bool SELL = new Bool(false);
-	// TODO use localhost if a local geth client is running or replace with the docker container IP: docker inspect <containerId> | grep IPAddress
-	public static final String CLIENT_IP = "172.17.0.2";
-	public static final String CLIENT_PORT = "8545";
-	public static final BigInteger GAS_PRICE_DEFAULT = BigInteger.valueOf(20_000_000_000L);
-	public static final BigInteger GAS_LIMIT_DEFAULT = BigInteger.valueOf(500_000L);
-	private static final String HEX_PREFIX = "0x";
-
-	private static Web3j web3 = null;
-
+	// use localhost if a local geth client is running or replace with the docker container IP: docker inspect <containerId> | grep IPAddress
+	private static final String CLIENT_IP = "172.17.0.2";
+	private static final String CLIENT_PORT = "8545";
 	
+	private static final BigInteger GAS_PRICE_DEFAULT = BigInteger.valueOf(20_000_000_000L);
+	private static final BigInteger GAS_LIMIT_DEFAULT = BigInteger.valueOf(500_000L);
+	private static final BigInteger INITIAL_VALUE_DEFAULT = BigInteger.valueOf(2_000_000L);
+	
+	private static final Uint256 QUANTITY_100 = new Uint256(BigInteger.valueOf(100));
+	private static final Uint256 QUANTITY_200 = new Uint256(BigInteger.valueOf(200));
+	private static final Uint256 PRICE_2015 = new Uint256(BigInteger.valueOf(2015));
+	private static final Uint256 PRICE_2020 = new Uint256(BigInteger.valueOf(2020));
+	private static final Uint256 PRICE_2025 = new Uint256(BigInteger.valueOf(2025));
+	private static final Uint256 PRICE_2030 = new Uint256(BigInteger.valueOf(2030));
+	
+	private static final Utf8String CONTRACT_SYMBOL = new Utf8String("CHFEUR");
+	
+	private static Web3j web3j = null;
+
 	@BeforeClass
 	public static void setUp() {
 		try {
 			String clientUrl = String.format("http://%s:%s", CLIENT_IP, CLIENT_PORT);
-			web3 = Web3j.build(new HttpService(clientUrl));
+			web3j = Web3j.build(new HttpService(clientUrl));
+			Web3ClientVersion versionResponse = web3j.web3ClientVersion().sendAsync().get();
+			System.out.println(String.format("Using version %s", versionResponse.getResult()));
+			String ownerAddress = Alice.ADDRESS;
+			String coinbaseAddress = Web3jUtil.getAccount(web3j, 0);
+			BigDecimal coinbaseBalance = Web3jUtil.getBalance(web3j, coinbaseAddress, Unit.ETHER);
+			BigDecimal ownerBalance = Web3jUtil.getBalance(web3j, ownerAddress, Unit.ETHER);
+			System.out.println(String.format("The ballance of the coinbase %s is %s Ether", coinbaseAddress, coinbaseBalance));
+			System.out.println(String.format("The ballance of the contact owner %s is %s Ether", ownerAddress, ownerBalance));
+
+			if (ownerBalance.compareTo(BigDecimal.TEN) < 0) {
+				String txHash = Web3jUtil.transfer(web3j, coinbaseAddress, ownerAddress, 10, Unit.ETHER);
+				System.out.println(String.format("10 ether to owner sent, txHash=%s", txHash));
+			}
 		} catch (Exception e) {
-			throw new RuntimeException("could not set up web3j", e);
+			throw new RuntimeException("could not set up unit test", e);
 		}
 	}
 	
@@ -59,130 +81,54 @@ public class TestFXTradingContract {
 	#4   BUY    09:06   100   20.15                       
 	#6   BUY    09:09   200   20.15     */
 	@Test
-	public void deployFXTrading() {
+	public void testDealOrdering() {
 		try {
-			Web3ClientVersion versionResponse = web3.web3ClientVersion().sendAsync().get();
-			
-			String contractOwnerAdress = Alice.ADDRESS;
-			String coinbase = getAccount(0);
-			
-//			getBalance(contractOwnerAdress);
-//			getBalance(coinbase);
-//
-//			transferEther(coinbase, contractOwnerAdress, Convert.toWei("90", Convert.Unit.ETHER).toBigInteger());
-//
-//			getBalance(contractOwnerAdress);
-//			getBalance(coinbase);
-			
-			System.out.println(versionResponse.getResult());
-			Future<FXTrading> deploy = FXTrading.deploy(web3, Alice.CREDENTIALS, GAS_PRICE_DEFAULT, BigInteger.valueOf(2_000_000L), BigInteger.valueOf(0), new Utf8String("CHFEUR"));
-			FXTrading contract = deploy.get();
-			System.out.println(contract.getContractAddress());
-			Utf8String x = contract.currencyPair().get();
-			System.out.println(x.getValue());
-			
-			contract.createDeal(new Uint256(BigInteger.valueOf(100)), new Uint256(BigInteger.valueOf(2030)), SELL, FIRMA1).get();
-			contract.createDeal(new Uint256(BigInteger.valueOf(100)), new Uint256(BigInteger.valueOf(2025)), SELL, FIRMA1).get();
-			contract.createDeal(new Uint256(BigInteger.valueOf(200)), new Uint256(BigInteger.valueOf(2030)), SELL, FIRMA1).get();
-			
-			Assert.assertEquals(BigInteger.valueOf(2030), readDeal(false, 0, contract).price);
-			Assert.assertEquals(BigInteger.valueOf(2030), readDeal(false, 1, contract).price);
-			Assert.assertEquals(BigInteger.valueOf(2025), readDeal(false, 2, contract).price);
-			
-			contract.createDeal(new Uint256(BigInteger.valueOf(100)), new Uint256(BigInteger.valueOf(2015)), BUY, FIRMA1).get();
-			contract.createDeal(new Uint256(BigInteger.valueOf(200)), new Uint256(BigInteger.valueOf(2020)), BUY, FIRMA1).get();
-			contract.createDeal(new Uint256(BigInteger.valueOf(200)), new Uint256(BigInteger.valueOf(2015)), BUY, FIRMA1).get();
-			
-			Assert.assertEquals(BigInteger.valueOf(2015), readDeal(true, 0, contract).price);
-			Assert.assertEquals(BigInteger.valueOf(2015), readDeal(true, 1, contract).price);
-			Assert.assertEquals(BigInteger.valueOf(2020), readDeal(true, 2, contract).price);
+			FXTrading contract = FXTrading.deploy(web3j, Alice.CREDENTIALS, GAS_PRICE_DEFAULT, INITIAL_VALUE_DEFAULT,
+					BigInteger.ZERO, CONTRACT_SYMBOL).get();
+			System.out.println(String.format("Contract deployed at addess %s", contract.getContractAddress()));
+
+			assertEquals(CONTRACT_SYMBOL, contract.currencyPair().get());
+
+			contract.createDeal(QUANTITY_100, PRICE_2030, SELL, COMPANY_1).get();
+			contract.createDeal(QUANTITY_100, PRICE_2025, SELL, COMPANY_1).get();
+			contract.createDeal(QUANTITY_200, PRICE_2030, SELL, COMPANY_1).get();
+
+			assertEquals(PRICE_2030, readDeal(false, 0, contract).price);
+			assertEquals(PRICE_2030, readDeal(false, 1, contract).price);
+			assertEquals(PRICE_2025, readDeal(false, 2, contract).price);
+
+			contract.createDeal(QUANTITY_100, PRICE_2015, BUY, COMPANY_1).get();
+			contract.createDeal(QUANTITY_200, PRICE_2020, BUY, COMPANY_1).get();
+			contract.createDeal(QUANTITY_200, PRICE_2015, BUY, COMPANY_1).get();
+
+			assertEquals(PRICE_2015, readDeal(true, 0, contract).price);
+			assertEquals(PRICE_2015, readDeal(true, 1, contract).price);
+			assertEquals(PRICE_2020, readDeal(true, 2, contract).price);
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException("Exception during unit test", e);
 		}
 	}
-	
+
 	private P_Deal readDeal(boolean buy, int index, FXTrading contract) throws InterruptedException, ExecutionException {
-		List<Type> list;
-		if (buy) {
-			list = contract.buyDeals(new Uint256(BigInteger.valueOf(index))).get();
-		} else {
-			list = contract.sellDeals(new Uint256(BigInteger.valueOf(index))).get();
-		}
-		return new P_Deal(list);
-				//buy ? new P_Deal(contract.buyDeals(new Uint256(BigInteger.valueOf(index))).get()) : new P_Deal(contract.sellDeals(new Uint256(BigInteger.valueOf(index))).get());
+		return buy ? new P_Deal(contract.buyDeals(new Uint256(BigInteger.valueOf(index))).get())
+				: new P_Deal(contract.sellDeals(new Uint256(BigInteger.valueOf(index))).get());
 	}
-	
-	class P_Deal {
-		public BigInteger quantity;
-		public BigInteger price;
-		public Boolean buy;
-		public String company;
-		public BigInteger dealNr;
 
+	private class P_Deal {
+		public Uint256 quantity;
+		public Uint256 price;
+		public Bool buy;
+		public Utf8String company;
+		public Uint256 dealNr;
+
+		@SuppressWarnings("rawtypes")
 		P_Deal(List<Type> list) {
-			quantity = ((Uint256) list.get(0)).getValue();
-			price = ((Uint256) list.get(1)).getValue();
-			buy = ((Bool) list.get(2)).getValue();
-			// TODO check whats wrong here
-//			company = ((UTF8String) list.get(3)).get();// toString();
-			dealNr = ((Uint256) list.get(4)).getValue();
+			quantity = (Uint256) list.get(0);
+			price = (Uint256) list.get(1);
+			buy = (Bool) list.get(2);
+			company = (Utf8String) list.get(3);
+			dealNr = (Uint256) list.get(4);
 		}
-	}
-
-	private String transferEther(String from, String to, BigInteger amount) throws Exception {
-		BigInteger nonce = getNonce(from);
-
-		Transaction transaction = new Transaction(from, nonce, GAS_PRICE_DEFAULT, GAS_LIMIT_DEFAULT, to, amount, null);
-		EthSendTransaction txRequest = web3.ethSendTransaction(transaction).sendAsync().get();
-		String txHash = txRequest.getTransactionHash();
-
-		Assert.assertTrue(String.format("tx has error state %s", txRequest.getError()), !txRequest.hasError());
-		Assert.assertTrue("tx hash is empty or null", txHash != null && txHash.startsWith(HEX_PREFIX));
-
-		System.out.println("tx hash: " + txHash);
-		System.out.println(String.format("amount: %d from: %s to %s", amount, from, to));
-
-		return txHash;
-	}
-
-	private BigInteger getNonce(String address) throws Exception {
-		EthGetTransactionCount txCount = web3.ethGetTransactionCount(address, DefaultBlockParameterName.LATEST)
-				.sendAsync().get();
-		BigInteger nonce = txCount.getTransactionCount();
-
-		Assert.assertTrue(String.format("nonce null for account %s", address), nonce != null);
-		Assert.assertTrue(String.format("nonce is negative %d account %s", nonce, address),
-				nonce.compareTo(new BigInteger("0")) >= 0);
-
-		return nonce;
-	}
-
-	private String getAccount(int i) throws Exception {
-		EthAccounts accountsResponse = web3.ethAccounts().sendAsync().get();
-		List<String> accounts = accountsResponse.getAccounts();
-
-		return accounts.get(i);
-	}
-	
-	private BigInteger getBalance(String address) throws Exception {
-		return hasWeis(address, new BigInteger("0"));
-	}
-	
-	private BigInteger hasWeis(String address, BigInteger minWeiAmount) throws Exception{
-		return hasWeis(address, minWeiAmount, true);
-	}
-
-	private BigInteger hasWeis(String address, BigInteger minWeiAmount, boolean sysout) throws Exception{
-		EthGetBalance balanceResponse = web3.ethGetBalance(address, DefaultBlockParameterName.LATEST).sendAsync().get();
-		BigInteger balance = balanceResponse.getBalance();
-
-		if(sysout) {
-			System.out.println(String.format("balance: %d account: %s" , balance, address));
-		}
-
-		Assert.assertTrue(String.format("not enough weis, expected at least %d, available %d for address %s", minWeiAmount, balance, address), balance.compareTo(minWeiAmount) >= 0);
-
-		return balance;
 	}
 
 }
