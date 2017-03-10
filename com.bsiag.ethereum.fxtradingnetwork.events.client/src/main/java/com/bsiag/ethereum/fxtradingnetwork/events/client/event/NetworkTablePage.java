@@ -1,5 +1,6 @@
 package com.bsiag.ethereum.fxtradingnetwork.events.client.event;
 
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
 
@@ -12,11 +13,12 @@ import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBooleanColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractDateTimeColumn;
+import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractDecimalColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractLongColumn;
-import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractNumberColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractSmartColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
+import org.eclipse.scout.rt.client.ui.form.fields.decimalfield.IDecimalField;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
@@ -295,7 +297,7 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(9000)
-    public class ExchangeRateColumn extends AbstractNumberColumn<Double> {
+    public class ExchangeRateColumn extends AbstractDecimalColumn<Double> {
       @Override
       protected String getConfiguredHeaderText() {
         return TEXTS.get("ExchangeRate");
@@ -314,6 +316,21 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
       @Override
       protected Double getConfiguredMaxValue() {
         return Double.MAX_VALUE;
+      }
+
+      @Override
+      protected RoundingMode getConfiguredRoundingMode() {
+        return RoundingMode.FLOOR;
+      }
+
+      @Override
+      protected int getConfiguredMaxIntegerDigits() {
+        return super.getConfiguredMaxIntegerDigits();
+      }
+
+      @Override
+      protected IDecimalField<Double> createDefaultEditor() {
+        return null;
       }
     }
 

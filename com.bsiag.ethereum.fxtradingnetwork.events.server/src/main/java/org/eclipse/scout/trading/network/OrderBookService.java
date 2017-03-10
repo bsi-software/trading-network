@@ -230,7 +230,7 @@ public class OrderBookService {
       if (!buy) {
         type = Order.Type.SELL;
       }
-      order = new Order(type, quantity.intValue() / 100, price.doubleValue());
+      order = new Order(type, quantity.intValue(), price.doubleValue() / 100);
       order.setId(dealNr.intValue());
     }
     return order;
