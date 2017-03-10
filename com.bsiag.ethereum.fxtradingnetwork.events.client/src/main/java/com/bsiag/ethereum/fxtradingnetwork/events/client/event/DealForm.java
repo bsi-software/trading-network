@@ -275,7 +275,7 @@ public class DealForm extends AbstractForm {
 
           @Override
           protected void execInitField() {
-            DecimalFormat format = new DecimalFormat("0.0000");
+            DecimalFormat format = new DecimalFormat("0.00");
             format.setMinimumFractionDigits(0);
             // format.setMaximumFractionDigits(19);
             setFormat(format);
