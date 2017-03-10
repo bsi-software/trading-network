@@ -15,7 +15,6 @@ import java.util.UUID;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.platform.holders.NVPair;
-import org.eclipse.scout.rt.platform.util.CompareUtility;
 import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.server.jdbc.SQL;
 import org.eclipse.scout.rt.shared.ISession;
@@ -29,7 +28,6 @@ import com.bsiag.ethereum.fxtradingnetwork.events.server.sql.SQLs;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.StatusCodeType;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.CreateEventPermission;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.DealFormData;
-import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.DealFormData.TradingActionBox;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.DealsTablePageData;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.IDealService;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.OwnDealsTablePageData;
@@ -104,12 +102,10 @@ public class DealService implements IDealService {
 		formData = load(formData);
 		boolean isBuy = TradingActionCodeType.BuyCode.ID.equals(formData.getTradingActionBox().getValue());
 		try {
-			//TODO dealNr speichern
-			BEANS.get(EthereumService.class).createDeal(formData.getOrganizationId()
-					, isBuy
-					, formData.getAmount().getValue().intValue()
-					, formData.getExchangeRate().getValue().doubleValue());
-			
+			// TODO dealNr speichern
+			BEANS.get(EthereumService.class).createDeal(formData.getOrganizationId(), isBuy,
+					formData.getAmount().getValue().intValue(), formData.getExchangeRate().getValue().doubleValue());
+
 			formData.setStatus(StatusCodeType.PublishedCode.ID);
 			store(formData);
 		} catch (Exception e) {
@@ -125,7 +121,7 @@ public class DealService implements IDealService {
 		}
 
 		SQL.selectInto(SQLs.DEAL_SELECT, formData);
-		//    SQL.selectInto(SQLs.EVENT_PARTICIPANTS_SELECT, formData);
+		// SQL.selectInto(SQLs.EVENT_PARTICIPANTS_SELECT, formData);
 
 		return formData;
 	}
@@ -147,12 +143,18 @@ public class DealService implements IDealService {
 
 		SQL.update(SQLs.DEAL_UPDATE, formData);
 
-		//    TableBeanHolderFilter deletedParticipants = new TableBeanHolderFilter(formData.getParticipantTableField(), ITableHolder.STATUS_DELETED);
-		//    TableBeanHolderFilter insertedParticipants = new TableBeanHolderFilter(formData.getParticipantTableField(), ITableHolder.STATUS_INSERTED);
+		// TableBeanHolderFilter deletedParticipants = new
+		// TableBeanHolderFilter(formData.getParticipantTableField(),
+		// ITableHolder.STATUS_DELETED);
+		// TableBeanHolderFilter insertedParticipants = new
+		// TableBeanHolderFilter(formData.getParticipantTableField(),
+		// ITableHolder.STATUS_INSERTED);
 		// NVPair dealId = new NVPair("dealId", formData.getDealId());
 
-		//    SQL.delete(SQLs.EVENT_PARTICIPANTS_DELETE, deletedParticipants, eventId);
-		//    SQL.insert(SQLs.EVENT_PARTICIPANTS_INSERT, insertedParticipants, eventId);
+		// SQL.delete(SQLs.EVENT_PARTICIPANTS_DELETE, deletedParticipants,
+		// eventId);
+		// SQL.insert(SQLs.EVENT_PARTICIPANTS_INSERT, insertedParticipants,
+		// eventId);
 
 		return formData;
 	}
