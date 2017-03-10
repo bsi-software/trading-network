@@ -17,10 +17,6 @@ public class DealFormData extends AbstractFormData {
 
   private static final long serialVersionUID = 1L;
 
-  public Amount getAmount() {
-    return getFieldByClass(Amount.class);
-  }
-
   /**
    * access method for property DealId.
    */
@@ -83,6 +79,10 @@ public class DealFormData extends AbstractFormData {
     return getPropertyByClass(OrganizationIdProperty.class);
   }
 
+  public Quantity getQuantity() {
+    return getFieldByClass(Quantity.class);
+  }
+
   /**
    * access method for property Status.
    */
@@ -103,11 +103,6 @@ public class DealFormData extends AbstractFormData {
 
   public TradingActionBox getTradingActionBox() {
     return getFieldByClass(TradingActionBox.class);
-  }
-
-  public static class Amount extends AbstractValueFieldData<Long> {
-
-    private static final long serialVersionUID = 1L;
   }
 
   public static class DealIdProperty extends AbstractPropertyData<String> {
@@ -131,6 +126,11 @@ public class DealFormData extends AbstractFormData {
   }
 
   public static class OrganizationIdProperty extends AbstractPropertyData<String> {
+
+    private static final long serialVersionUID = 1L;
+  }
+
+  public static class Quantity extends AbstractValueFieldData<Long> {
 
     private static final long serialVersionUID = 1L;
   }

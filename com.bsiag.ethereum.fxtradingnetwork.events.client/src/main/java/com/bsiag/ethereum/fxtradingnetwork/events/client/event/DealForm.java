@@ -34,7 +34,7 @@ import com.bsiag.ethereum.fxtradingnetwork.client.common.AbstractDirtyFormHandle
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.CancelButton;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox;
-import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.AmountField;
+import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.QuantityField;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.ExchangeRateField;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.OrderBookTypeField;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.TradingActionBox;
@@ -149,8 +149,8 @@ public class DealForm extends AbstractForm {
     return getFieldByClass(OrderBookTypeField.class);
   }
 
-  public AmountField getAmountField() {
-    return getFieldByClass(AmountField.class);
+  public QuantityField getQuantityField() {
+    return getFieldByClass(QuantityField.class);
   }
 
   @Override
@@ -235,7 +235,7 @@ public class DealForm extends AbstractForm {
         }
 
         @Order(20)
-        public class AmountField extends AbstractLongField {
+        public class QuantityField extends AbstractLongField {
 
           @Override
           public void setMandatory(boolean b) {

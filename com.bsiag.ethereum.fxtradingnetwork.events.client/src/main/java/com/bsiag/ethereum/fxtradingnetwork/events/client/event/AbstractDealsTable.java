@@ -32,19 +32,19 @@ public abstract class AbstractDealsTable extends AbstractTable {
     return getColumnSet().getColumnByClass(DealNrColumn.class);
   }
 
-  public AmountColumn getSellColumn() {
-    return getColumnSet().getColumnByClass(AmountColumn.class);
+  public QuantityColumn getQuantityColumn() {
+    return getColumnSet().getColumnByClass(QuantityColumn.class);
   }
 
-  public OrderBookTypeColumn getEndsColumn() {
+  public OrderBookTypeColumn getOrderBookTypeColumn() {
     return getColumnSet().getColumnByClass(OrderBookTypeColumn.class);
   }
 
-  public ExchangeRateColumn getBuyColumn() {
+  public ExchangeRateColumn getExchangeRateColumn() {
     return getColumnSet().getColumnByClass(ExchangeRateColumn.class);
   }
 
-  public TradingActionColumn getBuyCurrencyColumn() {
+  public TradingActionColumn getTradingActionColumn() {
     return getColumnSet().getColumnByClass(TradingActionColumn.class);
   }
 
@@ -58,39 +58,6 @@ public abstract class AbstractDealsTable extends AbstractTable {
   }
 
   @Order(1000)
-  public class DealIdColumn extends AbstractStringColumn {
-
-    @Override
-    protected boolean getConfiguredDisplayable() {
-      return false;
-    }
-
-    @Override
-    protected boolean getConfiguredPrimaryKey() {
-      return true;
-    }
-  }
-
-  @Order(2000)
-  public class DealNrColumn extends AbstractStringColumn {
-
-    @Override
-    protected String getConfiguredHeaderText() {
-      return TEXTS.get("Deal-Nr");
-    }
-
-    @Override
-    protected int getConfiguredWidth() {
-      return 100;
-    }
-
-    @Override
-    protected int getConfiguredHorizontalAlignment() {
-      return 0;
-    }
-  }
-
-  @Order(4000)
   public class OrderBookTypeColumn extends AbstractSmartColumn<String> {
 
     @Override
@@ -114,12 +81,36 @@ public abstract class AbstractDealsTable extends AbstractTable {
     }
   }
 
-  @Order(3000)
-  public class AmountColumn extends AbstractLongColumn {
+  @Order(2000)
+  public class TradingActionColumn extends AbstractSmartColumn<String> {
 
     @Override
     protected String getConfiguredHeaderText() {
-      return TEXTS.get("Amount");
+      return TEXTS.get("TradingAction");
+    }
+
+    @Override
+    protected int getConfiguredHorizontalAlignment() {
+      return 0;
+    }
+
+    @Override
+    protected int getConfiguredWidth() {
+      return 100;
+    }
+
+    @Override
+    protected Class<? extends ICodeType<?, String>> getConfiguredCodeType() {
+      return TradingActionCodeType.class;
+    }
+  }
+
+  @Order(3000)
+  public class QuantityColumn extends AbstractLongColumn {
+
+    @Override
+    protected String getConfiguredHeaderText() {
+      return TEXTS.get("Quantity");
     }
 
     @Override
@@ -133,7 +124,7 @@ public abstract class AbstractDealsTable extends AbstractTable {
     }
   }
 
-  @Order(5000)
+  @Order(4000)
   public class ExchangeRateColumn extends AbstractDecimalColumn<Double> {
 
     @Override
@@ -177,31 +168,21 @@ public abstract class AbstractDealsTable extends AbstractTable {
     }
   }
 
-  @Order(6000)
-  public class TradingActionColumn extends AbstractSmartColumn<String> {
+  @Order(5000)
+  public class DealIdColumn extends AbstractStringColumn {
 
     @Override
-    protected String getConfiguredHeaderText() {
-      return TEXTS.get("TradingAction");
+    protected boolean getConfiguredDisplayable() {
+      return false;
     }
 
     @Override
-    protected int getConfiguredHorizontalAlignment() {
-      return 0;
-    }
-
-    @Override
-    protected int getConfiguredWidth() {
-      return 100;
-    }
-
-    @Override
-    protected Class<? extends ICodeType<?, String>> getConfiguredCodeType() {
-      return TradingActionCodeType.class;
+    protected boolean getConfiguredPrimaryKey() {
+      return true;
     }
   }
 
-  @Order(7000)
+  @Order(6000)
   public class StatusColumn extends AbstractSmartColumn<String> {
 
     @Override
@@ -222,6 +203,25 @@ public abstract class AbstractDealsTable extends AbstractTable {
     @Override
     public Class<? extends ICodeType<?, String>> getConfiguredCodeType() {
       return StatusCodeType.class;
+    }
+  }
+
+  @Order(7000)
+  public class DealNrColumn extends AbstractStringColumn {
+
+    @Override
+    protected String getConfiguredHeaderText() {
+      return TEXTS.get("Deal-Nr");
+    }
+
+    @Override
+    protected int getConfiguredWidth() {
+      return 100;
+    }
+
+    @Override
+    protected int getConfiguredHorizontalAlignment() {
+      return 0;
     }
   }
 }
