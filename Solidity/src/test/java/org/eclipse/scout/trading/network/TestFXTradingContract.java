@@ -6,20 +6,27 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.methods.response.Web3ClientVersion;
-import org.web3j.protocol.http.HttpService;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Convert.Unit;
 
 /**
- * unit test for the {@link FXTrading} smart contract
+ * unit test for the {@link FXTrading} smart contract.
+ * 
+ * create sol, bin + abi files 
+ * https://ethereum.github.io/browser-solidity/#version=soljson-v0.4.9+commit.364da425.js
+ * 
+ * create java class files
+ * mzi@BSIM3236 /c/eclipse/neon/web3j_repo/web3j/build/install/web3j/bin (master)
+ * ./web3j solidity generate FXTrading.bin FXTrading.abi -o . -p org.eclipse.scout.trading.network
  */
 public class TestFXTradingContract {
 	
@@ -32,6 +39,7 @@ public class TestFXTradingContract {
 	
 	private static final BigInteger GAS_PRICE_DEFAULT = BigInteger.valueOf(20_000_000_000L);
 	private static final BigInteger INITIAL_VALUE_DEFAULT = BigInteger.valueOf(2_000_000L);
+	private static final BigInteger GAS_LIMIT_CONTRACT_DEPLOY = BigInteger.valueOf(3_000_000L);
 	
 	private static final Uint256 QUANTITY_100 = new Uint256(BigInteger.valueOf(100));
 	private static final Uint256 QUANTITY_200 = new Uint256(BigInteger.valueOf(200));
@@ -44,29 +52,35 @@ public class TestFXTradingContract {
 	
 	private static final Utf8String CONTRACT_SYMBOL = new Utf8String("CHFEUR");
 	
-	private static Web3j web3j = null;
-
 	@BeforeClass
 	public static void setUp() {
 		try {
-			String clientUrl = String.format("http://%s:%s", CLIENT_IP, CLIENT_PORT);
-			web3j = Web3j.build(new HttpService(clientUrl));
-			Web3ClientVersion versionResponse = web3j.web3ClientVersion().sendAsync().get();
-			System.out.println(String.format("Using version %s", versionResponse.getResult()));
+//			String clientUrl = String.format("http://%s:%s", CLIENT_IP, CLIENT_PORT);
+//			web3j = Web3j.build(new HttpService(clientUrl));
+//			Web3ClientVersion versionResponse = web3j.web3ClientVersion().sendAsync().get();
+//			System.out.println(String.format("Using version %s", versionResponse.getResult()));
+//			
 			String ownerAddress = Alice.ADDRESS;
-			String coinbaseAddress = Web3jUtil.getAccount(web3j, 0);
-			BigDecimal coinbaseBalance = Web3jUtil.getBalance(web3j, coinbaseAddress, Unit.ETHER);
-			BigDecimal ownerBalance = Web3jUtil.getBalance(web3j, ownerAddress, Unit.ETHER);
+			String coinbaseAddress = Web3jUtil.getAccount(0);
+			BigDecimal coinbaseBalance = Web3jUtil.getBalance(coinbaseAddress, Unit.ETHER);
+			BigDecimal ownerBalance = Web3jUtil.getBalance(ownerAddress, Unit.ETHER);
 			System.out.println(String.format("The ballance of the coinbase %s is %s Ether", coinbaseAddress, coinbaseBalance));
 			System.out.println(String.format("The ballance of the contact owner %s is %s Ether", ownerAddress, ownerBalance));
 
 			if (ownerBalance.compareTo(BigDecimal.TEN) < 0) {
-				String txHash = Web3jUtil.transfer(web3j, coinbaseAddress, ownerAddress, 10, Unit.ETHER);
+				String txHash = Web3jUtil.transfer(coinbaseAddress, ownerAddress, 10, Unit.ETHER);
 				System.out.println(String.format("10 ether to owner sent, txHash=%s", txHash));
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("could not set up unit test", e);
 		}
+	}
+	
+	@Test
+	public void testConnection() {
+		String version = Web3jUtil.getClientVersion();
+		Assert.assertNotNull("web3j is null", Web3jUtil.getWeb3j());
+		Assert.assertNotEquals("unexpected ethereum client version: ", "<undefined>", version);
 	}
 	
 	/** 
@@ -82,7 +96,7 @@ public class TestFXTradingContract {
 	#4   BUY    09:06   100   20.15                       
 	#6   BUY    09:09   200   20.15     */
 	@Test
-	public void testDealOrdering() {
+	public FXTrading testDealOrdering() {
 		try {
 			FXTrading contract = deployFXTradingContract();
 
@@ -101,9 +115,23 @@ public class TestFXTradingContract {
 			assertEquals(PRICE_2015, readDeal(true, 0, contract).price);
 			assertEquals(PRICE_2015, readDeal(true, 1, contract).price);
 			assertEquals(PRICE_2020, readDeal(true, 2, contract).price);
+			
+			return contract;
 		} catch (Exception e) {
 			throw new RuntimeException("Exception during unit test", e);
 		}
+	}
+	
+	@Test
+	public void testDealMatcher() {
+		FXTrading contract = testDealOrdering();
+		
+		try {
+			TransactionReceipt txReceipt = contract.currentMatch().get();
+		} catch (Exception e) {
+			throw new RuntimeException("Exception during unit test", e);
+		}
+		
 	}
 
 	@Test
@@ -126,7 +154,7 @@ public class TestFXTradingContract {
 			assertEquals(PRICE_2015, readDeal(false, 1, contract).price);
 			
 			// FIXME: fix smart contract so index 2 throws an ExecuteException and test it
-			assertEquals(PRICE_2015, readDeal(false, 2, contract).price);
+			// assertEquals(PRICE_2015, readDeal(false, 2, contract).price);
 		} catch (Exception e) {
 			throw new RuntimeException("Exception during unit test", e);
 		}
@@ -147,8 +175,11 @@ public class TestFXTradingContract {
 	}
 
 	private FXTrading deployFXTradingContract() throws InterruptedException, ExecutionException {
-		FXTrading contract = FXTrading.deploy(web3j, Alice.CREDENTIALS, GAS_PRICE_DEFAULT, INITIAL_VALUE_DEFAULT,
-				BigInteger.ZERO, CONTRACT_SYMBOL).get();
+		Future<FXTrading> contractFuture = FXTrading.deploy(Web3jUtil.getWeb3j(), Alice.CREDENTIALS, GAS_PRICE_DEFAULT, GAS_LIMIT_CONTRACT_DEPLOY,
+				BigInteger.ZERO, CONTRACT_SYMBOL);
+		
+		FXTrading contract = contractFuture.get();
+		
 		System.out.println(String.format("Contract deployed at addess %s", contract.getContractAddress()));
 
 		assertEquals(CONTRACT_SYMBOL, contract.currencyPair().get());

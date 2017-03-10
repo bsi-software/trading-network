@@ -4,6 +4,7 @@ contract FXTrading {
 
   deal[] public buyDeals;
   deal[] public sellDeals;
+  deal[] public doneDeals;
 
   // nice, bool to automatch
 
@@ -36,11 +37,102 @@ contract FXTrading {
     companys.push("Firma5");
   }
 
-  function mergeDeals(
-    uint256 _dealNr1,
-    uint256 _dealNr2)
-    returns (string _errorMessage) {
-    // todo implement
+  function currentMatch() 
+    returns (uint256 [2] _match) 
+  {
+    if(buyDeals.length == 0 || sellDeals.length == 0) {
+      return ([uint256(-1),uint256(-1)]);    
+    }
+    
+    deal dealBuy = buyDeals[buyDeals.length - 1];
+    deal dealSell = sellDeals[sellDeals.length - 1];
+    
+    if(dealBuy.price >= dealSell.price) {
+      return ([dealBuy.dealNr, dealSell.dealNr]);
+    }
+    
+    return ([uint256(-1),uint256(-1)]);    
+  }
+  
+  function executeMatch(uint256 _buyDealNr, uint256 _sellDealNr) 
+    returns (uint8 _status) 
+  {
+    // no matching buy order
+    if(buyDeals.length == 0 || _buyDealNr != buyDeals[buyDeals.length - 1].dealNr) {
+      return uint8(-1);
+    } 
+    
+    // no matching sell order
+    if(sellDeals.length == 0 || _sellDealNr != sellDeals[sellDeals.length - 1].dealNr) {
+      return uint8(-2);
+    }
+    
+    // no price match
+    if(buyDeals[buyDeals.length - 1].price < sellDeals[sellDeals.length - 1].price) {
+      return uint8(-3);
+    }
+    
+    deal dealBuy = buyDeals[buyDeals.length - 1];
+    deal dealSell = sellDeals[sellDeals.length - 1];
+    
+    // calculate quantity and price for matching order
+    uint256 quantity = dealBuy.quantity < dealSell.quantity ? dealBuy.quantity : dealSell.quantity;
+    uint256 price = (dealBuy.price + dealSell.price) / 2;
+    
+	// update order book and notify order owners
+	execute(dealBuy, quantity, price);
+	execute(dealSell, quantity, price);
+	
+	return uint8(0);
+  }
+  
+  function execute(deal _deal, uint256 _quantity, uint256 _price) private {
+    uint256 remainingQuantity = _deal.quantity - _quantity;
+    
+    if(remainingQuantity == 0) {
+      if(_deal.buy) {
+        delete buyDeals[buyDeals.length - 1];
+      }
+      else {
+        delete sellDeals[sellDeals.length - 1];
+      }
+    }
+    else {
+      if(_deal.buy) {
+        buyDeals[buyDeals.length - 1].quantity = remainingQuantity;
+      }
+      else {
+        sellDeals[sellDeals.length - 1].quantity = remainingQuantity;
+      }
+    }
+    
+    _deal.quantity = _quantity;
+    _deal.price = _price;
+    doneDeals.push(_deal);
+  }
+  
+  function isPending(uint256 _dealNr) 
+    returns (bool _pending) 
+  {
+    uint i;
+    
+    if(_dealNr < 0) {
+      return false;
+    }
+    
+  	for(i = 0; i < buyDeals.length; i++) {
+  	  if(_dealNr == buyDeals[i].dealNr) {
+  	    return true;
+      }
+  	}
+  	
+  	for(i = 0; i < sellDeals.length; i++) {
+  	  if(_dealNr == sellDeals[i].dealNr) {
+  	    return true;
+  	  }
+  	}
+    
+  	return false;
   }
 
   function revokeDeal(uint256 _dealNr, bool _buy) returns (string _errorMessage) {
@@ -107,7 +199,4 @@ contract FXTrading {
          }
         }
      }
-
-//  function orderArray() private
-  // priority queue, order book, buyer has to confirm
 }
