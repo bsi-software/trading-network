@@ -109,7 +109,7 @@ public class DealService implements IDealService {
     try {
       String dealNr = BEANS.get(OrderBookService.class).publish(convertToOrder(formData));
       if (StringUtility.hasText(dealNr)) {
-        formData.setDealNr(formData.getOrderBookType().getValue() + dealNr);
+        formData.setDealNr(dealNr);
         formData.setStatus(StatusCodeType.PublishedCode.ID);
         store(formData);
       }

@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.eclipse.scout.rt.platform.ApplicationScoped;
 import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.rt.platform.exception.ProcessingException;
 import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -179,9 +180,17 @@ public class OrderBookService {
    * @throws @throws
    *           Exception
    */
-  public List<Order> getOrders(String currencyPair) throws Exception {
-    List<Order> orders = new ArrayList<Order>(getSellOrders(getContract(currencyPair)));
-    orders.addAll(getBuyOrders(getContract(currencyPair)));
+  public List<Order> getOrders(String currencyPair) throws ProcessingException {
+    List<Order> orders = new ArrayList<Order>();
+    try {
+      orders.addAll(getSellOrders(getContract(currencyPair)));
+      orders.addAll(getBuyOrders(getContract(currencyPair)));
+    }
+    catch (InterruptedException | ExecutionException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      throw new ProcessingException(e.getMessage());
+    }
     return orders;
   }
 
@@ -221,7 +230,7 @@ public class OrderBookService {
       if (!buy) {
         type = Order.Type.SELL;
       }
-      order = new Order(type, quantity.intValue(), price.doubleValue());
+      order = new Order(type, quantity.intValue() / 100, price.doubleValue());
       order.setId(dealNr.intValue());
     }
     return order;
