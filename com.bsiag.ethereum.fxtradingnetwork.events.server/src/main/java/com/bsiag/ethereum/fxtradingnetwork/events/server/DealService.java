@@ -165,7 +165,7 @@ public class DealService implements IDealService {
     if (TradingActionCodeType.SellCode.ID.equals(formData.getTradingActionBox().getValue())) {
       type = Order.Type.SELL;
     }
-    Order order = new Order(type, formData.getAmount().getValue().intValue(), formData.getExchangeRate().getValue().doubleValue());
+    Order order = new Order(type, formData.getQuantity().getValue().intValue(), formData.getExchangeRate().getValue().doubleValue());
     order.setCurrencyPair(formData.getOrderBookType().getValue());
     order.setOwner(formData.getOrganizationId());
 
