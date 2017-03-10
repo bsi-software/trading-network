@@ -31,14 +31,13 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
 
 import com.bsiag.ethereum.fxtradingnetwork.client.common.AbstractDirtyFormHandler;
-import com.bsiag.ethereum.fxtradingnetwork.client.common.AbstractNotesBox.NotesField;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.CancelButton;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox;
-import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.SellGroupBox;
-import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.SellGroupBox.AmountField;
-import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.SellGroupBox.ExchangeRateField;
-import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.SellGroupBox.OrderBookTypeField;
-import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.SellGroupBox.TradingActionBox;
+import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox;
+import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.AmountField;
+import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.ExchangeRateField;
+import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.OrderBookTypeField;
+import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.TradingActionBox;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.OkButton;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.OrderBookTypeCodeType;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.DealFormData;
@@ -122,10 +121,6 @@ public class DealForm extends AbstractForm {
     return getFieldByClass(CancelButton.class);
   }
 
-  public NotesField getNotesField() {
-    return getFieldByClass(NotesField.class);
-  }
-
   public GeneralBox getGeneralBox() {
     return getFieldByClass(GeneralBox.class);
   }
@@ -134,15 +129,15 @@ public class DealForm extends AbstractForm {
     return getFieldByClass(MainBox.class);
   }
 
-  public SellGroupBox getSellGroupBox() {
-    return getFieldByClass(SellGroupBox.class);
+  public DealFormGroupBox getDealFormGroupBox() {
+    return getFieldByClass(DealFormGroupBox.class);
   }
 
   public ExchangeRateField getExchangeRateField() {
     return getFieldByClass(ExchangeRateField.class);
   }
 
-  public TradingActionBox getbuyAndSellRadioButtonGroupBox() {
+  public TradingActionBox getTradingActionGroupBox() {
     return getFieldByClass(TradingActionBox.class);
   }
 
@@ -150,11 +145,11 @@ public class DealForm extends AbstractForm {
     return getFieldByClass(OkButton.class);
   }
 
-  public OrderBookTypeField getSellCurrencyField() {
+  public OrderBookTypeField getOrderBookTypeField() {
     return getFieldByClass(OrderBookTypeField.class);
   }
 
-  public AmountField getSellAmountField() {
+  public AmountField getAmountField() {
     return getFieldByClass(AmountField.class);
   }
 
@@ -184,7 +179,7 @@ public class DealForm extends AbstractForm {
       }
 
       @Order(-1000)
-      public class SellGroupBox extends AbstractGroupBox {
+      public class DealFormGroupBox extends AbstractGroupBox {
 
         @Override
         protected int getConfiguredGridW() {
@@ -205,7 +200,7 @@ public class DealForm extends AbstractForm {
         public class TradingActionBox extends AbstractRadioButtonGroup<String> {
           @Override
           protected String getConfiguredLabel() {
-            return TEXTS.get("BuyOrSell");
+            return TEXTS.get("Action");
           }
 
           @Override
@@ -249,7 +244,7 @@ public class DealForm extends AbstractForm {
 
           @Override
           protected String getConfiguredLabel() {
-            return TEXTS.get("Amount");
+            return TEXTS.get("Quantity");
           }
 
           @Override
@@ -339,6 +334,12 @@ public class DealForm extends AbstractForm {
       exportFormData(formData);
       formData = BEANS.get(IDealService.class).prepareCreate(formData);
       importFormData(formData);
+    }
+
+    @Override
+    protected void execPostLoad() {
+      getTradingActionGroupBox().setValue(TradingActionCodeType.BuyCode.ID);
+      getOrderBookTypeField().setValue(OrderBookTypeCodeType.JpyEurCode.ID);
     }
 
     @Override
