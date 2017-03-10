@@ -11,6 +11,7 @@
 package com.bsiag.ethereum.fxtradingnetwork.events.shared.event;
 
 import org.eclipse.scout.rt.platform.ApplicationScoped;
+import org.eclipse.scout.rt.platform.exception.ProcessingException;
 import org.eclipse.scout.rt.shared.TunnelToServer;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 
@@ -34,5 +35,5 @@ public interface IDealService {
 
   DealFormData store(DealFormData formData);
 
-  boolean publish(String dealId);
+  boolean publish(String dealId) throws ProcessingException;
 }

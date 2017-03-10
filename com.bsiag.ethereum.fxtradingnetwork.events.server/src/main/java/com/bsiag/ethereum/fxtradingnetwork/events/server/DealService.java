@@ -13,6 +13,7 @@ package com.bsiag.ethereum.fxtradingnetwork.events.server;
 import java.util.UUID;
 
 import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.rt.platform.exception.ProcessingException;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.platform.holders.NVPair;
 import org.eclipse.scout.rt.platform.util.StringUtility;
@@ -22,8 +23,11 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.common.security.ACCESS;
 import org.eclipse.scout.rt.shared.session.Sessions;
+import org.eclipse.scout.trading.network.Order;
+import org.eclipse.scout.trading.network.OrderBookService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.bsiag.ethereum.fxtradingnetwork.events.account.EthereumService;
 import com.bsiag.ethereum.fxtradingnetwork.events.server.sql.SQLs;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.StatusCodeType;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.CreateEventPermission;
@@ -38,124 +42,133 @@ import com.bsiag.ethereum.fxtradingnetwork.shared.organization.IOrganizationServ
 
 public class DealService implements IDealService {
 
-	@Override
-	public DealsTablePageData getTableData(SearchFilter filter, String organizationId) {
-		DealsTablePageData pageData = new DealsTablePageData();
+  private static final Logger LOG = LoggerFactory.getLogger(DealService.class);
 
-		StringBuilder sqlSelect = new StringBuilder(SQLs.DEAL_PAGE_DATA_SELECT);
-		StringBuilder sqlWhere = new StringBuilder(" WHERE 1 = 1 ");
+  @Override
+  public DealsTablePageData getTableData(SearchFilter filter, String organizationId) {
+    DealsTablePageData pageData = new DealsTablePageData();
 
-		if (StringUtility.hasText(organizationId)) {
-			sqlWhere.append(SQLs.DEAL_PAGE_DATA_WHERE_CLAUSE);
-		}
+    StringBuilder sqlSelect = new StringBuilder(SQLs.DEAL_PAGE_DATA_SELECT);
+    StringBuilder sqlWhere = new StringBuilder(" WHERE 1 = 1 ");
 
-		String sql = sqlSelect.append(sqlWhere).append(SQLs.DEAL_PAGE_DATA_INTO).toString();
+    if (StringUtility.hasText(organizationId)) {
+      sqlWhere.append(SQLs.DEAL_PAGE_DATA_WHERE_CLAUSE);
+    }
 
-		SQL.selectInto(sql, new NVPair("organizationId", organizationId), new NVPair("page", pageData));
+    String sql = sqlSelect.append(sqlWhere).append(SQLs.DEAL_PAGE_DATA_INTO).toString();
 
-		return pageData;
-	}
+    SQL.selectInto(sql, new NVPair("organizationId", organizationId), new NVPair("page", pageData));
 
-	@Override
-	public OwnDealsTablePageData getOwnTableData(SearchFilter filter) {
-		OwnDealsTablePageData pageData = new OwnDealsTablePageData();
+    return pageData;
+  }
 
-		String userId = Sessions.currentSession(ISession.class).getUserId();
-		String userOrganizationId = BEANS.get(IOrganizationService.class).getOrganizationIdForUser(userId);
+  @Override
+  public OwnDealsTablePageData getOwnTableData(SearchFilter filter) {
+    OwnDealsTablePageData pageData = new OwnDealsTablePageData();
 
-		if (!StringUtility.isNullOrEmpty(userId) && !StringUtility.isNullOrEmpty(userOrganizationId)) {
-			StringBuilder sqlSelect = new StringBuilder(SQLs.DEAL_PAGE_DATA_SELECT);
-			StringBuilder sqlWhere = new StringBuilder(" WHERE 1 = 1 ");
+    String userId = Sessions.currentSession(ISession.class).getUserId();
+    String userOrganizationId = BEANS.get(IOrganizationService.class).getOrganizationIdForUser(userId);
 
-			sqlWhere.append(SQLs.DEAL_PAGE_DATA_WHERE_CLAUSE);
+    if (!StringUtility.isNullOrEmpty(userId) && !StringUtility.isNullOrEmpty(userOrganizationId)) {
+      StringBuilder sqlSelect = new StringBuilder(SQLs.DEAL_PAGE_DATA_SELECT);
+      StringBuilder sqlWhere = new StringBuilder(" WHERE 1 = 1 ");
 
-			String sql = sqlSelect.append(sqlWhere).append(SQLs.DEAL_PAGE_DATA_INTO).toString();
+      sqlWhere.append(SQLs.DEAL_PAGE_DATA_WHERE_CLAUSE);
 
-			SQL.selectInto(sql, new NVPair("organizationId", userOrganizationId), new NVPair("page", pageData));
-		}
+      String sql = sqlSelect.append(sqlWhere).append(SQLs.DEAL_PAGE_DATA_INTO).toString();
 
-		return pageData;
-	}
+      SQL.selectInto(sql, new NVPair("organizationId", userOrganizationId), new NVPair("page", pageData));
+    }
 
-	@Override
-	public DealFormData create(DealFormData formData) {
-		if (!ACCESS.check(new CreateEventPermission())) {
-			throw new VetoException(TEXTS.get("InsufficientPrivileges"));
-		}
+    return pageData;
+  }
 
-		if (StringUtility.isNullOrEmpty(formData.getDealId())) {
-			formData.setDealId(UUID.randomUUID().toString());
-			formData.setDealNr(UUID.randomUUID().toString());
-			formData.setStatus(StatusCodeType.InactiveCode.ID);
-		}
+  @Override
+  public DealFormData create(DealFormData formData) {
+    if (!ACCESS.check(new CreateEventPermission())) {
+      throw new VetoException(TEXTS.get("InsufficientPrivileges"));
+    }
 
-		SQL.insert(SQLs.DEAL_INSERT, formData);
+    if (StringUtility.isNullOrEmpty(formData.getDealId())) {
+      formData.setDealId(UUID.randomUUID().toString());
+      formData.setDealNr(UUID.randomUUID().toString());
+      formData.setStatus(StatusCodeType.InactiveCode.ID);
+    }
 
-		return store(formData);
-	}
+    SQL.insert(SQLs.DEAL_INSERT, formData);
 
-	@Override
-	public boolean publish(String dealId) {
-		boolean success = true;
-		DealFormData formData = new DealFormData();
-		formData.setDealId(dealId);
-		formData = load(formData);
-		boolean isBuy = TradingActionCodeType.BuyCode.ID.equals(formData.getTradingActionBox().getValue());
-		try {
-			// TODO dealNr speichern
-			BEANS.get(EthereumService.class).createDeal(formData.getOrganizationId(), isBuy,
-					formData.getAmount().getValue().intValue(), formData.getExchangeRate().getValue().doubleValue());
+    return store(formData);
+  }
 
-			formData.setStatus(StatusCodeType.PublishedCode.ID);
-			store(formData);
-		} catch (Exception e) {
-			success = false;
-		}
-		return success;
-	}
+  @Override
+  public boolean publish(String dealId) throws ProcessingException {
+    boolean success = true;
+    DealFormData formData = new DealFormData();
+    formData.setDealId(dealId);
+    formData = load(formData);
+    try {
+      String dealNr = BEANS.get(OrderBookService.class).publish(convertToOrder(formData));
+      if (StringUtility.hasText(dealNr)) {
+        formData.setDealNr(formData.getOrderBookType().getValue() + dealNr);
+        formData.setStatus(StatusCodeType.PublishedCode.ID);
+        store(formData);
+      }
+    }
+    catch (Exception e) {
+      LOG.error(e.getMessage());
+      throw new ProcessingException(e.getMessage());
+    }
+    return success;
+  }
 
-	@Override
-	public DealFormData load(DealFormData formData) {
-		if (!ACCESS.check(new ReadEventPermission())) {
-			throw new VetoException(TEXTS.get("InsufficientPrivileges"));
-		}
+  @Override
+  public DealFormData load(DealFormData formData) {
+    if (!ACCESS.check(new ReadEventPermission())) {
+      throw new VetoException(TEXTS.get("InsufficientPrivileges"));
+    }
 
-		SQL.selectInto(SQLs.DEAL_SELECT, formData);
-		// SQL.selectInto(SQLs.EVENT_PARTICIPANTS_SELECT, formData);
+    SQL.selectInto(SQLs.DEAL_SELECT, formData);
+    //    SQL.selectInto(SQLs.EVENT_PARTICIPANTS_SELECT, formData);
 
-		return formData;
-	}
+    return formData;
+  }
 
-	@Override
-	public DealFormData prepareCreate(DealFormData formData) {
-		if (!ACCESS.check(new CreateEventPermission())) {
-			throw new VetoException(TEXTS.get("InsufficientPrivileges"));
-		}
+  @Override
+  public DealFormData prepareCreate(DealFormData formData) {
+    if (!ACCESS.check(new CreateEventPermission())) {
+      throw new VetoException(TEXTS.get("InsufficientPrivileges"));
+    }
 
-		return formData;
-	}
+    return formData;
+  }
 
-	@Override
-	public DealFormData store(DealFormData formData) {
-		if (!ACCESS.check(new UpdateDealPermission())) {
-			throw new VetoException(TEXTS.get("InsufficientPrivileges"));
-		}
+  @Override
+  public DealFormData store(DealFormData formData) {
+    if (!ACCESS.check(new UpdateDealPermission())) {
+      throw new VetoException(TEXTS.get("InsufficientPrivileges"));
+    }
 
-		SQL.update(SQLs.DEAL_UPDATE, formData);
+    SQL.update(SQLs.DEAL_UPDATE, formData);
 
-		// TableBeanHolderFilter deletedParticipants = new
-		// TableBeanHolderFilter(formData.getParticipantTableField(),
-		// ITableHolder.STATUS_DELETED);
-		// TableBeanHolderFilter insertedParticipants = new
-		// TableBeanHolderFilter(formData.getParticipantTableField(),
-		// ITableHolder.STATUS_INSERTED);
-		// NVPair dealId = new NVPair("dealId", formData.getDealId());
+    //    TableBeanHolderFilter deletedParticipants = new TableBeanHolderFilter(formData.getParticipantTableField(), ITableHolder.STATUS_DELETED);
+    //    TableBeanHolderFilter insertedParticipants = new TableBeanHolderFilter(formData.getParticipantTableField(), ITableHolder.STATUS_INSERTED);
+    // NVPair dealId = new NVPair("dealId", formData.getDealId());
 
-		// SQL.delete(SQLs.EVENT_PARTICIPANTS_DELETE, deletedParticipants,
-		// eventId);
-		// SQL.insert(SQLs.EVENT_PARTICIPANTS_INSERT, insertedParticipants,
-		// eventId);
+    //    SQL.delete(SQLs.EVENT_PARTICIPANTS_DELETE, deletedParticipants, eventId);
+    //    SQL.insert(SQLs.EVENT_PARTICIPANTS_INSERT, insertedParticipants, eventId);
 
-		return formData;
-	}
+    return formData;
+  }
+
+  private Order convertToOrder(DealFormData formData) {
+    Order.Type type = Order.Type.BUY;
+    if (TradingActionCodeType.SellCode.ID.equals(formData.getTradingActionBox().getValue())) {
+      type = Order.Type.SELL;
+    }
+    Order order = new Order(type, formData.getAmount().getValue().intValue(), formData.getExchangeRate().getValue().doubleValue());
+    order.setCurrencyPair(formData.getOrderBookType().getValue());
+    order.setOwner(formData.getOrganizationId());
+
+    return order;
+  }
 }

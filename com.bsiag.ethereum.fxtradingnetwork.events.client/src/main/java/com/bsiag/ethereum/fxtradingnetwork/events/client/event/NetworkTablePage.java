@@ -110,16 +110,16 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
       return getColumnSet().getColumnByClass(BuyerTimeColumn.class);
     }
 
-    public BuyerAmountColumn getBuyerAmountColumn() {
-      return getColumnSet().getColumnByClass(BuyerAmountColumn.class);
+    public BuyerQuantityColumn getBuyerQuantityColumn() {
+      return getColumnSet().getColumnByClass(BuyerQuantityColumn.class);
     }
 
     public ExchangeRateColumn getExchangeRateColumn() {
       return getColumnSet().getColumnByClass(ExchangeRateColumn.class);
     }
 
-    public SellerAmountColumn getSellerAmountColumn() {
-      return getColumnSet().getColumnByClass(SellerAmountColumn.class);
+    public SellerQuantityColumn getSellerQuantityColumn() {
+      return getColumnSet().getColumnByClass(SellerQuantityColumn.class);
     }
 
     public SellerTimeColumn getSellerTimeColumn() {
@@ -282,10 +282,10 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(8000)
-    public class BuyerAmountColumn extends AbstractLongColumn {
+    public class BuyerQuantityColumn extends AbstractLongColumn {
       @Override
       protected String getConfiguredHeaderText() {
-        return TEXTS.get("Amount");
+        return TEXTS.get("Quantity");
       }
 
       @Override
@@ -318,10 +318,10 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
     }
 
     @Order(10000)
-    public class SellerAmountColumn extends AbstractLongColumn {
+    public class SellerQuantityColumn extends AbstractLongColumn {
       @Override
       protected String getConfiguredHeaderText() {
-        return TEXTS.get("Amount");
+        return TEXTS.get("Quantity");
       }
 
       @Override

@@ -1,85 +1,103 @@
 package org.eclipse.scout.trading.network;
 
+import org.eclipse.scout.rt.platform.util.StringUtility;
+
 /**
  * Simple order class
  */
 public class Order {
 
-	/**
-	 * Order types BUY and SELL
-	 */
-	public enum Type {
-		BUY, SELL
-	}
+  /**
+   * Order types BUY and SELL
+   */
+  public enum Type {
+    BUY, SELL
+  }
 
-	private int id;
-	private Type type;
-	private int amount;
-	private double price;
-	private String owner;
+  private int id;
+  private Type type;
+  private int amount;
+  private double price;
+  private String owner;
+  private String currencyPair;
 
-	public Order(Type type, int amount, double price) {
-		this.type = type;
-		this.setAmount(amount);
-		this.setPrice(price);
-	}
+  public Order(Type type, int amount, double price) {
+    this.type = type;
+    this.setAmount(amount);
+    this.setPrice(price);
+  }
 
-	public int getId() {
-		return id;
-	}
+  public int getId() {
+    return id;
+  }
 
-	public void setId(int id) {
-		if (id < 0) {
-			throw new RuntimeException("order id must not be negative");
-		}
+  public void setId(int id) {
+    if (id < 0) {
+      throw new RuntimeException("order id must not be negative");
+    }
 
-		this.id = id;
-	}
+    this.id = id;
+  }
 
-	public Type getType() {
-		return type;
-	}
+  public Type getType() {
+    return type;
+  }
 
-	protected void setType(Type type) {
-		if (type == null) {
-			throw new RuntimeException("order type must not be null");
-		}
+  protected void setType(Type type) {
+    if (type == null) {
+      throw new RuntimeException("order type must not be null");
+    }
 
-		this.type = type;
-	}
+    this.type = type;
+  }
 
-	public int getAmount() {
-		return amount;
-	}
+  public boolean isBuy() {
+    return (type.equals(Type.BUY));
+  }
 
-	public void setAmount(int amount) {
-		if (amount <= 0) {
-			throw new RuntimeException("order amount must be positive");
-		}
+  public int getAmount() {
+    return amount;
+  }
 
-		this.amount = amount;
-	}
+  public void setAmount(int amount) {
+    if (amount <= 0) {
+      throw new RuntimeException("order amount must be positive");
+    }
 
-	public double getPrice() {
-		return price;
-	}
+    this.amount = amount;
+  }
 
-	protected void setPrice(double price) {
-		if (price <= 0.0) {
-			throw new RuntimeException("order price must be positive");
-		}
-		this.price = price;
-	}
+  public double getPrice() {
+    return price;
+  }
 
-	public String getOwner() {
-		return owner;
-	}
+  protected void setPrice(double price) {
+    if (price <= 0.0) {
+      throw new RuntimeException("order price must be positive");
+    }
+    this.price = price;
+  }
 
-	public void setOwner(String owner) {
-		if (owner == null || owner.isEmpty()) {
-			throw new RuntimeException("order owner must not be null or empty");
-		}
+  public String getOwner() {
+    return owner;
+  }
 
-		this.owner = owner;
-	}
+  public void setOwner(String owner) {
+    if (owner == null || owner.isEmpty()) {
+      throw new RuntimeException("order owner must not be null or empty");
+    }
+
+    this.owner = owner;
+  }
+
+  public String getCurrencyPair() {
+    return currencyPair;
+  }
+
+  public void setCurrencyPair(String currencyPair) {
+    if (StringUtility.length(currencyPair) != 6) {
+      throw new RuntimeException("currency pair must contain exactly 6 charaters");
+    }
+    this.currencyPair = currencyPair;
+  }
 }

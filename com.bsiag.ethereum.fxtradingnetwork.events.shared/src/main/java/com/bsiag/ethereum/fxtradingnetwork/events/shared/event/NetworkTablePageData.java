@@ -62,9 +62,9 @@ public class NetworkTablePageData extends AbstractTablePageData {
     public static final String buyerSide = "buyerSide";
     public static final String buyerOrganization = "buyerOrganization";
     public static final String buyerTime = "buyerTime";
-    public static final String buyerAmount = "buyerAmount";
+    public static final String buyerQuantity = "buyerQuantity";
     public static final String exchangeRate = "exchangeRate";
-    public static final String sellerAmount = "sellerAmount";
+    public static final String sellerQuantity = "sellerQuantity";
     public static final String sellerTime = "sellerTime";
     public static final String sellerOrganization = "sellerOrganization";
     public static final String sellerSide = "sellerSide";
@@ -77,9 +77,9 @@ public class NetworkTablePageData extends AbstractTablePageData {
     private String m_buyerSide;
     private String m_buyerOrganization;
     private Date m_buyerTime;
-    private Long m_buyerAmount;
+    private Long m_buyerQuantity;
     private Double m_exchangeRate;
-    private Long m_sellerAmount;
+    private Long m_sellerQuantity;
     private Date m_sellerTime;
     private String m_sellerOrganization;
     private String m_sellerSide;
@@ -156,12 +156,12 @@ public class NetworkTablePageData extends AbstractTablePageData {
       m_buyerTime = newBuyerTime;
     }
 
-    public Long getBuyerAmount() {
-      return m_buyerAmount;
+    public Long getBuyerQuantity() {
+      return m_buyerQuantity;
     }
 
-    public void setBuyerAmount(Long newBuyerAmount) {
-      m_buyerAmount = newBuyerAmount;
+    public void setBuyerQuantity(Long newBuyerQuantity) {
+      m_buyerQuantity = newBuyerQuantity;
     }
 
     public Double getExchangeRate() {
@@ -172,12 +172,12 @@ public class NetworkTablePageData extends AbstractTablePageData {
       m_exchangeRate = newExchangeRate;
     }
 
-    public Long getSellerAmount() {
-      return m_sellerAmount;
+    public Long getSellerQuantity() {
+      return m_sellerQuantity;
     }
 
-    public void setSellerAmount(Long newSellerAmount) {
-      m_sellerAmount = newSellerAmount;
+    public void setSellerQuantity(Long newSellerQuantity) {
+      m_sellerQuantity = newSellerQuantity;
     }
 
     public Date getSellerTime() {
