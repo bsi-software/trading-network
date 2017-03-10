@@ -47,7 +47,7 @@ public final class Web3jUtil {
 	public static String getClientVersion() {
 		try {
 			Web3ClientVersion versionResponse;
-			versionResponse = web3j.web3ClientVersion().sendAsync().get();
+			versionResponse = getWeb3j().web3ClientVersion().sendAsync().get();
 			return versionResponse.getWeb3ClientVersion();
 		} 
 		catch (Exception e) {

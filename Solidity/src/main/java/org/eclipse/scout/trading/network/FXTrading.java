@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.EventValues;
@@ -78,9 +79,11 @@ public final class FXTrading extends Contract {
         });
     }
 
-    public Future<TransactionReceipt> currentMatch() {
-        Function function = new Function("currentMatch", Arrays.<Type>asList(), Collections.<TypeReference<?>>emptyList());
-        return executeTransactionAsync(function);
+    public CompletableFuture<List<Type>> currentMatch() {
+        Function function = new Function("currentMatch", 
+        		Arrays.<Type>asList(), 
+        		Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+        return executeCallMultipleValueReturnAsync(function);
     }
 
     public Future<List<Type>> buyDeals(Uint256 param0) {

@@ -34,7 +34,7 @@ public class TestFXTradingContract {
 	private static final Bool BUY = new Bool(true);	
 	private static final Bool SELL = new Bool(false);
 	// use localhost if a local geth client is running or replace with the docker container IP: docker inspect <containerId> | grep IPAddress
-	private static final String CLIENT_IP = "172.17.0.2";
+	private static final String CLIENT_IP = "192.168.99.100";
 	private static final String CLIENT_PORT = "8545";
 	
 	private static final BigInteger GAS_PRICE_DEFAULT = BigInteger.valueOf(20_000_000_000L);
@@ -78,9 +78,8 @@ public class TestFXTradingContract {
 	
 	@Test
 	public void testConnection() {
-		String version = Web3jUtil.getClientVersion();
 		Assert.assertNotNull("web3j is null", Web3jUtil.getWeb3j());
-		Assert.assertNotEquals("unexpected ethereum client version: ", "<undefined>", version);
+		Assert.assertNotEquals("unexpected ethereum client version: ", "<undefined>", Web3jUtil.getClientVersion());
 	}
 	
 	/** 
@@ -96,38 +95,48 @@ public class TestFXTradingContract {
 	#4   BUY    09:06   100   20.15                       
 	#6   BUY    09:09   200   20.15     */
 	@Test
-	public FXTrading testDealOrdering() {
+	public void testDealOrdering() {
 		try {
 			FXTrading contract = deployFXTradingContract();
 
-			contract.createDeal(QUANTITY_100, PRICE_2030, SELL, COMPANY_1).get();
-			contract.createDeal(QUANTITY_100, PRICE_2025, SELL, COMPANY_1).get();
-			contract.createDeal(QUANTITY_200, PRICE_2030, SELL, COMPANY_1).get();
-
+			initSellDeals(contract);
 			assertEquals(PRICE_2030, readDeal(false, 0, contract).price);
 			assertEquals(PRICE_2030, readDeal(false, 1, contract).price);
 			assertEquals(PRICE_2025, readDeal(false, 2, contract).price);
 
-			contract.createDeal(QUANTITY_100, PRICE_2015, BUY, COMPANY_1).get();
-			contract.createDeal(QUANTITY_200, PRICE_2020, BUY, COMPANY_1).get();
-			contract.createDeal(QUANTITY_200, PRICE_2015, BUY, COMPANY_1).get();
-
+			initBuyDeals(contract);
 			assertEquals(PRICE_2015, readDeal(true, 0, contract).price);
 			assertEquals(PRICE_2015, readDeal(true, 1, contract).price);
 			assertEquals(PRICE_2020, readDeal(true, 2, contract).price);
 			
-			return contract;
 		} catch (Exception e) {
 			throw new RuntimeException("Exception during unit test", e);
 		}
 	}
 	
+	private void initSellDeals(FXTrading contract) throws Exception {
+		contract.createDeal(QUANTITY_100, PRICE_2030, SELL, COMPANY_1).get();
+		contract.createDeal(QUANTITY_100, PRICE_2025, SELL, COMPANY_1).get();
+		contract.createDeal(QUANTITY_200, PRICE_2030, SELL, COMPANY_1).get();
+
+	}
+	
+	private void initBuyDeals(FXTrading contract) throws Exception {
+		contract.createDeal(QUANTITY_100, PRICE_2015, BUY, COMPANY_1).get();
+		contract.createDeal(QUANTITY_200, PRICE_2020, BUY, COMPANY_1).get();
+		contract.createDeal(QUANTITY_200, PRICE_2015, BUY, COMPANY_1).get();
+	}
+	
 	@Test
 	public void testDealMatcher() {
-		FXTrading contract = testDealOrdering();
-		
 		try {
-			TransactionReceipt txReceipt = contract.currentMatch().get();
+			FXTrading contract = deployFXTradingContract();
+			
+			initSellDeals(contract);
+			initBuyDeals(contract);
+
+			List<Type> resultList = contract.currentMatch().get();
+			System.out.println("result_size:" + resultList.size());
 		} catch (Exception e) {
 			throw new RuntimeException("Exception during unit test", e);
 		}
