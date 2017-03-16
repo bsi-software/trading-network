@@ -278,7 +278,7 @@ public class TestOrderBook {
 		printQueueStatus(contract, Queue.Executed);
 	}
 	
-	private void printQueueStatus(OrderBook contract, Queue queue) throws InterruptedException, ExecutionException {
+	private void printQueueStatus(OrderBook contract, Queue queue) {
 		String queueName = "<undefined>";
 		
 		switch(queue) {
@@ -291,7 +291,7 @@ public class TestOrderBook {
 		while (true) {
 			try {
 				System.out.println(String.format("%s[%s] = %s", queueName, i, readOrder(queue, i++, contract)));
-			} catch (ExecutionException e) {
+			} catch (Exception e) {
 				System.out.println();
 				return;
 			}
