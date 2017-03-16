@@ -1,4 +1,4 @@
-package org.eclipse.scout.trading.network;
+package org.eclipse.scout.trading.network.tool;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -19,15 +19,16 @@ import org.web3j.utils.Convert.Unit;
 /**
  * Helper class containing various methods to interact with the blockchain
  */
-public final class Web3jUtil {
+public final class Web3jHelper {
 	
-	private Web3jUtil() {}
+	private Web3jHelper() {}
 	
 	public static final BigInteger GAS_PRICE_DEFAULT = BigInteger.valueOf(20_000_000_000L);
-	public static final BigInteger GAS_LIMIT_DEFAULT = BigInteger.valueOf(500_000L);
+	public static final BigInteger GAS_LIMIT_DEFAULT = BigInteger.valueOf(4_700_000L);
 	
-	private static final String CLIENT_IP = "192.168.99.100";
-	private static final String CLIENT_PORT = "8545";
+	public static final String IP_ADDRESS = "192.168.99.100";
+	public static final String PORT = "8546";
+	
 	private static Web3j web3j = null;
 	
 	public static Web3j getWeb3j() {
@@ -35,8 +36,8 @@ public final class Web3jUtil {
 	}
 	
 	public static Web3j connect() {
-		System.out.println("Trying to connect to Ethereum net ...");
-		String clientUrl = String.format("http://%s:%s", CLIENT_IP, CLIENT_PORT);
+		String clientUrl = String.format("http://%s:%s", IP_ADDRESS, PORT);
+		System.out.println("Trying to connect to Ethereum net on " + clientUrl + " ...");
 		
 		web3j = Web3j.build(new HttpService(clientUrl));
 		

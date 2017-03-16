@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import org.eclipse.scout.trading.network.tool.Web3jHelper;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.crypto.Credentials;
 
@@ -14,7 +15,7 @@ import org.web3j.crypto.Credentials;
 
 public class OrderBookService {
 
-	private FXTrading contract;
+	private OrderBook contract;
 
 	/**
 	 * Deploys the order book service contract. The method blocks until the
@@ -26,8 +27,8 @@ public class OrderBookService {
 	 */
 	public String deploy(Credentials credentials, BigInteger gasPrice, BigInteger gasLimit, String symbol)
 			throws InterruptedException, ExecutionException {
-		contract = FXTrading
-				.deploy(Web3jUtil.getWeb3j(), credentials, gasPrice, gasLimit, BigInteger.valueOf(0), new Utf8String(symbol))
+		contract = OrderBook
+				.deploy(Web3jHelper.getWeb3j(), credentials, gasPrice, gasLimit, BigInteger.valueOf(0), new Utf8String(symbol))
 				.get();
 
 		System.out.println("contract successfully deployed at address" + contract.getContractAddress());
