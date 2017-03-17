@@ -16,7 +16,7 @@ public interface INetworkService extends IService {
    * @param filter
    * @return
    */
-  NetworkTablePageData getNetworkTableData(SearchFilter filter);
+  NetworkTablePageData getNetworkTableData(SearchFilter filter, String orderBookTypeId);
 
   void executeMerge(Long dealId1, Long dealId2);
 }

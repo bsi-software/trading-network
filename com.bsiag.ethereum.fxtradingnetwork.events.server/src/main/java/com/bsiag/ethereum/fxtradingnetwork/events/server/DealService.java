@@ -10,6 +10,7 @@
  ******************************************************************************/
 package com.bsiag.ethereum.fxtradingnetwork.events.server;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import org.eclipse.scout.rt.platform.BEANS;
@@ -158,6 +159,23 @@ public class DealService implements IDealService {
     //    SQL.insert(SQLs.EVENT_PARTICIPANTS_INSERT, insertedParticipants, eventId);
 
     return formData;
+  }
+
+  @Override
+  public BigDecimal getCurrentExchangeRate(String orderBookId, String tradingActionId) throws ProcessingException {
+    Order topOrderInverse = null;
+    OrderBookService service = BEANS.get(OrderBookService.class);
+    if (TradingActionCodeType.BuyCode.ID.equals(tradingActionId)) {
+      topOrderInverse = service.getTopSellOrder(orderBookId);
+    }
+    else if (TradingActionCodeType.SellCode.ID.equals(tradingActionId)) {
+      topOrderInverse = service.getTopBuyOrder(orderBookId);
+    }
+    BigDecimal exchangeRate = null;
+    if (null != topOrderInverse) {
+      exchangeRate = new BigDecimal(topOrderInverse.getPrice());
+    }
+    return exchangeRate;
   }
 
   private Order convertToOrder(DealFormData formData) {

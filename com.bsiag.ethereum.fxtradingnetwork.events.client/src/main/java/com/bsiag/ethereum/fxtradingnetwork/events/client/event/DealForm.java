@@ -12,8 +12,12 @@ package com.bsiag.ethereum.fxtradingnetwork.events.client.event;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.util.Set;
 
 import org.eclipse.scout.rt.client.dto.FormData;
+import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
+import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
+import org.eclipse.scout.rt.client.ui.action.menu.ValueFieldMenuType;
 import org.eclipse.scout.rt.client.ui.form.AbstractForm;
 import org.eclipse.scout.rt.client.ui.form.AbstractFormHandler;
 import org.eclipse.scout.rt.client.ui.form.IForm;
@@ -27,6 +31,8 @@ import org.eclipse.scout.rt.client.ui.form.fields.smartfield.AbstractSmartField;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.exception.VetoException;
+import org.eclipse.scout.rt.platform.util.CollectionUtility;
+import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
 
@@ -34,9 +40,9 @@ import com.bsiag.ethereum.fxtradingnetwork.client.common.AbstractDirtyFormHandle
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.CancelButton;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox;
-import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.QuantityField;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.ExchangeRateField;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.OrderBookTypeField;
+import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.QuantityField;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.GeneralBox.DealFormGroupBox.TradingActionBox;
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.DealForm.MainBox.OkButton;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.OrderBookTypeCodeType;
@@ -101,7 +107,7 @@ public class DealForm extends AbstractForm {
 
   @Override
   protected int getConfiguredDisplayHint() {
-    return IForm.DISPLAY_HINT_VIEW;
+    return IForm.DISPLAY_HINT_DIALOG;
   }
 
   public void startModify() {
@@ -192,6 +198,11 @@ public class DealForm extends AbstractForm {
         }
 
         @Override
+        protected boolean getConfiguredLabelVisible() {
+          return false;
+        }
+
+        @Override
         protected int getConfiguredGridColumnCount() {
           return 1;
         }
@@ -212,6 +223,7 @@ public class DealForm extends AbstractForm {
           protected Class<? extends ICodeType<?, String>> getConfiguredCodeType() {
             return TradingActionCodeType.class;
           }
+
         }
 
         @Order(10)
@@ -269,8 +281,13 @@ public class DealForm extends AbstractForm {
           }
 
           @Override
+          protected int getConfiguredGridW() {
+            return 1;
+          }
+
+          @Override
           public int getFractionDigits() {
-            return 4;
+            return 2;
           }
 
           @Override
@@ -288,6 +305,39 @@ public class DealForm extends AbstractForm {
             }
             return super.execValidateValue(rawValue);
           }
+
+          public void loadCurrentExchangeRate() {
+            if (StringUtility.hasText(getTradingActionGroupBox().getValue())
+                && StringUtility.hasText(getOrderBookTypeField().getValue())) {
+              BigDecimal currentRate = BEANS.get(IDealService.class).getCurrentExchangeRate(
+                  getOrderBookTypeField().getValue(), getTradingActionGroupBox().getValue());
+              setValue(currentRate);
+            }
+          }
+
+          @Order(1000)
+          public class LoadExchangeRateMenu extends AbstractMenu {
+            @Override
+            protected String getConfiguredText() {
+              return TEXTS.get("LoadCurrentExchangeRate");
+            }
+
+            @Override
+            protected String getConfiguredIconId() {
+              return "font:awesomeIcons \uf0ec";
+            }
+
+            @Override
+            protected Set<? extends IMenuType> getConfiguredMenuTypes() {
+              return CollectionUtility.hashSet(ValueFieldMenuType.NotNull, ValueFieldMenuType.Null);
+            }
+
+            @Override
+            protected void execAction() {
+              getExchangeRateField().loadCurrentExchangeRate();
+            }
+          }
+
         }
 
       }
@@ -339,7 +389,7 @@ public class DealForm extends AbstractForm {
     @Override
     protected void execPostLoad() {
       getTradingActionGroupBox().setValue(TradingActionCodeType.BuyCode.ID);
-      getOrderBookTypeField().setValue(OrderBookTypeCodeType.JpyEurCode.ID);
+      getOrderBookTypeField().setValue(OrderBookTypeCodeType.UsdEurCode.ID);
     }
 
     @Override

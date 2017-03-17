@@ -40,7 +40,7 @@ import org.web3j.utils.Convert.Unit;
 
 import com.bsiag.ethereum.fxtradingnetwork.events.account.model.Account;
 import com.bsiag.ethereum.fxtradingnetwork.events.account.model.Transaction;
-import com.bsiag.ethereum.fxtradingnetwork.events.server.FXTrading;
+import com.bsiag.ethereum.fxtradingnetwork.events.server.OrderBook;
 
 @ApplicationScoped
 public class EthereumService {
@@ -68,7 +68,7 @@ public class EthereumService {
   // the connection to the ethereum net
   private Web3j web3j = null;
 
-  private FXTrading contract = null;
+  private OrderBook contract = null;
   private String rpc_coinbase;
 
   // TODO replace these with some real persistence
@@ -103,8 +103,13 @@ public class EthereumService {
 //        EthSendTransaction txRequest = getWeb3j().ethSendTransaction(transaction).sendAsync().get();
 //        LOG.info(String.format("added %d weis to account of prs01. tx hash: %s", amount, txRequest.getTransactionHash()));
 
+        String contractOwnerAdress = Alice.ADDRESS;
+        if (getBalance(contractOwnerAdress).compareTo(Convert.toWei("10", Convert.Unit.ETHER)) < 0) {
+          transferEther(rpc_coinbase, contractOwnerAdress, Convert.toWei("10", Convert.Unit.ETHER).toBigInteger());
+        }
+
         // TODO check if this is a good place
-        contract = deployContract();
+//        contract = deployContract();
       }
       catch (Exception e) {
         LOG.error(e.getMessage());
@@ -113,7 +118,7 @@ public class EthereumService {
     }
   }
 
-  private FXTrading deployContract() throws Exception {
+  private OrderBook deployContract() throws Exception {
     String contractOwnerAdress = Alice.ADDRESS;
 
     if (getBalance(contractOwnerAdress).compareTo(Convert.toWei("10", Convert.Unit.ETHER)) < 0) {
@@ -122,11 +127,9 @@ public class EthereumService {
 
     LOG.info(getBalance(contractOwnerAdress).toString());
 
-    Future<FXTrading> deploy = FXTrading.deploy(getWeb3j(), Alice.CREDENTIALS, GAS_PRICE_DEFAULT, BigInteger.valueOf(2_000_000L), BigInteger.valueOf(0), new Utf8String("CHFEUR"));
-    FXTrading contract = deploy.get();
+    Future<OrderBook> deploy = OrderBook.deploy(getWeb3j(), Alice.CREDENTIALS, GAS_PRICE_DEFAULT, BigInteger.valueOf(2_000_000L), BigInteger.valueOf(0), new Utf8String("CHFEUR"));
+    OrderBook contract = deploy.get();
     System.out.println(contract.getContractAddress());
-    Utf8String x = contract.currencyPair().get();
-    System.out.println(x.getValue());
 
     return contract;
   }
@@ -140,7 +143,7 @@ public class EthereumService {
     Uint256 dealQuantity = new Uint256(BigInteger.valueOf(quantity));
     Uint256 dealPrice = new Uint256(BigInteger.valueOf((long) (100 * price)));
 
-    TransactionReceipt receipt = contract.createDeal(dealQuantity, dealPrice, buy, owner).get();
+    TransactionReceipt receipt = contract.createOrder(dealQuantity, dealPrice, buy).get();
     LOG.info(receipt.getTransactionHash());
 
     for (int i = 0; i < 10; i++) {
@@ -156,13 +159,13 @@ public class EthereumService {
     return dealNr;
   }
 
-  private P_Deal readDeal(boolean buy, int index, FXTrading contract) throws InterruptedException, ExecutionException {
+  private P_Deal readDeal(boolean buy, int index, OrderBook contract) throws InterruptedException, ExecutionException {
     List<Type> list;
     if (buy) {
-      list = contract.buyDeals(new Uint256(BigInteger.valueOf(index))).get();
+      list = contract.buyOrders(new Uint256(BigInteger.valueOf(index))).get();
     }
     else {
-      list = contract.sellDeals(new Uint256(BigInteger.valueOf(index))).get();
+      list = contract.sellOrders(new Uint256(BigInteger.valueOf(index))).get();
     }
     P_Deal deal = null;
     if (null != list && list.size() > 0) {

@@ -48,8 +48,8 @@ public class DealOutline extends AbstractOutline {
   protected void execCreateChildPages(List<IPage<?>> pageList) {
     OwnDealsTablePage dealsTablePage = new OwnDealsTablePage();
     pageList.add(dealsTablePage);
-    NetworkTablePage networkTablePage = new NetworkTablePage();
-    pageList.add(networkTablePage);
+    NetworkNodePage networkNodePage = new NetworkNodePage();
+    pageList.add(networkNodePage);
   }
 
   @Override

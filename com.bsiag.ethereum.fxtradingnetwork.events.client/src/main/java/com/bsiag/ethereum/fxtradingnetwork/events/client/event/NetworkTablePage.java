@@ -22,13 +22,15 @@ import org.eclipse.scout.rt.client.ui.form.fields.decimalfield.IDecimalField;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
-import org.eclipse.scout.rt.platform.util.CompareUtility;
+import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
+import org.eclipse.scout.rt.shared.services.common.code.ICode;
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
 
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.NetworkTablePage.Table;
+import com.bsiag.ethereum.fxtradingnetwork.events.shared.OrderBookTypeCodeType;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.INetworkService;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.NetworkTablePageData;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.TradingActionCodeType;
@@ -37,26 +39,48 @@ import com.bsiag.ethereum.fxtradingnetwork.shared.organization.OrganizationLooku
 @Data(NetworkTablePageData.class)
 public class NetworkTablePage extends AbstractPageWithTable<Table> {
 
-  private String organizationId;
+  private String m_organizationId;
+  private String m_orderBookId;
+
+  public NetworkTablePage(String organizationId, String orderBookId) {
+    super();
+    m_organizationId = organizationId;
+    m_orderBookId = orderBookId;
+  }
 
   @FormData
   public String getOrganizationId() {
-    return organizationId;
+    return m_organizationId;
   }
 
   @FormData
   public void setOrganizationId(String organizationId) {
-    this.organizationId = organizationId;
+    this.m_organizationId = organizationId;
+  }
+
+  public String getOrderBookId() {
+    return m_orderBookId;
+  }
+
+  public void setOrderBookId(String orderBookId) {
+    m_orderBookId = orderBookId;
   }
 
   @Override
   protected String getConfiguredTitle() {
-    return TEXTS.get("Network");
+    String title = TEXTS.get("Network");
+    if (StringUtility.hasText(m_orderBookId)) {
+      ICode<String> code = BEANS.get(OrderBookTypeCodeType.class).getCode(m_orderBookId);
+      if (null != code) {
+        title = code.getText();
+      }
+    }
+    return title;
   }
 
   @Override
   protected void execLoadData(SearchFilter filter) {
-    importPageData(BEANS.get(INetworkService.class).getNetworkTableData(filter));
+    importPageData(BEANS.get(INetworkService.class).getNetworkTableData(filter, getOrderBookId()));
   }
 
   @Override
@@ -134,6 +158,17 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
 
     public SellerSideColumn getSellerSideColumn() {
       return getColumnSet().getColumnByClass(SellerSideColumn.class);
+    }
+
+    public ExecuteMergeMenu getExecuteMergeMenu() {
+      return getMenuByClass(ExecuteMergeMenu.class);
+    }
+
+    @Override
+    protected void execContentChanged() {
+      decorateCellsForMatches();
+      selectMatches();
+      getExecuteMergeMenu().adjustVisability();
     }
 
     @Order(1000)
@@ -405,7 +440,7 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected Set<? extends IMenuType> getConfiguredMenuTypes() {
-        return CollectionUtility.hashSet(TableMenuType.EmptySpace);
+        return CollectionUtility.hashSet(TableMenuType.EmptySpace, TableMenuType.MultiSelection, TableMenuType.SingleSelection);
       }
 
       @Override
@@ -415,21 +450,7 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
 
       @Override
       protected String getConfiguredIconId() {
-        return "font:awesomeIcons \f0ec";
-      }
-
-      @Override
-      protected void execInitAction() {
-        List<ITableRow> matchedRows = getIsMatchedColumn().findRows(true);
-        if (matchedRows.size() == 2) {
-          for (ITableRow row : matchedRows) {
-            if (CompareUtility.equals(TradingActionCodeType.SellCode.ID, getSideColumn().getValue(row))
-                && getOwnDealColumn().getValue(row)) {
-              setVisible(true);
-              break;
-            }
-          }
-        }
+        return "font:awesomeIcons \uf0ec";
       }
 
       @Override
@@ -439,6 +460,39 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
           INetworkService service = BEANS.get(INetworkService.class);
           service.executeMerge(getDealIdColumn().getValue(matchedRows.get(0)), getDealIdColumn().getValue(matchedRows.get(1)));
         }
+      }
+
+      public void adjustVisability() {
+        List<ITableRow> matchedRows = getIsMatchedColumn().findRows(true);
+        if (matchedRows.size() == 2) {
+          //TODO only if the sell action is for the users organization the menu is visible
+//          for (ITableRow row : matchedRows) {
+//            if (CompareUtility.equals(TradingActionCodeType.SellCode.ID, getSideColumn().getValue(row))
+//                && getOwnDealColumn().getValue(row)) {
+          setVisible(true);
+//              break;
+//            }
+//          }
+        }
+        else {
+          setVisible(false);
+        }
+      }
+    }
+
+    protected void decorateCellsForMatches() {
+      List<ITableRow> matchedRows = getIsMatchedColumn().findRows(true);
+      for (ITableRow matchedRow : matchedRows) {
+        matchedRow.setForegroundColor("014786");
+        matchedRow.setBackgroundColor("ffcc8a");
+      }
+    }
+
+    protected void selectMatches() {
+      List<ITableRow> matchedRows = getIsMatchedColumn().findRows(true);
+      if (matchedRows.size() > 0) {
+        selectRows(matchedRows);
+        scrollToSelection();
       }
     }
 

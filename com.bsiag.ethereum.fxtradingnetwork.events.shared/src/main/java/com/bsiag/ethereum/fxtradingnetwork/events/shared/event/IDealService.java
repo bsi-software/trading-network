@@ -10,6 +10,8 @@
  ******************************************************************************/
 package com.bsiag.ethereum.fxtradingnetwork.events.shared.event;
 
+import java.math.BigDecimal;
+
 import org.eclipse.scout.rt.platform.ApplicationScoped;
 import org.eclipse.scout.rt.platform.exception.ProcessingException;
 import org.eclipse.scout.rt.shared.TunnelToServer;
@@ -36,4 +38,6 @@ public interface IDealService {
   DealFormData store(DealFormData formData);
 
   boolean publish(String dealId) throws ProcessingException;
+
+  BigDecimal getCurrentExchangeRate(String orderBookId, String tradingActionId) throws ProcessingException;
 }

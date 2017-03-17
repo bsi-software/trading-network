@@ -145,6 +145,15 @@ public interface SQLs {
   String PARTICIPANT_INSERT_VALUES_02 = "VALUES ('evt02', 'prs01')";
   String PARTICIPANT_INSERT_VALUES_03 = "VALUES ('evt01', 'prs02')";
 
+  String DEPLOYED_ORDER_BOOK_CREATE = ""
+      + " CREATE TABLE deployed_order_book"
+      + " ( "
+      + "   ENVIRONMENT VARCHAR(15) NOT NULL, "
+      + "   ORDER_BOOK_TYPE VARCHAR(15) NOT NULL, "
+      + "   ADDRESS VARCHAR(255) NOT NULL, "
+      + "   CONSTRAINT DEPLOYED_ORDER_BOOK_PK1 PRIMARY KEY (ENVIRONMENT, ORDER_BOOK_TYPE) "
+      + " )";
+
   String PERSON_EVENT_SELECT = ""
       + "SELECT       e.event_id, "
       + "             e.title, "
