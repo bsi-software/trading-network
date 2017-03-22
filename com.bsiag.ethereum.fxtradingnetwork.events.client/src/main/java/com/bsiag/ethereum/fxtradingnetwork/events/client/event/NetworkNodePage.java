@@ -20,7 +20,7 @@ public class NetworkNodePage extends AbstractPageWithNodes {
 
   @Override
   protected String getConfiguredTitle() {
-    return TEXTS.get("Network");
+    return TEXTS.get("tradingCenter");
   }
 
   @Override

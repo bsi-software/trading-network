@@ -92,7 +92,6 @@ public class DealService implements IDealService {
 
     if (StringUtility.isNullOrEmpty(formData.getDealId())) {
       formData.setDealId(UUID.randomUUID().toString());
-      formData.setDealNr(UUID.randomUUID().toString());
       formData.setStatus(StatusCodeType.InactiveCode.ID);
     }
 

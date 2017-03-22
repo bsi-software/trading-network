@@ -10,31 +10,16 @@
  ******************************************************************************/
 package com.bsiag.ethereum.fxtradingnetwork.client;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
 import org.eclipse.scout.rt.client.session.ClientSessionProvider;
 import org.eclipse.scout.rt.client.ui.form.AbstractForm;
 import org.eclipse.scout.rt.client.ui.form.ScoutInfoForm;
 import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
 import org.eclipse.scout.rt.client.ui.form.fields.htmlfield.AbstractHtmlField;
-import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
-import org.eclipse.scout.rt.platform.config.CONFIG;
 import org.eclipse.scout.rt.platform.html.HTML;
-import org.eclipse.scout.rt.platform.html.IHtmlElement;
-import org.eclipse.scout.rt.platform.util.HexUtility;
-import org.eclipse.scout.rt.platform.util.StringUtility;
-import org.eclipse.scout.rt.shared.ISession;
 import org.eclipse.scout.rt.shared.TEXTS;
 
-import com.bsiag.ethereum.fxtradingnetwork.client.ConfigProperties.UserDomainProperty;
 import com.bsiag.ethereum.fxtradingnetwork.client.UserForm.MainBox.GroupBox.HtmlField;
-import com.bsiag.ethereum.fxtradingnetwork.shared.common.IResetDataStoreService;
 
 public class UserForm extends AbstractForm {
 
@@ -112,9 +97,9 @@ public class UserForm extends AbstractForm {
               ScoutInfoForm form = new ScoutInfoForm();
               form.startModify();
               break;
-            case "reset-data":
-              BEANS.get(IResetDataStoreService.class).resetDataStore();
-              break;
+//            case "reset-data":
+//              BEANS.get(IResetDataStoreService.class).resetDataStore();
+//              break;
             case "logout":
               ClientSessionProvider.currentSession(ClientSession.class).stop();
               break;
@@ -126,39 +111,39 @@ public class UserForm extends AbstractForm {
 
   private String createHtmlContent() {
     return HTML.div(
-        HTML.div(getGravatarImage()),
+        //HTML.div(getGravatarImage()),
         HTML.div(HTML.appLink("application-info", TEXTS.get("ApplicationInformation"))),
-        HTML.div(HTML.appLink("reset-data", TEXTS.get("ResetData"))),
+        //HTML.div(HTML.appLink("reset-data", TEXTS.get("ResetData"))),
         HTML.div(HTML.appLink("logout", TEXTS.get("Logout")))).toHtml();
   }
 
-  private IHtmlElement getGravatarImage() {
-    String userDomain = CONFIG.getPropertyValue(UserDomainProperty.class);
-    if (userDomain == null) {
-      return HTML.imgByIconId(Icons.Person);
-    }
-
-    try {
-      // Get the email address of the user
-      String emailAddress = StringUtility.trim(String.format("%s@%s", ISession.CURRENT.get().getUserId(), userDomain)).toLowerCase();
-
-      // Calculate MD5 Hash of email address
-      MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-      messageDigest.reset();
-      String emailMd5Hash = HexUtility.encode(messageDigest.digest(emailAddress.getBytes(StandardCharsets.UTF_8)));
-
-      // Get the Gravatar image
-      URL url = new URL("http://www.gravatar.com/avatar/" + emailMd5Hash);
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-      connection.setRequestMethod("GET");
-      connection.connect();
-      if (connection.getResponseCode() == 200) {
-        return HTML.div(HTML.img(url.toString()));
-      }
-    }
-    catch (IOException | NoSuchAlgorithmException e) {
-      // NOOP
-    }
-    return HTML.imgByIconId(Icons.Person);
-  }
+//  private IHtmlElement getGravatarImage() {
+//    String userDomain = CONFIG.getPropertyValue(UserDomainProperty.class);
+//    if (userDomain == null) {
+//      return HTML.imgByIconId(Icons.Person);
+//    }
+//
+//    try {
+//      // Get the email address of the user
+//      String emailAddress = StringUtility.trim(String.format("%s@%s", ISession.CURRENT.get().getUserId(), userDomain)).toLowerCase();
+//
+//      // Calculate MD5 Hash of email address
+//      MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+//      messageDigest.reset();
+//      String emailMd5Hash = HexUtility.encode(messageDigest.digest(emailAddress.getBytes(StandardCharsets.UTF_8)));
+//
+//      // Get the Gravatar image
+//      URL url = new URL("http://www.gravatar.com/avatar/" + emailMd5Hash + "?d=identicon");
+//      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+//      connection.setRequestMethod("GET");
+//      connection.connect();
+//      if (connection.getResponseCode() == 200) {
+//        return HTML.div(HTML.img(url.toString()));
+//      }
+//    }
+//    catch (IOException | NoSuchAlgorithmException e) {
+//      // NOOP
+//    }
+//    return HTML.imgByIconId(Icons.Person);
+//  }
 }

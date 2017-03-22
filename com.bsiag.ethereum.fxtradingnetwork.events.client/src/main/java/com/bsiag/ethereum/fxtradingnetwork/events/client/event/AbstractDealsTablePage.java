@@ -13,13 +13,13 @@ import org.eclipse.scout.rt.client.ui.form.FormEvent;
 import org.eclipse.scout.rt.client.ui.form.FormListener;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
-import org.eclipse.scout.rt.platform.exception.ProcessingException;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 
 import com.bsiag.ethereum.fxtradingnetwork.client.Icons;
 import com.bsiag.ethereum.fxtradingnetwork.client.common.AbstractEditMenu;
 import com.bsiag.ethereum.fxtradingnetwork.client.common.AbstractNewMenu;
+import com.bsiag.ethereum.fxtradingnetwork.events.shared.StatusCodeType;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.AbstractDealsTablePageData;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.IDealService;
 
@@ -54,9 +54,9 @@ public abstract class AbstractDealsTablePage<T extends AbstractDealsTablePage<T>
   }
 
   @Override
-  public void initPage() throws ProcessingException {
-    registerDataChangeListener(IDealService.notificationEnum.Deals);
-    super.initPage();
+  protected void execInitPage() {
+    registerDataChangeListener(IDealService.NotificationEnum.Deals);
+    super.execInitPage();
   }
 
   public class Table extends AbstractDealsTable {
@@ -68,6 +68,15 @@ public abstract class AbstractDealsTablePage<T extends AbstractDealsTablePage<T>
 
     @Order(1000)
     public class EditMenu extends AbstractEditMenu {
+
+      @Override
+      protected void execOwnerValueChanged(Object newOwnerValue) {
+        boolean isVisible = false;
+        if (StatusCodeType.InactiveCode.ID.equals(getStatusColumn().getValue(getSelectedRow()))) {
+          isVisible = (true);
+        }
+        setVisible(isVisible);
+      }
 
       @Override
       protected void execAction() {
@@ -95,10 +104,19 @@ public abstract class AbstractDealsTablePage<T extends AbstractDealsTablePage<T>
       }
 
       @Override
+      protected void execOwnerValueChanged(Object newOwnerValue) {
+        boolean isVisible = false;
+        if (StatusCodeType.InactiveCode.ID.equals(getStatusColumn().getValue(getSelectedRow()))) {
+          isVisible = (true);
+        }
+        setVisible(isVisible);
+      }
+
+      @Override
       protected void execAction() {
-    	  String dealId = getDealIdColumn().getSelectedValue();
-    	  BEANS.get(IDealService.class).publish(dealId);
-    	  reloadPage();
+        String dealId = getDealIdColumn().getSelectedValue();
+        BEANS.get(IDealService.class).publish(dealId);
+        reloadPage();
       }
     }
 

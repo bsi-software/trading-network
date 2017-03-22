@@ -12,6 +12,7 @@ package com.bsiag.ethereum.fxtradingnetwork.client;
 
 import java.util.List;
 
+import org.eclipse.scout.rt.client.session.ClientSessionProvider;
 import org.eclipse.scout.rt.client.ui.action.keystroke.AbstractKeyStroke;
 import org.eclipse.scout.rt.client.ui.action.keystroke.IKeyStroke;
 import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
@@ -56,6 +57,10 @@ public class Desktop extends AbstractDesktop {
   @Override
   protected void execDefaultView() {
     setOutline(ContactOutline.class);
+  }
+
+  public static Desktop get() {
+    return (Desktop) ClientSessionProvider.currentSession().getDesktop();
   }
 
   public class RefreshOutlineKeyStroke extends AbstractKeyStroke {
@@ -121,36 +126,6 @@ public class Desktop extends AbstractDesktop {
     //tag::quickAccessMenu[]
   }
   //end::quickAccessMenu[]
-
-  //tag::OptionsMenu[]
-  @Order(20)
-  public class OptionsMenu extends AbstractFormMenu<OptionsForm> { // <1>
-
-    @Override
-    protected String getConfiguredText() {
-      return TEXTS.get("Options");
-    }
-
-    @Override
-    protected String getConfiguredIconId() {
-      return AbstractIcons.Gear;
-    }
-    //end::DesktopInit[]
-
-    //end::OptionsMenu[]
-    @Override
-    protected String getConfiguredKeyStroke() {
-      return IKeyStroke.F11;
-    }
-
-    @Override
-    protected Class<OptionsForm> getConfiguredForm() {
-      return OptionsForm.class;
-    }
-    //tag::OptionsMenu[]
-    //tag::DesktopInit[]
-  }
-  //end::OptionsMenu[]
 
   @Order(30)
   public class UserMenu extends AbstractFormMenu<UserForm> { // <2>

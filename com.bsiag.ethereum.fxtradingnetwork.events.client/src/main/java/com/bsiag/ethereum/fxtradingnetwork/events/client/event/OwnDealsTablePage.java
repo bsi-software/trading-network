@@ -21,13 +21,14 @@ public class OwnDealsTablePage extends AbstractDealsTablePage<OwnDealsTablePage.
   protected void execLoadData(SearchFilter filter) {
     importPageData(BEANS.get(IDealService.class).getOwnTableData(filter));
   }
+
   @Override
   protected void execInitPage() {
     IOrganizationService service = BEANS.get(IOrganizationService.class);
     String ownOrganisationId = service.getOrganizationIdForUser(ClientSession.get().getUserId());
     setOrganizationId(ownOrganisationId);
-    super.execInitDetailForm();
-  } 
+    super.execInitPage();
+  }
 
   public class Table extends AbstractDealsTablePage<OwnDealsTablePage.Table>.Table {
 

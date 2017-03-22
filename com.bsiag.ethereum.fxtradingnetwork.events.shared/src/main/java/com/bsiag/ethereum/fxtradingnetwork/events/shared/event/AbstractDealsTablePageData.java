@@ -49,44 +49,20 @@ public abstract class AbstractDealsTablePageData extends AbstractTablePageData {
   public abstract static class AbstractDealsTableRowData extends AbstractTableRowData {
 
     private static final long serialVersionUID = 1L;
-    public static final String dealId = "dealId";
-    public static final String dealNr = "dealNr";
-    public static final String quantity = "quantity";
     public static final String orderBookType = "orderBookType";
-    public static final String exchangeRate = "exchangeRate";
     public static final String tradingAction = "tradingAction";
+    public static final String quantity = "quantity";
+    public static final String exchangeRate = "exchangeRate";
+    public static final String dealId = "dealId";
     public static final String status = "status";
-    private String m_dealId;
-    private String m_dealNr;
-    private Long m_quantity;
+    public static final String dealNr = "dealNr";
     private String m_orderBookType;
-    private Double m_exchangeRate;
     private String m_tradingAction;
+    private Long m_quantity;
+    private Double m_exchangeRate;
+    private String m_dealId;
     private String m_status;
-
-    public String getDealId() {
-      return m_dealId;
-    }
-
-    public void setDealId(String newDealId) {
-      m_dealId = newDealId;
-    }
-
-    public String getDealNr() {
-      return m_dealNr;
-    }
-
-    public void setDealNr(String newDealNr) {
-      m_dealNr = newDealNr;
-    }
-
-    public Long getQuantity() {
-      return m_quantity;
-    }
-
-    public void setQuantity(Long newQuantity) {
-      m_quantity = newQuantity;
-    }
+    private String m_dealNr;
 
     public String getOrderBookType() {
       return m_orderBookType;
@@ -94,14 +70,6 @@ public abstract class AbstractDealsTablePageData extends AbstractTablePageData {
 
     public void setOrderBookType(String newOrderBookType) {
       m_orderBookType = newOrderBookType;
-    }
-
-    public Double getExchangeRate() {
-      return m_exchangeRate;
-    }
-
-    public void setExchangeRate(Double newExchangeRate) {
-      m_exchangeRate = newExchangeRate;
     }
 
     public String getTradingAction() {
@@ -112,12 +80,44 @@ public abstract class AbstractDealsTablePageData extends AbstractTablePageData {
       m_tradingAction = newTradingAction;
     }
 
+    public Long getQuantity() {
+      return m_quantity;
+    }
+
+    public void setQuantity(Long newQuantity) {
+      m_quantity = newQuantity;
+    }
+
+    public Double getExchangeRate() {
+      return m_exchangeRate;
+    }
+
+    public void setExchangeRate(Double newExchangeRate) {
+      m_exchangeRate = newExchangeRate;
+    }
+
+    public String getDealId() {
+      return m_dealId;
+    }
+
+    public void setDealId(String newDealId) {
+      m_dealId = newDealId;
+    }
+
     public String getStatus() {
       return m_status;
     }
 
     public void setStatus(String newStatus) {
       m_status = newStatus;
+    }
+
+    public String getDealNr() {
+      return m_dealNr;
+    }
+
+    public void setDealNr(String newDealNr) {
+      m_dealNr = newDealNr;
     }
   }
 }

@@ -1,5 +1,6 @@
 package com.bsiag.ethereum.fxtradingnetwork.events.shared.event;
 
+import org.eclipse.scout.rt.platform.ApplicationScoped;
 import org.eclipse.scout.rt.platform.service.IService;
 import org.eclipse.scout.rt.shared.TunnelToServer;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
@@ -9,14 +10,15 @@ import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
  *
  * @author uko
  */
+@ApplicationScoped
 @TunnelToServer
 public interface INetworkService extends IService {
 
-  /**
-   * @param filter
-   * @return
-   */
   NetworkTablePageData getNetworkTableData(SearchFilter filter, String orderBookTypeId);
 
-  void executeMerge(Long dealId1, Long dealId2);
+  NetworkTablePageData getNetworkTableData(SearchFilter filter, String orderBookTypeId, boolean useCache);
+
+  void executeMerge(String orderBookTypeId, Long dealId1, Long dealId2);
+
+  void synchronizeOrderBooks();
 }

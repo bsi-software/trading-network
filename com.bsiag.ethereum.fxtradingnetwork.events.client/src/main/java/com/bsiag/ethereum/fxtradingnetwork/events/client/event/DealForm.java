@@ -120,7 +120,7 @@ public class DealForm extends AbstractForm {
 
   @Override
   public void execStored() {
-    getDesktop().dataChanged(IDealService.notificationEnum.Deals);
+    getDesktop().dataChanged(IDealService.NotificationEnum.Deals);
   }
 
   public CancelButton getCancelButton() {

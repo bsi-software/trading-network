@@ -10,6 +10,13 @@ public class OrderBookTypeCodeType extends AbstractCodeType<String, String> {
   private static final long serialVersionUID = 1L;
   private static final String ID = "ca9b65cb-924e-4582-abe9-0a7ac02cd371";
 
+  public static enum NotificationEnum {
+    USDEUR,
+    EURJPY,
+    GBPEUR,
+    USDJPY
+  }
+
   @Override
   public String getId() {
     return ID;
@@ -32,13 +39,13 @@ public class OrderBookTypeCodeType extends AbstractCodeType<String, String> {
   }
 
   @Order(2000)
-  public static class JpyEurCode extends AbstractCode<String> {
+  public static class EurJpyCode extends AbstractCode<String> {
     private static final long serialVersionUID = 1L;
-    public static final String ID = "JPYEUR";
+    public static final String ID = "EURJPY";
 
     @Override
     protected String getConfiguredText() {
-      return TEXTS.get("JPY-EUR");
+      return TEXTS.get("EURJPY");
     }
 
     @Override
@@ -64,7 +71,7 @@ public class OrderBookTypeCodeType extends AbstractCodeType<String, String> {
   }
 
   @Order(4000)
-  public static class UsdYenCode extends AbstractCode<String> {
+  public static class UsdJpyCode extends AbstractCode<String> {
     private static final long serialVersionUID = 1L;
     public static final String ID = "USDJPY";
 

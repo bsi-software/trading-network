@@ -11,14 +11,8 @@
 package com.bsiag.ethereum.fxtradingnetwork.events.server;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-import com.bsiag.ethereum.fxtradingnetwork.events.server.sql.SQLs;
-import com.bsiag.ethereum.fxtradingnetwork.events.shared.person.PersonFormTabExtensionData;
-import com.bsiag.ethereum.fxtradingnetwork.events.shared.person.PersonFormWalletTabExtensionData;
-import com.bsiag.ethereum.fxtradingnetwork.events.shared.person.PersonTablePageDataExtension;
-import com.bsiag.ethereum.fxtradingnetwork.server.sql.DatabaseProperties;
-import com.bsiag.ethereum.fxtradingnetwork.server.sql.IDataStoreService;
-import com.bsiag.ethereum.fxtradingnetwork.server.sql.SuperUserRunContextProducer;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.IPlatform.State;
 import org.eclipse.scout.rt.platform.IPlatformListener;
@@ -29,12 +23,23 @@ import org.eclipse.scout.rt.platform.context.RunContext;
 import org.eclipse.scout.rt.platform.exception.ExceptionHandler;
 import org.eclipse.scout.rt.platform.holders.NVPair;
 import org.eclipse.scout.rt.platform.holders.StringArrayHolder;
+import org.eclipse.scout.rt.platform.job.FixedDelayScheduleBuilder;
+import org.eclipse.scout.rt.platform.job.Jobs;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.platform.util.concurrent.IRunnable;
 import org.eclipse.scout.rt.server.jdbc.SQL;
 import org.eclipse.scout.rt.shared.extension.IExtensionRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.bsiag.ethereum.fxtradingnetwork.events.server.event.ReloadOrdersFromOrderBookJob;
+import com.bsiag.ethereum.fxtradingnetwork.events.server.sql.SQLs;
+import com.bsiag.ethereum.fxtradingnetwork.events.shared.person.PersonFormTabExtensionData;
+import com.bsiag.ethereum.fxtradingnetwork.events.shared.person.PersonFormWalletTabExtensionData;
+import com.bsiag.ethereum.fxtradingnetwork.events.shared.person.PersonTablePageDataExtension;
+import com.bsiag.ethereum.fxtradingnetwork.server.sql.DatabaseProperties;
+import com.bsiag.ethereum.fxtradingnetwork.server.sql.IDataStoreService;
+import com.bsiag.ethereum.fxtradingnetwork.server.sql.SuperUserRunContextProducer;
 
 @Order(20)
 public class PlatformListener implements IPlatformListener, IDataStoreService {
@@ -45,6 +50,7 @@ public class PlatformListener implements IPlatformListener, IDataStoreService {
     if (event.getState() == State.BeanManagerValid) {
       autoCreateDatabase();
       registerExtensions();
+      registerJobs();
     }
   }
 
@@ -76,6 +82,21 @@ public class PlatformListener implements IPlatformListener, IDataStoreService {
     extensionRegistry.register(PersonTablePageDataExtension.class);
     extensionRegistry.register(PersonFormTabExtensionData.class);
     extensionRegistry.register(PersonFormWalletTabExtensionData.class);
+  }
+
+  private void registerJobs() {
+    Jobs.schedule(new ReloadOrdersFromOrderBookJob(),
+        Jobs.newInput()
+            .withName(ReloadOrdersFromOrderBookJob.ID)
+            .withRunContext(BEANS.get(SuperUserRunContextProducer.class).produce())
+            .withExecutionTrigger(Jobs.newExecutionTrigger()
+                .withSchedule(FixedDelayScheduleBuilder.repeatForever(10, TimeUnit.SECONDS)))
+            .withExceptionHandling(new ExceptionHandler() {
+              @Override
+              public void handle(Throwable t) {
+                LOG.error("Error on execution of job " + ReloadOrdersFromOrderBookJob.ID + ": ", t);
+              }
+            }, true));
   }
 
   public void createEventTable() {

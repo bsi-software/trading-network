@@ -21,7 +21,7 @@ import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 @TunnelToServer
 public interface IDealService {
 
-  public enum notificationEnum {
+  public enum NotificationEnum {
     Deals
   }
 

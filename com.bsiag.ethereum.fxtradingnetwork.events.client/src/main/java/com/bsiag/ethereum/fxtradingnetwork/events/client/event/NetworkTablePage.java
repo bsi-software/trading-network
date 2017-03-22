@@ -28,6 +28,8 @@ import org.eclipse.scout.rt.shared.services.common.code.ICode;
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.NetworkTablePage.Table;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.OrderBookTypeCodeType;
@@ -38,6 +40,7 @@ import com.bsiag.ethereum.fxtradingnetwork.shared.organization.OrganizationLooku
 
 @Data(NetworkTablePageData.class)
 public class NetworkTablePage extends AbstractPageWithTable<Table> {
+  private static final Logger LOG = LoggerFactory.getLogger(NetworkTablePage.class);
 
   private String m_organizationId;
   private String m_orderBookId;
@@ -79,8 +82,26 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
   }
 
   @Override
+  protected void execInitPage() {
+    try {
+      OrderBookTypeCodeType.NotificationEnum changeObject = OrderBookTypeCodeType.NotificationEnum.valueOf(m_orderBookId);
+      registerDataChangeListener(changeObject);
+    }
+    catch (Exception e) {
+      LOG.error("Error on register data change listener for order book: " + m_orderBookId, e);
+    }
+  }
+
+  @Override
   protected void execLoadData(SearchFilter filter) {
     importPageData(BEANS.get(INetworkService.class).getNetworkTableData(filter, getOrderBookId()));
+  }
+
+  @Override
+  protected void execDataChanged(Object... dataTypes) {
+    if (isVisible()) {
+      importPageData(BEANS.get(INetworkService.class).getNetworkTableData(getSearchFilter(), getOrderBookId(), true));
+    }
   }
 
   @Override
@@ -457,15 +478,29 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
       protected void execAction() {
         List<ITableRow> matchedRows = getIsMatchedColumn().findRows(true);
         if (matchedRows.size() == 2) {
-          INetworkService service = BEANS.get(INetworkService.class);
-          service.executeMerge(getDealIdColumn().getValue(matchedRows.get(0)), getDealIdColumn().getValue(matchedRows.get(1)));
+          ITableRow buyRow = null;
+          ITableRow sellRow = null;
+          for (ITableRow row : matchedRows) {
+            String sideId = getSideColumn().getValue(row);
+            if (TradingActionCodeType.BuyCode.ID.equals(sideId)) {
+              buyRow = row;
+            }
+            else if (TradingActionCodeType.SellCode.ID.equals(sideId)) {
+              sellRow = row;
+            }
+          }
+          if (null != buyRow && null != sellRow) {
+            INetworkService service = BEANS.get(INetworkService.class);
+            service.executeMerge(getOrderBookId(), getDealIdColumn().getValue(buyRow), getDealIdColumn().getValue(sellRow));
+            reloadPage();
+          }
         }
       }
 
       public void adjustVisability() {
         List<ITableRow> matchedRows = getIsMatchedColumn().findRows(true);
         if (matchedRows.size() == 2) {
-          //TODO only if the sell action is for the users organization the menu is visible
+          //TODO [uko] only if the sell action is for the users organization the menu is visible
 //          for (ITableRow row : matchedRows) {
 //            if (CompareUtility.equals(TradingActionCodeType.SellCode.ID, getSideColumn().getValue(row))
 //                && getOwnDealColumn().getValue(row)) {
@@ -483,8 +518,8 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
     protected void decorateCellsForMatches() {
       List<ITableRow> matchedRows = getIsMatchedColumn().findRows(true);
       for (ITableRow matchedRow : matchedRows) {
-        matchedRow.setForegroundColor("014786");
-        matchedRow.setBackgroundColor("ffcc8a");
+        matchedRow.setForegroundColor("AD1B02");
+        matchedRow.setBackgroundColor("FFCC8A");
       }
     }
 

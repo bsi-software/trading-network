@@ -248,6 +248,16 @@ public class OrderBookService {
     return match;
   }
 
+  public void executeMatch(String currencyPair, int buyOrderId, int sellOrderId) {
+    try {
+      getContract(currencyPair).executeMatch(new Int256(BigInteger.valueOf(buyOrderId)), new Int256(BigInteger.valueOf(sellOrderId)));
+    }
+    catch (InterruptedException | ExecutionException e) {
+      e.printStackTrace();
+      throw new ProcessingException();
+    }
+  }
+
   /**
    * Returns the top buy order (or null) for the given order book
    *
