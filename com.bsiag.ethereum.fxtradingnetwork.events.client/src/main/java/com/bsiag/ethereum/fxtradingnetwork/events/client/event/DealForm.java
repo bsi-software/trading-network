@@ -28,9 +28,12 @@ import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
 import org.eclipse.scout.rt.client.ui.form.fields.longfield.AbstractLongField;
 import org.eclipse.scout.rt.client.ui.form.fields.radiobuttongroup.AbstractRadioButtonGroup;
 import org.eclipse.scout.rt.client.ui.form.fields.smartfield.AbstractSmartField;
+import org.eclipse.scout.rt.client.ui.messagebox.MessageBoxes;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
+import org.eclipse.scout.rt.platform.exception.ProcessingException;
 import org.eclipse.scout.rt.platform.exception.VetoException;
+import org.eclipse.scout.rt.platform.status.IStatus;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
@@ -309,9 +312,14 @@ public class DealForm extends AbstractForm {
           public void loadCurrentExchangeRate() {
             if (StringUtility.hasText(getTradingActionGroupBox().getValue())
                 && StringUtility.hasText(getOrderBookTypeField().getValue())) {
-              BigDecimal currentRate = BEANS.get(IDealService.class).getCurrentExchangeRate(
-                  getOrderBookTypeField().getValue(), getTradingActionGroupBox().getValue());
-              setValue(currentRate);
+              try {
+                BigDecimal currentRate = BEANS.get(IDealService.class).getCurrentExchangeRate(
+                    getOrderBookTypeField().getValue(), getTradingActionGroupBox().getValue());
+                setValue(currentRate);
+              }
+              catch (ProcessingException e) {
+                MessageBoxes.createOk().withBody(TEXTS.get("CouldNotLoadExchangeRate")).withSeverity(IStatus.ERROR).show();
+              }
             }
           }
 

@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.bsiag.ethereum.fxtradingnetwork.events.client.event.NetworkTablePage.Table;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.OrderBookTypeCodeType;
+import com.bsiag.ethereum.fxtradingnetwork.events.shared.OrderBookTypeCodeType.NotificationEnum;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.INetworkService;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.NetworkTablePageData;
 import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.TradingActionCodeType;
@@ -42,13 +43,21 @@ import com.bsiag.ethereum.fxtradingnetwork.shared.organization.OrganizationLooku
 public class NetworkTablePage extends AbstractPageWithTable<Table> {
   private static final Logger LOG = LoggerFactory.getLogger(NetworkTablePage.class);
 
+  private boolean m_dataChangeListenerActive;
   private String m_organizationId;
   private String m_orderBookId;
+  private NotificationEnum m_dataChancedListenerDataType;
 
   public NetworkTablePage(String organizationId, String orderBookId) {
     super();
     m_organizationId = organizationId;
     m_orderBookId = orderBookId;
+    try {
+      m_dataChancedListenerDataType = OrderBookTypeCodeType.NotificationEnum.valueOf(m_orderBookId);
+    }
+    catch (Exception e) {
+      LOG.error("Error on register data change listener for order book: " + m_orderBookId, e);
+    }
   }
 
   @FormData
@@ -83,24 +92,49 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
 
   @Override
   protected void execInitPage() {
-    try {
-      OrderBookTypeCodeType.NotificationEnum changeObject = OrderBookTypeCodeType.NotificationEnum.valueOf(m_orderBookId);
-      registerDataChangeListener(changeObject);
-    }
-    catch (Exception e) {
-      LOG.error("Error on register data change listener for order book: " + m_orderBookId, e);
-    }
+    super.execInitPage();
   }
 
   @Override
   protected void execLoadData(SearchFilter filter) {
-    importPageData(BEANS.get(INetworkService.class).getNetworkTableData(filter, getOrderBookId()));
+    NetworkTablePageData pageData = null;
+    if (m_dataChangeListenerActive) {
+      pageData = BEANS.get(INetworkService.class).getNetworkTableDataFromCache(filter, getOrderBookId());
+    }
+    else {
+      pageData = BEANS.get(INetworkService.class).getNetworkTableData(filter, getOrderBookId());
+    }
+
+    importPageData(pageData);
   }
 
   @Override
   protected void execDataChanged(Object... dataTypes) {
-    if (isVisible()) {
-      importPageData(BEANS.get(INetworkService.class).getNetworkTableData(getSearchFilter(), getOrderBookId(), true));
+    if (null != m_dataChancedListenerDataType) {
+      try {
+        m_dataChangeListenerActive = true;
+        reloadPage();
+      }
+      catch (Exception e) {
+        LOG.warn("Error on Page reload.", e);
+      }
+      finally {
+        m_dataChangeListenerActive = false;
+      }
+    }
+  }
+
+  @Override
+  protected void execPageActivated() {
+    if (null != m_dataChancedListenerDataType) {
+      registerDataChangeListener(m_dataChancedListenerDataType);
+    }
+  }
+
+  @Override
+  protected void execPageDeactivated() {
+    if (null != m_dataChancedListenerDataType) {
+      unregisterDataChangeListener(m_dataChancedListenerDataType);
     }
   }
 
@@ -519,7 +553,7 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
       List<ITableRow> matchedRows = getIsMatchedColumn().findRows(true);
       for (ITableRow matchedRow : matchedRows) {
         matchedRow.setForegroundColor("AD1B02");
-        matchedRow.setBackgroundColor("FFCC8A");
+        matchedRow.setBackgroundColor("FCF2D3");
       }
     }
 

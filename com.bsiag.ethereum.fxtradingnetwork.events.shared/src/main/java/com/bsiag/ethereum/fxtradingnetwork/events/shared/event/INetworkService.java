@@ -16,7 +16,7 @@ public interface INetworkService extends IService {
 
   NetworkTablePageData getNetworkTableData(SearchFilter filter, String orderBookTypeId);
 
-  NetworkTablePageData getNetworkTableData(SearchFilter filter, String orderBookTypeId, boolean useCache);
+  NetworkTablePageData getNetworkTableDataFromCache(SearchFilter filter, String orderBookTypeId);
 
   void executeMerge(String orderBookTypeId, Long dealId1, Long dealId2);
 

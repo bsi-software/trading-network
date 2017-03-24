@@ -35,18 +35,18 @@
 @palette-green-4: #1F7C5D;
 
 /* PWC-Orange */
-/*
-@palette-blue-7: #D86800;
-@palette-blue-6: #FA7800;
-@palette-blue-5: #FF8A1D;
-@palette-blue-4: #FF9B3F;
-@palette-blue-3: #FFAD61;
-@palette-blue-2: #FFBF83;
-@palette-blue-1: #FFD0A5;
-@palette-blue-0: #FFE2C7;
-*/
+@palette-blue-7: #C24D03;
+@palette-blue-6: #D85604;
+@palette-blue-5: #FA7800;
+@palette-blue-4: #FF8A1D;
+@palette-blue-3: #FF9B3F;
+@palette-blue-2: #FFAD61;
+@palette-blue-1: #FFBF83;
+@palette-blue-0: #FFD0A5;
+
 
 /* PWC Red */
+/*
 @palette-blue-7: #8A1501;
 @palette-blue-6: #AD1B02;
 @palette-blue-5: #C55F4D;
@@ -55,6 +55,7 @@
 @palette-blue-2: #DEA399;
 @palette-blue-1: #E6BAB3;
 @palette-blue-0: #F6E8E5;
+*/
 
 
 @palette-gray-0: #FEFEFE;
