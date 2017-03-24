@@ -20,14 +20,14 @@ public class DealFormData extends AbstractFormData {
   /**
    * access method for property DealId.
    */
-  public String getDealId() {
+  public Long getDealId() {
     return getDealIdProperty().getValue();
   }
 
   /**
    * access method for property DealId.
    */
-  public void setDealId(String dealId) {
+  public void setDealId(Long dealId) {
     getDealIdProperty().setValue(dealId);
   }
 
@@ -105,7 +105,7 @@ public class DealFormData extends AbstractFormData {
     return getFieldByClass(TradingActionBox.class);
   }
 
-  public static class DealIdProperty extends AbstractPropertyData<String> {
+  public static class DealIdProperty extends AbstractPropertyData<Long> {
 
     private static final long serialVersionUID = 1L;
   }

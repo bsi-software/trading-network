@@ -60,7 +60,7 @@ public abstract class AbstractDealsTablePageData extends AbstractTablePageData {
     private String m_tradingAction;
     private Long m_quantity;
     private Double m_exchangeRate;
-    private String m_dealId;
+    private Long m_dealId;
     private String m_status;
     private String m_dealNr;
 
@@ -96,11 +96,11 @@ public abstract class AbstractDealsTablePageData extends AbstractTablePageData {
       m_exchangeRate = newExchangeRate;
     }
 
-    public String getDealId() {
+    public Long getDealId() {
       return m_dealId;
     }
 
-    public void setDealId(String newDealId) {
+    public void setDealId(Long newDealId) {
       m_dealId = newDealId;
     }
 

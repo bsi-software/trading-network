@@ -19,6 +19,7 @@ import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.server.jdbc.SQL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
@@ -97,23 +98,21 @@ public class OrderBookService {
    */
   public String publish(Order order) {
     //TODO return real dealNr. Check if order contains dealNr => not allowed
-    int dealNr = -1;
-    String dealNrString = "";
     Bool buy = new Bool(order.isBuy());
     Uint256 dealQuantity = new Uint256(BigInteger.valueOf(order.getAmount()));
     Uint256 dealPrice = new Uint256(BigInteger.valueOf((long) (100 * order.getPrice())));
+    Uint256 extId = new Uint256(BigInteger.valueOf((long) order.getExtId()));
+
+    String transactionHash = "";
     try {
-      TransactionReceipt receipt = getContract(order.getCurrencyPair()).createOrder(dealQuantity, dealPrice, buy).get();
-      //TODO actual orderId. Change contract...
-      dealNr = m_dealCounter;
-      m_dealCounter = m_dealCounter + 1;
-      dealNrString = "" + dealNr;
+      TransactionReceipt receipt = getContract(order.getCurrencyPair()).createOrder(dealQuantity, dealPrice, buy, extId).get();
+      transactionHash = receipt.getTransactionHash();
     }
     catch (InterruptedException | ExecutionException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    return dealNrString;
+    return transactionHash;
   }
 
   /**
@@ -218,6 +217,7 @@ public class OrderBookService {
     try {
       orders.addAll(getSellOrders(getContract(currencyPair)));
       orders.addAll(getBuyOrders(getContract(currencyPair)));
+      orders.forEach((o) -> o.setCurrencyPair(currencyPair));
     }
     catch (InterruptedException | ExecutionException e) {
       // TODO Auto-generated catch block
@@ -377,16 +377,16 @@ public class OrderBookService {
       BigInteger quantity = ((Uint256) list.get(0)).getValue();
       BigInteger price = ((Uint256) list.get(1)).getValue();
       Boolean buy = ((Bool) list.get(2)).getValue();
-      // TODO check whats wrong here
-      String company;
-//    company = ((UTF8String) list.get(3)).get();// toString();
+      String ownerAddress = ((Address) list.get(3)).toString();
       BigInteger dealNr = ((Uint256) list.get(4)).getValue();
+      BigInteger extId = ((Uint256) list.get(5)).getValue();
       Order.Type type = Order.Type.BUY;
       if (!buy) {
         type = Order.Type.SELL;
       }
-      order = new Order(type, quantity.intValue(), price.doubleValue() / 100);
+      order = new Order(type, quantity.intValue(), price.doubleValue() / 100, extId.intValue());
       order.setId(dealNr.intValue());
+      order.setOwner(ownerAddress);
     }
     return order;
   }

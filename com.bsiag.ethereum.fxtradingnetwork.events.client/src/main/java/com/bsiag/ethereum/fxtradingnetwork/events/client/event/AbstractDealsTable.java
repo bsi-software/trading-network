@@ -169,7 +169,7 @@ public abstract class AbstractDealsTable extends AbstractTable {
   }
 
   @Order(5000)
-  public class DealIdColumn extends AbstractStringColumn {
+  public class DealIdColumn extends AbstractLongColumn {
 
     @Override
     protected boolean getConfiguredDisplayable() {

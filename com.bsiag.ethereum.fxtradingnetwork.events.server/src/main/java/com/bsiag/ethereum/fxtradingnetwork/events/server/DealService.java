@@ -11,12 +11,12 @@
 package com.bsiag.ethereum.fxtradingnetwork.events.server;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.exception.ProcessingException;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.platform.holders.NVPair;
+import org.eclipse.scout.rt.platform.util.CompareUtility;
 import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.server.jdbc.SQL;
 import org.eclipse.scout.rt.shared.ISession;
@@ -90,8 +90,8 @@ public class DealService implements IDealService {
       throw new VetoException(TEXTS.get("InsufficientPrivileges"));
     }
 
-    if (StringUtility.isNullOrEmpty(formData.getDealId())) {
-      formData.setDealId(UUID.randomUUID().toString());
+    if (CompareUtility.isOneOf(formData.getDealId(), null, 0L)) {
+      formData.setDealId(SQL.getSequenceNextval("deal_deal_id_seq"));
       formData.setStatus(StatusCodeType.InactiveCode.ID);
     }
 
@@ -101,15 +101,15 @@ public class DealService implements IDealService {
   }
 
   @Override
-  public boolean publish(String dealId) throws ProcessingException {
+  public boolean publish(Long dealId) throws ProcessingException {
     boolean success = true;
     DealFormData formData = new DealFormData();
     formData.setDealId(dealId);
     formData = load(formData);
     try {
-      String dealNr = BEANS.get(OrderBookService.class).publish(convertToOrder(formData));
-      if (StringUtility.hasText(dealNr)) {
-        formData.setDealNr(dealNr);
+      String transactionHash = BEANS.get(OrderBookService.class).publish(convertToOrder(formData));
+      //TODO: [uko] change status to pending and save hash
+      if (StringUtility.hasText(transactionHash)) {
         formData.setStatus(StatusCodeType.PublishedCode.ID);
         store(formData);
       }
@@ -128,7 +128,6 @@ public class DealService implements IDealService {
     }
 
     SQL.selectInto(SQLs.DEAL_SELECT, formData);
-    //    SQL.selectInto(SQLs.EVENT_PARTICIPANTS_SELECT, formData);
 
     return formData;
   }
@@ -149,13 +148,6 @@ public class DealService implements IDealService {
     }
 
     SQL.update(SQLs.DEAL_UPDATE, formData);
-
-    //    TableBeanHolderFilter deletedParticipants = new TableBeanHolderFilter(formData.getParticipantTableField(), ITableHolder.STATUS_DELETED);
-    //    TableBeanHolderFilter insertedParticipants = new TableBeanHolderFilter(formData.getParticipantTableField(), ITableHolder.STATUS_INSERTED);
-    // NVPair dealId = new NVPair("dealId", formData.getDealId());
-
-    //    SQL.delete(SQLs.EVENT_PARTICIPANTS_DELETE, deletedParticipants, eventId);
-    //    SQL.insert(SQLs.EVENT_PARTICIPANTS_INSERT, insertedParticipants, eventId);
 
     return formData;
   }
@@ -182,7 +174,7 @@ public class DealService implements IDealService {
     if (TradingActionCodeType.SellCode.ID.equals(formData.getTradingActionBox().getValue())) {
       type = Order.Type.SELL;
     }
-    Order order = new Order(type, formData.getQuantity().getValue().intValue(), formData.getExchangeRate().getValue().doubleValue());
+    Order order = new Order(type, formData.getQuantity().getValue().intValue(), formData.getExchangeRate().getValue().doubleValue(), formData.getDealId().intValue());
     order.setCurrencyPair(formData.getOrderBookType().getValue());
     order.setOwner(formData.getOrganizationId());
 

@@ -114,7 +114,7 @@ public abstract class AbstractDealsTablePage<T extends AbstractDealsTablePage<T>
 
       @Override
       protected void execAction() {
-        String dealId = getDealIdColumn().getSelectedValue();
+        Long dealId = getDealIdColumn().getSelectedValue();
         BEANS.get(IDealService.class).publish(dealId);
         reloadPage();
       }

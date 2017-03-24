@@ -20,7 +20,7 @@ public interface SQLs {
   String DEAL_CREATE_TABLE = ""
       + "CREATE       "
       + "TABLE        DEAL "
-      + "            (deal_id VARCHAR(64) NOT NULL CONSTRAINT DEAL_PK PRIMARY KEY, "
+      + "            (deal_id numeric(15) NOT NULL CONSTRAINT DEAL_PK PRIMARY KEY, "
       + "             organization_id VARCHAR(64) NOT NULL, "
       + "             deal_nr VARCHAR(64), "
       + "             quantity numeric (15), "

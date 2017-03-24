@@ -50,6 +50,13 @@ public class TestOrderBook {
 	private static final Uint256 PRICE_2025 = new Uint256(BigInteger.valueOf(2025));
 	private static final Uint256 PRICE_2030 = new Uint256(BigInteger.valueOf(2030));
 	private static final Uint256 PRICE_2035 = new Uint256(BigInteger.valueOf(2035));
+	private static final Uint256 EXTERN_ID_SELL1 = new Uint256(BigInteger.valueOf(123));
+	private static final Uint256 EXTERN_ID_SELL2 = new Uint256(BigInteger.valueOf(456));
+	private static final Uint256 EXTERN_ID_SELL3 = new Uint256(BigInteger.valueOf(789));
+	private static final Uint256 EXTERN_ID_BUY1 = new Uint256(BigInteger.valueOf(147));
+	private static final Uint256 EXTERN_ID_BUY2 = new Uint256(BigInteger.valueOf(258));
+	private static final Uint256 EXTERN_ID_BUY3 = new Uint256(BigInteger.valueOf(369));
+	private static final Uint256 EXTERN_ID_BUY4 = new Uint256(BigInteger.valueOf(159));
 
 	private static final Int256 ORDER_ID_1 = new Int256(BigInteger.ONE);
 
@@ -116,16 +123,16 @@ public class TestOrderBook {
 	}
 
 	private void initSellOrders(OrderBook contract) throws Exception {
-		contract.createOrder(QUANTITY_100, PRICE_2030, SELL).get();
-		contract.createOrder(QUANTITY_100, PRICE_2025, SELL).get();
-		contract.createOrder(QUANTITY_200, PRICE_2030, SELL).get();
+		contract.createOrder(QUANTITY_100, PRICE_2030, SELL, EXTERN_ID_SELL1).get();
+		contract.createOrder(QUANTITY_100, PRICE_2025, SELL, EXTERN_ID_SELL2).get();
+		contract.createOrder(QUANTITY_200, PRICE_2030, SELL, EXTERN_ID_SELL3).get();
 
 	}
 
 	private void initBuyOrders(OrderBook contract) throws Exception {
-		contract.createOrder(QUANTITY_100, PRICE_2015, BUY).get();
-		contract.createOrder(QUANTITY_200, PRICE_2020, BUY).get();
-		contract.createOrder(QUANTITY_200, PRICE_2015, BUY).get();
+		contract.createOrder(QUANTITY_100, PRICE_2015, BUY, EXTERN_ID_BUY1).get();
+		contract.createOrder(QUANTITY_200, PRICE_2020, BUY, EXTERN_ID_BUY2).get();
+		contract.createOrder(QUANTITY_200, PRICE_2015, BUY, EXTERN_ID_BUY3).get();
 	}
 
 	@Test
@@ -155,7 +162,7 @@ public class TestOrderBook {
 			contract.executeMatch(buyOrderId, sellOrderId).get();
 
 			// add matching order
-			contract.createOrder(QUANTITY_250, PRICE_2035, BUY).get();
+			contract.createOrder(QUANTITY_250, PRICE_2035, BUY, EXTERN_ID_BUY4).get();
 			buyOrders = contract.getNumberOfBuyOrders().get().getValue();
 			assertEquals("Wrong number of buy orders", BigInteger.valueOf(4), buyOrders);
 
@@ -252,9 +259,9 @@ public class TestOrderBook {
 		try {
 			contract = deployContract();
 
-			contract.createOrder(QUANTITY_100, PRICE_2025, SELL).get();
-			contract.createOrder(QUANTITY_100, PRICE_2030, SELL).get();
-			contract.createOrder(QUANTITY_200, PRICE_2015, SELL).get();
+			contract.createOrder(QUANTITY_100, PRICE_2025, SELL, EXTERN_ID_SELL1).get();
+			contract.createOrder(QUANTITY_100, PRICE_2030, SELL, EXTERN_ID_SELL2).get();
+			contract.createOrder(QUANTITY_200, PRICE_2015, SELL, EXTERN_ID_SELL3).get();
 
 			printQueueStatus(contract, Queue.Sell);
 

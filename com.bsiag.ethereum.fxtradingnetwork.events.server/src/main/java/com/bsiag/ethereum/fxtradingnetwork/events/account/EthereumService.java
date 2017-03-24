@@ -142,8 +142,9 @@ public class EthereumService {
     Bool buy = new Bool(type);
     Uint256 dealQuantity = new Uint256(BigInteger.valueOf(quantity));
     Uint256 dealPrice = new Uint256(BigInteger.valueOf((long) (100 * price)));
+    Uint256 extId = new Uint256(BigInteger.valueOf(0L));
 
-    TransactionReceipt receipt = contract.createOrder(dealQuantity, dealPrice, buy).get();
+    TransactionReceipt receipt = contract.createOrder(dealQuantity, dealPrice, buy, extId).get();
     LOG.info(receipt.getTransactionHash());
 
     for (int i = 0; i < 10; i++) {

@@ -57,7 +57,7 @@ import com.bsiag.ethereum.fxtradingnetwork.events.shared.event.UpdateDealPermiss
 @FormData(value = DealFormData.class, sdkCommand = FormData.SdkCommand.CREATE)
 public class DealForm extends AbstractForm {
 
-  private String dealId;
+  private Long dealId;
 
   private String organizationId;
   private String dealNr;
@@ -94,12 +94,12 @@ public class DealForm extends AbstractForm {
   }
 
   @FormData
-  public String getDealId() {
+  public Long getDealId() {
     return dealId;
   }
 
   @FormData
-  public void setDealId(String dealId) {
+  public void setDealId(Long dealId) {
     this.dealId = dealId;
   }
 

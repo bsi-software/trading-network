@@ -20,11 +20,13 @@ public class Order {
   private double price;
   private String owner;
   private String currencyPair;
+  private int extId;
 
-  public Order(Type type, int amount, double price) {
+  public Order(Type type, int amount, double price, int extId) {
     this.type = type;
     this.setAmount(amount);
     this.setPrice(price);
+    this.setExtId(extId);
   }
 
   public int getId() {
@@ -99,5 +101,13 @@ public class Order {
       throw new RuntimeException("currency pair must contain exactly 6 charaters");
     }
     this.currencyPair = currencyPair;
+  }
+
+  public int getExtId() {
+    return extId;
+  }
+
+  public void setExtId(int extId) {
+    this.extId = extId;
   }
 }

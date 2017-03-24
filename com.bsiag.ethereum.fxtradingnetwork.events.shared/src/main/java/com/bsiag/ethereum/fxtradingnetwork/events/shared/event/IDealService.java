@@ -37,7 +37,7 @@ public interface IDealService {
 
   DealFormData store(DealFormData formData);
 
-  boolean publish(String dealId) throws ProcessingException;
+  boolean publish(Long dealId) throws ProcessingException;
 
   BigDecimal getCurrentExchangeRate(String orderBookId, String tradingActionId) throws ProcessingException;
 }
