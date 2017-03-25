@@ -12,31 +12,26 @@ package com.bsiag.ethereum.fxtradingnetwork.client.contact;
 
 import java.util.List;
 
-import com.bsiag.ethereum.fxtradingnetwork.client.Icons;
-import com.bsiag.ethereum.fxtradingnetwork.client.organization.OrganizationTablePage;
-import com.bsiag.ethereum.fxtradingnetwork.client.person.PersonTablePage;
 import org.eclipse.scout.rt.client.ui.desktop.outline.AbstractOutline;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
 import org.eclipse.scout.rt.shared.TEXTS;
 
-//tag::Outline[]
-//tag::OutlineInit[]
+import com.bsiag.ethereum.fxtradingnetwork.client.Icons;
+import com.bsiag.ethereum.fxtradingnetwork.client.account.AccountTablePage;
+import com.bsiag.ethereum.fxtradingnetwork.client.order.DealsTablePage;
+import com.bsiag.ethereum.fxtradingnetwork.client.organization.OrganizationTablePage;
+import com.bsiag.ethereum.fxtradingnetwork.client.person.PersonTablePage;
+
 public class ContactOutline extends AbstractOutline {
 
-  //tag::execCreateChildPagesPerson[]
   @Override
   protected void execCreateChildPages(List<IPage<?>> pageList) {
-    //end::OutlineInit[]
     // pages to be shown in the navigation area of this outline
-    pageList.add(new PersonTablePage()); // <1>
-    //end::execCreateChildPagesPerson[]
-    //tag::execCreateChildPagesOrganization[]
+    pageList.add(new PersonTablePage());
     pageList.add(new OrganizationTablePage());
-    //end::execCreateChildPagesOrganization[]
-    //tag::execCreateChildPagesPerson[]
-    //tag::OutlineInit[]
+    pageList.add(new AccountTablePage());
+    pageList.add(new DealsTablePage());
   }
-  //end::execCreateChildPagesPerson[]
 
   @Override
   protected String getConfiguredTitle() {
@@ -48,5 +43,3 @@ public class ContactOutline extends AbstractOutline {
     return Icons.Category;
   }
 }
-//end::OutlineInit[]
-//end::Outline[]

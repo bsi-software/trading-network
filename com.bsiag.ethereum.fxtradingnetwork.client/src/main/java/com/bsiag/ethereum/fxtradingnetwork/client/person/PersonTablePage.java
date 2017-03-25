@@ -12,11 +12,6 @@ package com.bsiag.ethereum.fxtradingnetwork.client.person;
 
 import java.util.Set;
 
-import com.bsiag.ethereum.fxtradingnetwork.client.Icons;
-import com.bsiag.ethereum.fxtradingnetwork.client.common.CountryLookupCall;
-import com.bsiag.ethereum.fxtradingnetwork.shared.organization.OrganizationLookupCall;
-import com.bsiag.ethereum.fxtradingnetwork.shared.person.IPersonService;
-import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonTablePageData;
 import org.eclipse.scout.rt.client.dto.PageData;
 import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
 import org.eclipse.scout.rt.client.ui.action.menu.IMenu;
@@ -24,6 +19,7 @@ import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
+import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractLongColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractSmartColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
@@ -39,15 +35,16 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
 
-// tag::PageInit[]
-// tag::structure[]
-// tag::linkToOrganization[]
+import com.bsiag.ethereum.fxtradingnetwork.client.Icons;
+import com.bsiag.ethereum.fxtradingnetwork.client.common.CountryLookupCall;
+import com.bsiag.ethereum.fxtradingnetwork.shared.organization.OrganizationLookupCall;
+import com.bsiag.ethereum.fxtradingnetwork.shared.person.IPersonService;
+import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonTablePageData;
+
 @PageData(PersonTablePageData.class)
 public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table> {
-  // end::structure[]
-  // end::PageInit[]
 
-  private String organizationId; // <1>
+  private String organizationId;
 
   public String getOrganizationId() {
     return organizationId;
@@ -56,14 +53,11 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
   public void setOrganizationId(String organizationId) {
     this.organizationId = organizationId;
   }
-  // end::linkToOrganization[]
-  // tag::PageInit[]
 
   @Override
   protected String getConfiguredTitle() {
     return TEXTS.get("Persons"); // <1>
   }
-  // tag::linkToOrganization[]
 
   @Override
   protected IPage<?> execCreateChildPage(ITableRow row) {
@@ -75,25 +69,15 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
   @Override
   protected void execLoadData(SearchFilter filter) {
     importPageData(BEANS.get(IPersonService.class)
-        .getPersonTableData(filter, getOrganizationId())); // <2>
+        .getPersonTableData(filter, getOrganizationId()));
   }
-  // end::linkToOrganization[]
 
   @Override // <3>
   protected boolean getConfiguredLeaf() {
     return false;
   }
-  // tag::structure[]
-  // tag::linkToOrganization[]
 
-  // tag::organizationColumn[]
-  // tag::PageInit[]
   public class Table extends AbstractTable {
-    // end::linkToOrganization[]
-    // end::organizationColumn[]
-    // end::structure[]
-    // container class to hold columns and other elements for this table page <4>
-    // end::PageInit[]
 
     public LastNameColumn getLastNameColumn() {
       return getColumnSet().getColumnByClass(LastNameColumn.class);
@@ -103,13 +87,11 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
     protected String getConfiguredDefaultIconId() {
       return Icons.Person;
     }
-    //tag::menu[]
 
     @Override
     protected Class<? extends IMenu> getConfiguredDefaultMenu() { // <1>
       return EditMenu.class;
     }
-    //end::menu[]
 
     public CountryColumn getCountryColumn() {
       return getColumnSet().getColumnByClass(CountryColumn.class);
@@ -134,11 +116,9 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
     public PersonIdColumn getPersonIdColumn() {
       return getColumnSet().getColumnByClass(PersonIdColumn.class);
     }
-    // tag::menu[]
 
     @Order(10)
     public class EditMenu extends AbstractMenu {
-      // end::menu[]
 
       @Override
       protected String getConfiguredIconId() {
@@ -150,7 +130,6 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
         return "alt-e";
       }
 
-      // tag::menu[]
       @Override
       protected String getConfiguredText() {
         return TEXTS.get("Edit");
@@ -165,12 +144,9 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
         form.startModify();
       }
     }
-    // tag::linkToOrganization[]
 
     @Order(20)
     public class NewMenu extends AbstractMenu {
-      // end::menu[]
-      // end::linkToOrganization[]
 
       @Override
       protected String getConfiguredKeyStroke() {
@@ -182,7 +158,6 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
         // get unicode from http://fontawesome.io/icon/magic/
         return "font:awesomeIcons \uf0d0";
       }
-      // tag::menu[]
 
       @Override
       protected String getConfiguredText() {
@@ -190,24 +165,20 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
       }
 
       @Override
-      protected Set<? extends IMenuType> getConfiguredMenuTypes() { // <3>
+      protected Set<? extends IMenuType> getConfiguredMenuTypes() {
         return CollectionUtility.<IMenuType> hashSet(
             TableMenuType.EmptySpace, TableMenuType.SingleSelection);
       }
-      // tag::linkToOrganization[]
 
       @Override
       protected void execAction() {
         PersonForm form = new PersonForm();
-        // end::menu[]
-        form.getOrganizationField().setValue(getOrganizationId()); // <3>
-        // tag::menu[]
+        form.getOrganizationField().setValue(getOrganizationId());
         form.addFormListener(new PersonFormListener());
         // start the form using its new handler
         form.startNew();
       }
     }
-    // end::linkToOrganization[]
 
     private class PersonFormListener implements FormListener {
 
@@ -219,25 +190,21 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
         }
       }
     }
-    // end::menu[]
 
-    //tag::PersonIdColumn[]
     @Order(1)
     public class PersonIdColumn extends AbstractStringColumn {
 
-      @Override // <1>
+      @Override
       protected boolean getConfiguredDisplayable() {
         return false;
       }
 
-      @Override // <2>
+      @Override
       protected boolean getConfiguredPrimaryKey() {
         return true;
       }
     }
-    //end::PersonIdColumn[]
 
-    //tag::FirstNameColumn[]
     @Order(2)
     public class FirstNameColumn extends AbstractStringColumn {
 
@@ -251,7 +218,6 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
         return 120;
       }
     }
-    //end::FirstNameColumn[]
 
     @Order(3)
     public class LastNameColumn extends AbstractStringColumn {
@@ -281,7 +247,6 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
       }
     }
 
-    //tag::CountryColumn[]
     @Order(5)
     public class CountryColumn extends AbstractSmartColumn<String> {
 
@@ -295,14 +260,12 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
         return 120;
       }
 
-      @Override // <1>
+      @Override
       protected Class<? extends ILookupCall<String>> getConfiguredLookupCall() {
         return CountryLookupCall.class;
       }
     }
-    //end::CountryColumn[]
 
-    //tag::PhoneColumn[]
     @Order(6)
     public class PhoneColumn extends AbstractStringColumn {
 
@@ -311,7 +274,7 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
         return TEXTS.get("Phone");
       }
 
-      @Override // <1>
+      @Override
       protected boolean getConfiguredVisible() {
         return false;
       }
@@ -321,7 +284,6 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
         return 120;
       }
     }
-    //end::PhoneColumn[]
 
     @Order(7)
     public class MobileColumn extends AbstractStringColumn {
@@ -360,7 +322,6 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
         return 200;
       }
     }
-    // tag::organizationColumn[]
 
     @Order(9)
     public class OrganizationColumn extends AbstractSmartColumn<String> {
@@ -374,22 +335,27 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
       protected Class<? extends ILookupCall<String>> getConfiguredLookupCall() {
         return OrganizationLookupCall.class;
       }
-      // end::organizationColumn[]
 
       @Override
       protected int getConfiguredWidth() {
         return 200;
       }
-      // tag::organizationColumn[]
     }
-    // tag::structure[]
-    // tag::PageInit[]
-    // tag::linkToOrganization[]
+
+    @Order(10)
+    public class EventsColumn extends AbstractLongColumn {
+
+      @Override
+      protected String getConfiguredHeaderText() {
+        return TEXTS.get("Events");
+      }
+
+      @Override
+      protected int getConfiguredWidth() {
+        return 100;
+      }
+    }
   }
-  // end::PageInit[]
-  // end::structure[]
-  // end::organizationColumn[]
-  // end::linkToOrganization[]
 
   @Override
   protected String getConfiguredIconId() {
@@ -400,10 +366,4 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
   protected Class<? extends ISearchForm> getConfiguredSearchForm() {
     return PersonSearchForm.class;
   }
-  // tag::PageInit[]
-  // tag::structure[]
-  // tag::linkToOrganization[]
 }
-// end::PageInit[]
-// end::structure[]
-// end::linkToOrganization[]

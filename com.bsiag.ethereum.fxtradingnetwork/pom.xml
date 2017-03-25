@@ -42,9 +42,6 @@
     <module>../com.bsiag.ethereum.fxtradingnetwork.ui.html.app.war</module>
 
     <!-- Events module -->
-    <module>../com.bsiag.ethereum.fxtradingnetwork.events.client</module>
-    <module>../com.bsiag.ethereum.fxtradingnetwork.events.shared</module>
-    <module>../com.bsiag.ethereum.fxtradingnetwork.events.server</module>
     <module>../com.bsiag.ethereum.fxtradingnetwork.all.app.dev</module>
 
     <!-- Specific settings for the contact application -->

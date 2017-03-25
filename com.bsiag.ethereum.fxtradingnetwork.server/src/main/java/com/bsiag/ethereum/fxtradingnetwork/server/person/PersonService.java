@@ -12,14 +12,7 @@ package com.bsiag.ethereum.fxtradingnetwork.server.person;
 
 import java.util.UUID;
 
-import com.bsiag.ethereum.fxtradingnetwork.server.sql.SQLs;
-import com.bsiag.ethereum.fxtradingnetwork.shared.person.IPersonService;
-import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonCreatePermission;
-import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonFormData;
-import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonReadPermission;
-import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonSearchFormData;
-import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonTablePageData;
-import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonUpdatePermission;
+import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.exception.VetoException;
 import org.eclipse.scout.rt.platform.holders.NVPair;
 import org.eclipse.scout.rt.platform.util.StringUtility;
@@ -28,11 +21,19 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.common.security.ACCESS;
 
-//tag::all[]
-//tag::getTableData[]
+import com.bsiag.ethereum.fxtradingnetwork.server.account.EthereumService;
+import com.bsiag.ethereum.fxtradingnetwork.server.account.model.Account;
+import com.bsiag.ethereum.fxtradingnetwork.server.sql.SQLs;
+import com.bsiag.ethereum.fxtradingnetwork.shared.person.IPersonService;
+import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonCreatePermission;
+import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonFormData;
+import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonReadPermission;
+import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonSearchFormData;
+import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonTablePageData;
+import com.bsiag.ethereum.fxtradingnetwork.shared.person.PersonUpdatePermission;
+
 public class PersonService implements IPersonService {
 
-  //end::all[]
   @Override
   public PersonTablePageData getPersonTableData(SearchFilter filter, String organizationId) {
     PersonTablePageData pageData = new PersonTablePageData();
@@ -40,11 +41,8 @@ public class PersonService implements IPersonService {
     StringBuilder sql = new StringBuilder();
 
     sql.append(SQLs.PERSON_PAGE_SELECT);
-    // end::getTableData[]
-    // tag::addOrganizationCriteria[]
     sql.append(" WHERE 1 = 1 ");
     addToWhere(sql, organizationId, "organization_id", "organizationId");
-    // end::addOrganizationCriteria[]
 
     if (searchData != null) {
       addToWhere(sql, searchData.getFirstName().getValue(), "first_name", "firstName");
@@ -54,38 +52,32 @@ public class PersonService implements IPersonService {
       addToWhere(sql, searchData.getOrganization().getValue(), "organization_id", "organization");
     }
 
-    // tag::getTableData[]
     sql.append(SQLs.PERSON_PAGE_DATA_SELECT_INTO);
 
     SQL.selectInto(sql.toString(), searchData, new NVPair("organizationId", organizationId), new NVPair("page", pageData));
 
     return pageData;
   }
-  // end::getTableData[]
-  // tag::addOrganizationCriteria[]
 
   protected void addToWhere(StringBuilder sqlWhere, String fieldValue, String sqlAttribute, String searchAttribute) {
     if (StringUtility.hasText(fieldValue)) {
       sqlWhere.append(String.format(SQLs.AND_LIKE_CAUSE, sqlAttribute, searchAttribute));
     }
   }
-  // end::addOrganizationCriteria[]
 
-  //tag::all[]
   @Override
   public PersonFormData create(PersonFormData formData) {
     if (!ACCESS.check(new PersonCreatePermission())) {
       throw new VetoException(TEXTS.get("InsufficientPrivileges"));
     }
 
-    // add a unique person id if necessary
     if (StringUtility.isNullOrEmpty(formData.getPersonId())) {
       formData.setPersonId(UUID.randomUUID().toString());
     }
 
-    SQL.insert(SQLs.PERSON_INSERT, formData); // <1>
+    SQL.insert(SQLs.PERSON_INSERT, formData);
 
-    return store(formData); // <2>
+    return store(formData);
   }
 
   @Override
@@ -94,7 +86,20 @@ public class PersonService implements IPersonService {
       throw new VetoException(TEXTS.get("InsufficientPrivileges"));
     }
 
-    SQL.selectInto(SQLs.PERSON_SELECT, formData); // <3>
+    SQL.selectInto(SQLs.PERSON_SELECT, formData);
+
+    String personId = formData.getPersonId();
+    Account wallet = null;
+
+    if (personId.equals("prs01")) {
+      wallet = BEANS.get(EthereumService.class).getWallet("0x8d2ec831056c620fea2fabad8bf6548fc5810cc3");
+    }
+    else if (personId.equals("prs01a")) {
+      wallet = BEANS.get(EthereumService.class).getWallet("0xcbc12f306da804bb681aceeb34f0bc58ba2f7ad7");
+    }
+
+    formData.getWalletAddress().setValue(wallet.getAddress());
+    formData.getWalletPath().setValue(wallet.getFile().getAbsolutePath());
 
     return formData;
   }
@@ -105,11 +110,10 @@ public class PersonService implements IPersonService {
       throw new VetoException(TEXTS.get("InsufficientPrivileges"));
     }
 
-    SQL.update(SQLs.PERSON_UPDATE, formData); // <4>
+    SQL.update(SQLs.PERSON_UPDATE, formData);
 
     return formData;
   }
-  // tag::getTableData[]
 }
 // end::all[]
 // end::getTableData[]

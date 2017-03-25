@@ -4,8 +4,10 @@ import java.util.Date;
 
 import javax.annotation.Generated;
 
+import org.eclipse.scout.rt.shared.data.basic.table.AbstractTableRowData;
 import org.eclipse.scout.rt.shared.data.form.AbstractFormData;
 import org.eclipse.scout.rt.shared.data.form.fields.AbstractValueFieldData;
+import org.eclipse.scout.rt.shared.data.form.fields.tablefield.AbstractTableFieldBeanData;
 import org.eclipse.scout.rt.shared.data.form.properties.AbstractPropertyData;
 
 /**
@@ -35,6 +37,10 @@ public class PersonFormData extends AbstractFormData {
 
   public EmailWork getEmailWork() {
     return getFieldByClass(EmailWork.class);
+  }
+
+  public Events getEvents() {
+    return getFieldByClass(Events.class);
   }
 
   public FirstName getFirstName() {
@@ -95,8 +101,24 @@ public class PersonFormData extends AbstractFormData {
     return getFieldByClass(Position.class);
   }
 
+  public ShowPassword getShowPassword() {
+    return getFieldByClass(ShowPassword.class);
+  }
+
   public Street getStreet() {
     return getFieldByClass(Street.class);
+  }
+
+  public WalletAddress getWalletAddress() {
+    return getFieldByClass(WalletAddress.class);
+  }
+
+  public WalletPassword getWalletPassword() {
+    return getFieldByClass(WalletPassword.class);
+  }
+
+  public WalletPath getWalletPath() {
+    return getFieldByClass(WalletPath.class);
   }
 
   public static class City extends AbstractValueFieldData<String> {
@@ -122,6 +144,100 @@ public class PersonFormData extends AbstractFormData {
   public static class EmailWork extends AbstractValueFieldData<String> {
 
     private static final long serialVersionUID = 1L;
+  }
+
+  public static class Events extends AbstractTableFieldBeanData {
+
+    private static final long serialVersionUID = 1L;
+
+    @Override
+    public EventsRowData addRow() {
+      return (EventsRowData) super.addRow();
+    }
+
+    @Override
+    public EventsRowData addRow(int rowState) {
+      return (EventsRowData) super.addRow(rowState);
+    }
+
+    @Override
+    public EventsRowData createRow() {
+      return new EventsRowData();
+    }
+
+    @Override
+    public Class<? extends AbstractTableRowData> getRowType() {
+      return EventsRowData.class;
+    }
+
+    @Override
+    public EventsRowData[] getRows() {
+      return (EventsRowData[]) super.getRows();
+    }
+
+    @Override
+    public EventsRowData rowAt(int index) {
+      return (EventsRowData) super.rowAt(index);
+    }
+
+    public void setRows(EventsRowData[] rows) {
+      super.setRows(rows);
+    }
+
+    public static class EventsRowData extends AbstractTableRowData {
+
+      private static final long serialVersionUID = 1L;
+      public static final String id = "id";
+      public static final String title = "title";
+      public static final String starts = "starts";
+      public static final String city = "city";
+      public static final String country = "country";
+      private String m_id;
+      private String m_title;
+      private Date m_starts;
+      private String m_city;
+      private String m_country;
+
+      public String getId() {
+        return m_id;
+      }
+
+      public void setId(String newId) {
+        m_id = newId;
+      }
+
+      public String getTitle() {
+        return m_title;
+      }
+
+      public void setTitle(String newTitle) {
+        m_title = newTitle;
+      }
+
+      public Date getStarts() {
+        return m_starts;
+      }
+
+      public void setStarts(Date newStarts) {
+        m_starts = newStarts;
+      }
+
+      public String getCity() {
+        return m_city;
+      }
+
+      public void setCity(String newCity) {
+        m_city = newCity;
+      }
+
+      public String getCountry() {
+        return m_country;
+      }
+
+      public void setCountry(String newCountry) {
+        m_country = newCountry;
+      }
+    }
   }
 
   public static class FirstName extends AbstractValueFieldData<String> {
@@ -179,7 +295,27 @@ public class PersonFormData extends AbstractFormData {
     private static final long serialVersionUID = 1L;
   }
 
+  public static class ShowPassword extends AbstractValueFieldData<Boolean> {
+
+    private static final long serialVersionUID = 1L;
+  }
+
   public static class Street extends AbstractValueFieldData<String> {
+
+    private static final long serialVersionUID = 1L;
+  }
+
+  public static class WalletAddress extends AbstractValueFieldData<String> {
+
+    private static final long serialVersionUID = 1L;
+  }
+
+  public static class WalletPassword extends AbstractValueFieldData<String> {
+
+    private static final long serialVersionUID = 1L;
+  }
+
+  public static class WalletPath extends AbstractValueFieldData<String> {
 
     private static final long serialVersionUID = 1L;
   }

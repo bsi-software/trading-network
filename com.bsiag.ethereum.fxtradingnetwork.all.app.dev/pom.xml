@@ -31,12 +31,6 @@
 			<artifactId>com.bsiag.ethereum.fxtradingnetwork.ui.html</artifactId>
 		</dependency>
 
-		<!-- Events module -->
-		<dependency>
-			<groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-			<artifactId>com.bsiag.ethereum.fxtradingnetwork.events.client</artifactId>
-		</dependency>
-
 		<!-- Jetty Server -->
 		<dependency>
 			<groupId>org.eclipse.scout.rt</groupId>
@@ -57,12 +51,6 @@
 		<dependency>
 			<groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
 			<artifactId>com.bsiag.ethereum.fxtradingnetwork.server</artifactId>
-		</dependency>
-
-		<!-- Events module -->
-		<dependency>
-			<groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-			<artifactId>com.bsiag.ethereum.fxtradingnetwork.events.server</artifactId>
 		</dependency>
 
 		<dependency>

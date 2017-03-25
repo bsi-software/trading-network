@@ -10,12 +10,12 @@
  ******************************************************************************/
 package com.bsiag.ethereum.fxtradingnetwork.client;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.scout.rt.client.session.ClientSessionProvider;
 import org.eclipse.scout.rt.client.ui.action.keystroke.AbstractKeyStroke;
 import org.eclipse.scout.rt.client.ui.action.keystroke.IKeyStroke;
-import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
 import org.eclipse.scout.rt.client.ui.desktop.AbstractDesktop;
 import org.eclipse.scout.rt.client.ui.desktop.outline.AbstractOutlineViewButton;
 import org.eclipse.scout.rt.client.ui.desktop.outline.IOutline;
@@ -24,19 +24,13 @@ import org.eclipse.scout.rt.client.ui.form.AbstractFormMenu;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.config.CONFIG;
 import org.eclipse.scout.rt.platform.config.PlatformConfigProperties.ApplicationNameProperty;
-import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.AbstractIcons;
 import org.eclipse.scout.rt.shared.ISession;
-import org.eclipse.scout.rt.shared.TEXTS;
 
 import com.bsiag.ethereum.fxtradingnetwork.client.contact.ContactOutline;
+import com.bsiag.ethereum.fxtradingnetwork.client.order.DealOutline;
 
-//tag::DesktopInit[]
-//tag::quickAccessMenu[]
 public class Desktop extends AbstractDesktop {
-
-  //end::quickAccessMenu[]
-  //end::DesktopInit[]
   @Override
   protected String getConfiguredTitle() {
     return CONFIG.getPropertyValue(ApplicationNameProperty.class);
@@ -47,12 +41,13 @@ public class Desktop extends AbstractDesktop {
     return "application_logo";
   }
 
-  //tag::getConfiguredOutlines[]
   @Override
   protected List<Class<? extends IOutline>> getConfiguredOutlines() {
-    return CollectionUtility.<Class<? extends IOutline>> arrayList(ContactOutline.class);
+    List<Class<? extends IOutline>> outlines = new ArrayList<>();
+    outlines.add(ContactOutline.class);
+    outlines.add(DealOutline.class);
+    return outlines;
   }
-  //end::getConfiguredOutlines[]
 
   @Override
   protected void execDefaultView() {
@@ -81,11 +76,9 @@ public class Desktop extends AbstractDesktop {
     }
   }
 
-  // tag::DesktopInit[]
   // outline buttons of the application
-  @Order(1)
+  @Order(1000)
   public class ContactOutlineViewButton extends AbstractOutlineViewButton {
-    //end::DesktopInit[]
 
     public ContactOutlineViewButton() {
       this(ContactOutline.class);
@@ -104,37 +97,39 @@ public class Desktop extends AbstractDesktop {
     protected String getConfiguredKeyStroke() {
       return "ctrl-shift-c";
     }
-    //tag::DesktopInit[]
   }
 
-  // top level menus for the header area of the application
-  //tag::quickAccessMenu[]
-  @Order(10)
-  public class QuickAccessMenu extends AbstractMenu {
+  @Order(2000)
+  public class EventOutlineViewButton extends AbstractOutlineViewButton {
+
+    public EventOutlineViewButton() {
+      super(Desktop.this, DealOutline.class);
+    }
 
     @Override
-    protected String getConfiguredText() {
-      return TEXTS.get("QuickAccess");
+    protected DisplayStyle getConfiguredDisplayStyle() {
+      return DisplayStyle.MENU;
     }
-    //end::quickAccessMenu[]
-    //end::DesktopInit[]
 
     @Override
     protected String getConfiguredKeyStroke() {
-      return IKeyStroke.F10;
+      return "ctrl-shift-e";
     }
-    //tag::quickAccessMenu[]
   }
-  //end::quickAccessMenu[]
 
-  @Order(30)
+  // top level menus for the header area of the application
+  @Order(1000)
+  public class QuickAccessMenu extends AbstractQuickAccessMenu {
+
+  }
+
+  @Order(2000)
   public class UserMenu extends AbstractFormMenu<UserForm> { // <2>
 
     @Override
     protected String getConfiguredIconId() {
       return AbstractIcons.Person;
     }
-    //end::DesktopInit[]
 
     @Override
     protected String getConfiguredKeyStroke() {
@@ -150,9 +145,5 @@ public class Desktop extends AbstractDesktop {
     protected Class<UserForm> getConfiguredForm() {
       return UserForm.class;
     }
-    //tag::DesktopInit[]
   }
-  //tag::quickAccessMenu[]
 }
-//end::DesktopInit[]
-//end::quickAccessMenu[]

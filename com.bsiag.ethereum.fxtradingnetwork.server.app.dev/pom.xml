@@ -21,11 +21,6 @@
       <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
       <artifactId>com.bsiag.ethereum.fxtradingnetwork.server</artifactId>
     </dependency>
-    <!-- Events module -->
-    <dependency>
-      <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-      <artifactId>com.bsiag.ethereum.fxtradingnetwork.events.server</artifactId>
-    </dependency>
 
     <!-- Jetty Server -->
     <dependency>

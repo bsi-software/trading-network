@@ -15,12 +15,12 @@ import java.util.List;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithNodes;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
 
+import com.bsiag.ethereum.fxtradingnetwork.client.order.DealsTablePage;
 import com.bsiag.ethereum.fxtradingnetwork.client.person.PersonTablePage;
 
-// tag::all[]
 public class OrganizationNodePage extends AbstractPageWithNodes {
 
-  private String organizationId; // <1>
+  private String organizationId;
 
   public String getOrganizationId() {
     return organizationId;
@@ -30,11 +30,12 @@ public class OrganizationNodePage extends AbstractPageWithNodes {
     this.organizationId = organizationId;
   }
 
-  @Override // <2>
+  @Override
   protected void execCreateChildPages(List<IPage<?>> pageList) {
     PersonTablePage personTablePage = new PersonTablePage();
-    personTablePage.setOrganizationId(getOrganizationId()); // <3>
+    personTablePage.setOrganizationId(getOrganizationId());
     pageList.add(personTablePage);
+    pageList.add(new DealsTablePage());
+    pageList.add(new OrganizationBankAccountTablePage());
   }
 }
-// end::all[]

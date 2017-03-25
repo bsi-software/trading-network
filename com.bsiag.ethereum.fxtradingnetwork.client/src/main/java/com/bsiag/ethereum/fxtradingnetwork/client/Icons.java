@@ -23,4 +23,6 @@ public class Icons extends AbstractIcons {
   public static final String Person = "user";
 
   public static final String Contacts = AbstractIcons.Category;
+
+  public static final String Deal = AbstractIcons.Target;
 }
