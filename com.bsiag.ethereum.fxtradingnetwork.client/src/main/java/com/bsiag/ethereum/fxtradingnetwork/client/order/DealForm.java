@@ -59,38 +59,39 @@ public class DealForm extends AbstractForm {
 
   private Long dealId;
 
-  private String organizationId;
-  private String dealNr;
-  private String status;
+  private String m_organizationId;
+  private String m_dealNr;
+  private String m_status;
+  private String m_publishTransactionHash;
 
   @FormData
   public String getStatus() {
-    return status;
+    return m_status;
   }
 
   @FormData
   public void setStatus(String status) {
-    this.status = status;
+    this.m_status = status;
   }
 
   @FormData
   public String getOrganizationId() {
-    return organizationId;
+    return m_organizationId;
   }
 
   @FormData
   public String getDealNr() {
-    return dealNr;
+    return m_dealNr;
   }
 
   @FormData
   public void setDealNr(String dealNr) {
-    this.dealNr = dealNr;
+    this.m_dealNr = dealNr;
   }
 
   @FormData
   public void setOrganizationId(String organizationId) {
-    this.organizationId = organizationId;
+    this.m_organizationId = organizationId;
   }
 
   @FormData
@@ -101,6 +102,16 @@ public class DealForm extends AbstractForm {
   @FormData
   public void setDealId(Long dealId) {
     this.dealId = dealId;
+  }
+
+  @FormData
+  public String getPublishTransactionHash() {
+    return m_publishTransactionHash;
+  }
+
+  @FormData
+  public void setPublishTransactionHash(String publishTransactionHash) {
+    m_publishTransactionHash = publishTransactionHash;
   }
 
   @Override

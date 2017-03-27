@@ -79,6 +79,24 @@ public class DealFormData extends AbstractFormData {
     return getPropertyByClass(OrganizationIdProperty.class);
   }
 
+  /**
+   * access method for property PublishTransactionHash.
+   */
+  public String getPublishTransactionHash() {
+    return getPublishTransactionHashProperty().getValue();
+  }
+
+  /**
+   * access method for property PublishTransactionHash.
+   */
+  public void setPublishTransactionHash(String publishTransactionHash) {
+    getPublishTransactionHashProperty().setValue(publishTransactionHash);
+  }
+
+  public PublishTransactionHashProperty getPublishTransactionHashProperty() {
+    return getPropertyByClass(PublishTransactionHashProperty.class);
+  }
+
   public Quantity getQuantity() {
     return getFieldByClass(Quantity.class);
   }
@@ -126,6 +144,11 @@ public class DealFormData extends AbstractFormData {
   }
 
   public static class OrganizationIdProperty extends AbstractPropertyData<String> {
+
+    private static final long serialVersionUID = 1L;
+  }
+
+  public static class PublishTransactionHashProperty extends AbstractPropertyData<String> {
 
     private static final long serialVersionUID = 1L;
   }

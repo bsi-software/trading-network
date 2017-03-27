@@ -32,13 +32,13 @@ public class StatusCodeType extends AbstractCodeType<String, String> {
   }
 
   @Order(2000)
-  public static class PublishedCode extends AbstractCode<String> {
+  public static class PendingCode extends AbstractCode<String> {
     private static final long serialVersionUID = 1L;
-    public static final String ID = "9750ea5d-cec9-48a8-a837-522f4395c800";
+    public static final String ID = "dc010b18-9598-4031-89e6-70924d0589b5";
 
     @Override
     protected String getConfiguredText() {
-      return TEXTS.get("Published");
+      return TEXTS.get("Pending0");
     }
 
     @Override
@@ -48,13 +48,13 @@ public class StatusCodeType extends AbstractCodeType<String, String> {
   }
 
   @Order(3000)
-  public static class ReadyForMergingCode extends AbstractCode<String> {
+  public static class PublishedCode extends AbstractCode<String> {
     private static final long serialVersionUID = 1L;
-    public static final String ID = "dc010b18-9598-4031-89e6-70924d0589b5";
+    public static final String ID = "9750ea5d-cec9-48a8-a837-522f4395c800";
 
     @Override
     protected String getConfiguredText() {
-      return TEXTS.get("ReadyForMerging");
+      return TEXTS.get("Published");
     }
 
     @Override

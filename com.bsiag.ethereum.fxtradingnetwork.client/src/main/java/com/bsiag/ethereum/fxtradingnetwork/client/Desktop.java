@@ -21,14 +21,17 @@ import org.eclipse.scout.rt.client.ui.desktop.outline.AbstractOutlineViewButton;
 import org.eclipse.scout.rt.client.ui.desktop.outline.IOutline;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
 import org.eclipse.scout.rt.client.ui.form.AbstractFormMenu;
+import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.config.CONFIG;
 import org.eclipse.scout.rt.platform.config.PlatformConfigProperties.ApplicationNameProperty;
+import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.AbstractIcons;
 import org.eclipse.scout.rt.shared.ISession;
 
 import com.bsiag.ethereum.fxtradingnetwork.client.contact.ContactOutline;
 import com.bsiag.ethereum.fxtradingnetwork.client.order.DealOutline;
+import com.bsiag.ethereum.fxtradingnetwork.shared.organization.IOrganizationService;
 
 public class Desktop extends AbstractDesktop {
   @Override
@@ -44,14 +47,20 @@ public class Desktop extends AbstractDesktop {
   @Override
   protected List<Class<? extends IOutline>> getConfiguredOutlines() {
     List<Class<? extends IOutline>> outlines = new ArrayList<>();
-    outlines.add(ContactOutline.class);
     outlines.add(DealOutline.class);
+    outlines.add(ContactOutline.class);
     return outlines;
   }
 
   @Override
   protected void execDefaultView() {
-    setOutline(ContactOutline.class);
+    String organizationId = BEANS.get(IOrganizationService.class).getOrganizationIdForUser(ClientSession.get().getUserId());
+    if (StringUtility.hasText(organizationId)) {
+      setOutline(DealOutline.class);
+    }
+    else {
+      setOutline(ContactOutline.class);
+    }
   }
 
   public static Desktop get() {

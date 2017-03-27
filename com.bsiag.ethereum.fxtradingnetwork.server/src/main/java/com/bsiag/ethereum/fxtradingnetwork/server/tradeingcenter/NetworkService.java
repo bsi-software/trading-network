@@ -11,6 +11,7 @@ import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.bsiag.ethereum.fxtradingnetwork.server.order.DealService;
 import com.bsiag.ethereum.fxtradingnetwork.server.orderbook.OrderBookService;
 import com.bsiag.ethereum.fxtradingnetwork.server.orderbook.model.Order;
 import com.bsiag.ethereum.fxtradingnetwork.server.orderbook.model.OrderBookCache;
@@ -31,6 +32,8 @@ public class NetworkService implements INetworkService {
     OrderBookService orderBookService = BEANS.get(OrderBookService.class);
     List<Order> orders = orderBookService.getOrders(orderBookTypeId);
     OrderMatch match = orderBookService.getMatch(orderBookTypeId);
+
+    BEANS.get(DealService.class).checkStatusForPendingOrders(orderBookTypeId, orders);
 
     return convertToTablePageData(orders, match);
   }

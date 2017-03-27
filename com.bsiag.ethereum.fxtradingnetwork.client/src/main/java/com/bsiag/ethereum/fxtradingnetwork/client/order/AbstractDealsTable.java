@@ -201,6 +201,11 @@ public abstract class AbstractDealsTable extends AbstractTable {
     }
 
     @Override
+    protected int getConfiguredSortIndex() {
+      return 1;
+    }
+
+    @Override
     public Class<? extends ICodeType<?, String>> getConfiguredCodeType() {
       return StatusCodeType.class;
     }

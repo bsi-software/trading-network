@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.bsiag.ethereum.fxtradingnetwork.server.jobs.ReloadOrdersFromOrderBookJob;
+import com.bsiag.ethereum.fxtradingnetwork.server.jobs.UpdatePendingOrderStatusJob;
 import com.bsiag.ethereum.fxtradingnetwork.server.sql.SuperUserRunContextProducer;
 
 public class JobUtility {
@@ -17,6 +18,7 @@ public class JobUtility {
 
   public static void registerJobs() {
     registerReloadOrdersFromOrderBookJob();
+    registerUpdatePendingOrderStatusJob();
   }
 
   private static void registerReloadOrdersFromOrderBookJob() {
@@ -30,6 +32,22 @@ public class JobUtility {
               @Override
               public void handle(Throwable t) {
                 LOG.error("Error on execution of job " + ReloadOrdersFromOrderBookJob.ID + ": ", t);
+              }
+            }, true));
+  }
+
+  private static void registerUpdatePendingOrderStatusJob() {
+    Jobs.schedule(new UpdatePendingOrderStatusJob(),
+        Jobs.newInput()
+            .withName(UpdatePendingOrderStatusJob.ID)
+            .withRunContext(BEANS.get(SuperUserRunContextProducer.class).produce())
+            .withExecutionTrigger(Jobs.newExecutionTrigger()
+                .withStartIn(2, TimeUnit.SECONDS)
+                .withSchedule(FixedDelayScheduleBuilder.repeatForever(10, TimeUnit.SECONDS)))
+            .withExceptionHandling(new ExceptionHandler() {
+              @Override
+              public void handle(Throwable t) {
+                LOG.error("Error on execution of job " + UpdatePendingOrderStatusJob.ID + ": ", t);
               }
             }, true));
   }

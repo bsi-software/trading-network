@@ -10,15 +10,12 @@
  ******************************************************************************/
 package com.bsiag.ethereum.fxtradingnetwork.server.sql;
 
-//tag::createDB[]
-//tag::organizationListing[]
 public interface SQLs {
-  //end::organizationListing[]
 
   String SELECT_TABLE_NAMES = ""
       + "SELECT   UPPER(tablename) "
       + "FROM     sys.systables "
-      + "INTO     :result"; // <1>
+      + "INTO     :result";
 
   String ORGANIZATION_CREATE_TABLE = ""
       + "CREATE   TABLE ORGANIZATION "
@@ -76,20 +73,17 @@ public interface SQLs {
       + "</text>"
       + "<all> </all>";
 
-  //tag::lookupService[]
   String ORGANIZATION_LOOKUP = ""
       + "SELECT   organization_id, "
       + "         name "
       + "FROM     ORGANIZATION "
       + "WHERE    1 = 1 "
-      + "<key>    AND organization_id = :key</key> " // <1>
-      + "<text>   AND UPPER(name) LIKE UPPER(:text||'%') </text> " // <2>
-      + "<all></all>"; // <3>
-  //end::lookupService[]
+      + "<key>    AND organization_id = :key</key> "
+      + "<text>   AND UPPER(name) LIKE UPPER(:text||'%') </text> "
+      + "<all></all>";
 
   String AND_LIKE_CAUSE = "AND LOWER(%s) LIKE LOWER(:%s || '%%') ";
 
-  //tag::organizationListing[]
   String ORGANIZATION_PAGE_SELECT = ""
       + "SELECT   organization_id, "
       + "         name, "
@@ -99,12 +93,11 @@ public interface SQLs {
       + "FROM     ORGANIZATION ";
 
   String ORGANIZATION_PAGE_DATA_SELECT_INTO = ""
-      + "INTO     :{page.organizationId}, " // <1>
+      + "INTO     :{page.organizationId}, "
       + "         :{page.name}, "
       + "         :{page.city}, "
       + "         :{page.country}, "
       + "         :{page.homepage}";
-  //end::organizationListing[]
 
   String ORGANIZATION_INSERT = ""
       + "INSERT   INTO "
@@ -680,6 +673,7 @@ public interface SQLs {
       + "             order_book_type VARCHAR(64), "
       + "             trading_action VARCHAR(64), "
       + "             status VARCHAR(64), "
+      + "             publish_transaction_hash VARCHAR(130), "
       + "             CONSTRAINT ORGANIZATION_FK FOREIGN KEY (organization_id) REFERENCES ORGANIZATION(organization_id))";
 
   String DEAL_PAGE_DATA_SELECT = ""
@@ -703,7 +697,7 @@ public interface SQLs {
       + "             :{page.orderBookType}, "
       + "             :{page.tradingAction}, "
       + "             :{page.status} ";
-  //TODO removeorganizationId/_id from DEAL_INSERT
+  //TODO remove organizationId/_id from DEAL_INSERT
   String DEAL_INSERT = ""
       + "INSERT     INTO "
       + "DEAL      (deal_id,organization_id) "
@@ -716,7 +710,8 @@ public interface SQLs {
       + "             exchange_rate = :exchangeRate, "
       + "             order_book_type = :orderBookType, "
       + "             trading_action = :tradingActionBox, "
-      + "             status = :status "
+      + "             status = :status,"
+      + "             publish_transaction_hash = :publishTransactionHash "
       + "WHERE        deal_id = :dealId";
 
   String DEAL_SELECT = ""
@@ -930,8 +925,16 @@ public interface SQLs {
 
   String EVENT_DROP_TABLE = "DROP TABLE EVENT";
 
-  // tag::organizationListing[]
-  // tag::createDB[]
+  String DEALS_SELECT_IN_STATUS_FORM_ORDERBOOK = ""
+      + "SELECT     deal_id "
+      + "FROM       deal "
+      + "WHERE      order_book_type = :orderBookType "
+      + "AND        status = :status "
+      + "INTO       :{dealId} ";
+
+  String DEALS_UPDATE_STATUS_AND_DEAL_NR = ""
+      + "UPDATE deal "
+      + "SET    status = :status, "
+      + "       deal_nr = :dealNr "
+      + "WHERE  deal_id = :dealId ";
 }
-// end::createDB[]
-// end::organizationListing[]

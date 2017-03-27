@@ -11,16 +11,22 @@
 package com.bsiag.ethereum.fxtradingnetwork.server.order;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.exception.ProcessingException;
+import org.eclipse.scout.rt.platform.exception.ProcessingStatus;
 import org.eclipse.scout.rt.platform.exception.VetoException;
+import org.eclipse.scout.rt.platform.holders.LongArrayHolder;
 import org.eclipse.scout.rt.platform.holders.NVPair;
 import org.eclipse.scout.rt.platform.util.CompareUtility;
 import org.eclipse.scout.rt.platform.util.StringUtility;
+import org.eclipse.scout.rt.platform.util.TypeCastUtility;
 import org.eclipse.scout.rt.server.jdbc.SQL;
 import org.eclipse.scout.rt.shared.ISession;
 import org.eclipse.scout.rt.shared.TEXTS;
+import org.eclipse.scout.rt.shared.services.common.code.ICode;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.common.security.ACCESS;
 import org.eclipse.scout.rt.shared.session.Sessions;
@@ -29,11 +35,13 @@ import org.slf4j.LoggerFactory;
 
 import com.bsiag.ethereum.fxtradingnetwork.server.orderbook.OrderBookService;
 import com.bsiag.ethereum.fxtradingnetwork.server.orderbook.model.Order;
+import com.bsiag.ethereum.fxtradingnetwork.server.orderbook.model.OrderBookCache;
 import com.bsiag.ethereum.fxtradingnetwork.server.sql.SQLs;
 import com.bsiag.ethereum.fxtradingnetwork.shared.order.CreateEventPermission;
 import com.bsiag.ethereum.fxtradingnetwork.shared.order.DealFormData;
 import com.bsiag.ethereum.fxtradingnetwork.shared.order.DealsTablePageData;
 import com.bsiag.ethereum.fxtradingnetwork.shared.order.IDealService;
+import com.bsiag.ethereum.fxtradingnetwork.shared.order.OrderBookTypeCodeType;
 import com.bsiag.ethereum.fxtradingnetwork.shared.order.OwnDealsTablePageData;
 import com.bsiag.ethereum.fxtradingnetwork.shared.order.ReadEventPermission;
 import com.bsiag.ethereum.fxtradingnetwork.shared.order.StatusCodeType;
@@ -108,9 +116,9 @@ public class DealService implements IDealService {
     formData = load(formData);
     try {
       String transactionHash = BEANS.get(OrderBookService.class).publish(convertToOrder(formData));
-      //TODO: [uko] change status to pending and save hash
       if (StringUtility.hasText(transactionHash)) {
-        formData.setStatus(StatusCodeType.PublishedCode.ID);
+        formData.setStatus(StatusCodeType.PendingCode.ID);
+        formData.setPublishTransactionHash(transactionHash);
         store(formData);
       }
     }
@@ -169,6 +177,38 @@ public class DealService implements IDealService {
     return exchangeRate;
   }
 
+  public void checkStatusForPendingOrders() {
+    for (ICode<String> code : BEANS.get(OrderBookTypeCodeType.class).getCodes()) {
+      checkStatusForPendingOrders(code.getId(), new ArrayList<Order>());
+    }
+  }
+
+  public void checkStatusForPendingOrders(String orderBookTypeId, List<Order> orders) throws ProcessingException {
+    if (StringUtility.isNullOrEmpty(orderBookTypeId)) {
+      throw new ProcessingException(new ProcessingStatus("orderBookId is not allowed to be null or empty."));
+    }
+
+    if (orders == null || orders.size() == 0) {
+      orders = BEANS.get(OrderBookCache.class).loadOrders(orderBookTypeId);
+    }
+
+    LongArrayHolder pendingDeals = new LongArrayHolder();
+    SQL.selectInto(SQLs.DEALS_SELECT_IN_STATUS_FORM_ORDERBOOK,
+        new NVPair("orderBookType", orderBookTypeId),
+        new NVPair("status", StatusCodeType.PendingCode.ID),
+        new NVPair("dealId", pendingDeals));
+
+    for (Long dealId : pendingDeals.getValue()) {
+      for (Order order : orders) {
+        if (CompareUtility.equals(dealId.intValue(), order.getExtId())) {
+          Long dealNr = TypeCastUtility.castValue(order.getId(), Long.class);
+          updateDealStatusAndSaveDealNr(dealId, dealNr, StatusCodeType.PublishedCode.ID);
+          //TODO: [uko] notify Ui, that deal is published
+        }
+      }
+    }
+  }
+
   private Order convertToOrder(DealFormData formData) {
     Order.Type type = Order.Type.BUY;
     if (TradingActionCodeType.SellCode.ID.equals(formData.getTradingActionBox().getValue())) {
@@ -179,5 +219,24 @@ public class DealService implements IDealService {
     order.setOwner(formData.getOrganizationId());
 
     return order;
+  }
+
+  private boolean updateDealStatusAndSaveDealNr(Long dealId, Long dealNr, String newStatusCodeId) {
+    ICode<String> statusCode = BEANS.get(StatusCodeType.class).getCode(newStatusCodeId);
+    if (null == statusCode) {
+      throw new ProcessingException("This status: " + newStatusCodeId + " is not a valid status code id. See valid code ids in StatusCodeType.");
+    }
+
+    int updateResult = SQL.update(SQLs.DEALS_UPDATE_STATUS_AND_DEAL_NR,
+        new NVPair("status", newStatusCodeId),
+        new NVPair("dealNr", dealNr),
+        new NVPair("dealId", dealId));
+
+    boolean successfull = false;
+    if (updateResult > 0) {
+      successfull = true;
+    }
+
+    return successfull;
   }
 }
