@@ -28,4 +28,6 @@ public interface IOrganizationService extends IService {
   OrganizationFormData store(OrganizationFormData formData);
 
   String getOrganizationIdForUser(String userId);
+
+  String getUserIdForOrganization(String organizationId);
 }

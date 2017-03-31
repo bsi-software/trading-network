@@ -33,6 +33,8 @@ public interface IDealService {
 
   DealFormData load(DealFormData formData);
 
+  DealFormData loadByDealNr(String orderBookId, Long dealNr);
+
   DealFormData prepareCreate(DealFormData formData);
 
   DealFormData store(DealFormData formData);

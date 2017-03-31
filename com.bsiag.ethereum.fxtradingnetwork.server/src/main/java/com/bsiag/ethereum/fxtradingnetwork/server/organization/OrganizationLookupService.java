@@ -10,18 +10,17 @@
  ******************************************************************************/
 package com.bsiag.ethereum.fxtradingnetwork.server.organization;
 
-import com.bsiag.ethereum.fxtradingnetwork.server.sql.SQLs;
-import com.bsiag.ethereum.fxtradingnetwork.shared.organization.IOrganizationLookupService;
 import org.eclipse.scout.rt.server.jdbc.lookup.AbstractSqlLookupService;
 
-//tag::all[]
+import com.bsiag.ethereum.fxtradingnetwork.server.sql.SQLs;
+import com.bsiag.ethereum.fxtradingnetwork.shared.organization.IOrganizationLookupService;
+
 public class OrganizationLookupService
     extends AbstractSqlLookupService<String>
     implements IOrganizationLookupService {
 
   @Override
   protected String getConfiguredSqlSelect() {
-    return SQLs.ORGANIZATION_LOOKUP; // <1>
+    return SQLs.ORGANIZATION_LOOKUP;
   }
 }
-//end::all[]

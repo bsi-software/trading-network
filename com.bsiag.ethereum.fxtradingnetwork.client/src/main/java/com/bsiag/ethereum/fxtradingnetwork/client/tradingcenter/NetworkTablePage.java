@@ -22,8 +22,10 @@ import org.eclipse.scout.rt.client.ui.form.fields.decimalfield.IDecimalField;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
+import org.eclipse.scout.rt.platform.util.CompareUtility;
 import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
+import org.eclipse.scout.rt.shared.data.basic.FontSpec;
 import org.eclipse.scout.rt.shared.services.common.code.ICode;
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
@@ -371,6 +373,11 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
       protected int getConfiguredWidth() {
         return 100;
       }
+
+      @Override
+      protected boolean getConfiguredVisible() {
+        return false;
+      }
     }
 
     @Order(8000)
@@ -448,6 +455,11 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
       protected int getConfiguredWidth() {
         return 100;
       }
+
+      @Override
+      protected boolean getConfiguredVisible() {
+        return false;
+      }
     }
 
     @Order(12000)
@@ -523,7 +535,7 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
               sellRow = row;
             }
           }
-          if (null != buyRow && null != sellRow) {
+          if (null != buyRow && null != sellRow && getOwnDealColumn().getValue(buyRow)) {
             INetworkService service = BEANS.get(INetworkService.class);
             service.executeMerge(getOrderBookId(), getDealIdColumn().getValue(buyRow), getDealIdColumn().getValue(sellRow));
             reloadPage();
@@ -533,27 +545,31 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
 
       public void adjustVisability() {
         List<ITableRow> matchedRows = getIsMatchedColumn().findRows(true);
+        boolean visible = false;
         if (matchedRows.size() == 2) {
-          //TODO [uko] only if the sell action is for the users organization the menu is visible
-//          for (ITableRow row : matchedRows) {
-//            if (CompareUtility.equals(TradingActionCodeType.SellCode.ID, getSideColumn().getValue(row))
-//                && getOwnDealColumn().getValue(row)) {
-          setVisible(true);
-//              break;
-//            }
-//          }
+          for (ITableRow row : matchedRows) {
+            if (CompareUtility.equals(TradingActionCodeType.BuyCode.ID, getSideColumn().getValue(row))
+                && getOwnDealColumn().getValue(row)) {
+              visible = true;
+              break;
+            }
+          }
         }
-        else {
-          setVisible(false);
-        }
+        setVisible(visible);
       }
     }
 
     protected void decorateCellsForMatches() {
+      // Highlight matched rows
       List<ITableRow> matchedRows = getIsMatchedColumn().findRows(true);
       for (ITableRow matchedRow : matchedRows) {
         matchedRow.setForegroundColor("AD1B02");
         matchedRow.setBackgroundColor("FCF2D3");
+      }
+      // Highlight rows with own deals
+      List<ITableRow> ownRows = getOwnDealColumn().findRows(true);
+      for (ITableRow ownRow : ownRows) {
+        ownRow.setFont(FontSpec.parse("BOLD"));
       }
     }
 

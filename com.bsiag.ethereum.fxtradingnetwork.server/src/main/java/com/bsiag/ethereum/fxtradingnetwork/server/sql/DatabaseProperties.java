@@ -16,7 +16,6 @@ import org.eclipse.scout.rt.platform.config.AbstractBooleanConfigProperty;
 import org.eclipse.scout.rt.platform.config.AbstractStringConfigProperty;
 import org.eclipse.scout.rt.platform.config.AbstractSubjectConfigProperty;
 
-// tag::structure[]
 public class DatabaseProperties {
 
   public static class DatabaseAutoCreateProperty extends AbstractBooleanConfigProperty {
@@ -24,18 +23,16 @@ public class DatabaseProperties {
 
     @Override
     protected Boolean getDefaultValue() {
-      return Boolean.FALSE; // <1>
+      return Boolean.FALSE;
     }
 
     @Override
     public String getKey() {
-      return "fxtradingnetwork.database.autocreate"; // <2>
+      return "fxtradingnetwork.database.autocreate";
     }
   }
 
   public static class DatabaseAutoPopulateProperty extends AbstractBooleanConfigProperty {
-    // defines default value and key
-    // end::structure[]
 
     @Override
     protected Boolean getDefaultValue() {
@@ -46,12 +43,9 @@ public class DatabaseProperties {
     public String getKey() {
       return "fxtradingnetwork.database.autopopulate";
     }
-    // tag::structure[]
   }
 
   public static class JdbcMappingNameProperty extends AbstractStringConfigProperty {
-    // defines default value and key
-    // end::structure[]
 
     @Override
     protected String getDefaultValue() {
@@ -62,7 +56,6 @@ public class DatabaseProperties {
     public String getKey() {
       return "fxtradingnetwork.database.jdbc.mapping.name";
     }
-    // tag::structure[]
   }
 
   public static class JdbcUsernameProperty extends AbstractStringConfigProperty {
@@ -84,8 +77,6 @@ public class DatabaseProperties {
   }
 
   public static class SuperUserSubjectProperty extends AbstractSubjectConfigProperty {
-    // defines default value and key
-    // end::structure[]
 
     @Override
     protected Subject getDefaultValue() {
@@ -96,7 +87,5 @@ public class DatabaseProperties {
     public String getKey() {
       return "fxtradingnetwork.superuser";
     }
-    // tag::structure[]
   }
 }
-// end::structure[]

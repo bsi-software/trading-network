@@ -5,7 +5,7 @@ import org.eclipse.scout.rt.platform.util.concurrent.IRunnable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.bsiag.ethereum.fxtradingnetwork.shared.tradingcenter.INetworkService;
+import com.bsiag.ethereum.fxtradingnetwork.server.tradeingcenter.NetworkService;
 
 public class ReloadOrdersFromOrderBookJob implements IRunnable {
   private static final Logger LOG = LoggerFactory.getLogger(ReloadOrdersFromOrderBookJob.class);
@@ -14,7 +14,7 @@ public class ReloadOrdersFromOrderBookJob implements IRunnable {
 
   @Override
   public void run() throws Exception {
-    BEANS.get(INetworkService.class).synchronizeOrderBooks();
+    BEANS.get(NetworkService.class).synchronizeOrderBooks();
   }
 
 }

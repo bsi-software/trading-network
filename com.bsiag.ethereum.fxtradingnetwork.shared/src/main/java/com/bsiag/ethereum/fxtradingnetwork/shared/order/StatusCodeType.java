@@ -64,6 +64,22 @@ public class StatusCodeType extends AbstractCodeType<String, String> {
   }
 
   @Order(4000)
+  public static class PartiallyCompletedCode extends AbstractCode<String> {
+    private static final long serialVersionUID = 1L;
+    public static final String ID = "ce83dd7a-be69-4679-8bf5-f39e96971b0b";
+
+    @Override
+    protected String getConfiguredText() {
+      return TEXTS.get("PartiallyCompleted");
+    }
+
+    @Override
+    public String getId() {
+      return ID;
+    }
+  }
+
+  @Order(5000)
   public static class CompletedCode extends AbstractCode<String> {
     private static final long serialVersionUID = 1L;
     public static final String ID = "3ca92b83-3b67-4e10-aedb-56cf0d8a2fd3";

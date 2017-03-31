@@ -4,10 +4,13 @@ import java.util.List;
 
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.util.CompareUtility;
+import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.platform.util.TypeCastUtility;
 import org.eclipse.scout.rt.server.clientnotification.ClientNotificationRegistry;
+import org.eclipse.scout.rt.shared.ISession;
 import org.eclipse.scout.rt.shared.services.common.code.ICode;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
+import org.eclipse.scout.rt.shared.session.Sessions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +20,11 @@ import com.bsiag.ethereum.fxtradingnetwork.server.orderbook.model.Order;
 import com.bsiag.ethereum.fxtradingnetwork.server.orderbook.model.OrderBookCache;
 import com.bsiag.ethereum.fxtradingnetwork.server.orderbook.model.OrderMatch;
 import com.bsiag.ethereum.fxtradingnetwork.shared.notification.OrderBookSynchronizedNotification;
+import com.bsiag.ethereum.fxtradingnetwork.shared.order.DealFormData;
+import com.bsiag.ethereum.fxtradingnetwork.shared.order.IDealService;
 import com.bsiag.ethereum.fxtradingnetwork.shared.order.OrderBookTypeCodeType;
 import com.bsiag.ethereum.fxtradingnetwork.shared.order.TradingActionCodeType;
+import com.bsiag.ethereum.fxtradingnetwork.shared.organization.IOrganizationService;
 import com.bsiag.ethereum.fxtradingnetwork.shared.tradingcenter.INetworkService;
 import com.bsiag.ethereum.fxtradingnetwork.shared.tradingcenter.NetworkTablePageData;
 import com.bsiag.ethereum.fxtradingnetwork.shared.tradingcenter.NetworkTablePageData.NetworkTableRowData;
@@ -43,6 +49,8 @@ public class NetworkService implements INetworkService {
     List<Order> orders = BEANS.get(OrderBookCache.class).loadOrders(orderBookTypeId);
     OrderMatch match = BEANS.get(OrderBookCache.class).loadMatch(orderBookTypeId);
 
+    BEANS.get(DealService.class).checkStatusForPendingOrders(orderBookTypeId, orders);
+
     return convertToTablePageData(orders, match);
   }
 
@@ -51,7 +59,6 @@ public class NetworkService implements INetworkService {
     BEANS.get(OrderBookService.class).executeMatch(orderBookTypeId, dealId1.intValue(), dealId2.intValue());
   }
 
-  @Override
   public void synchronizeOrderBooks() {
     for (ICode<String> code : BEANS.get(OrderBookTypeCodeType.class).getCodes()) {
       OrderBookService orderBookService = BEANS.get(OrderBookService.class);
@@ -62,14 +69,31 @@ public class NetworkService implements INetworkService {
     }
   }
 
+  public void synchronizeExecutedOrdersFromOrderBooks() {
+    for (ICode<String> code : BEANS.get(OrderBookTypeCodeType.class).getCodes()) {
+      OrderBookService orderBookService = BEANS.get(OrderBookService.class);
+      List<Order> orders = orderBookService.getExecutedOrders(code.getId());
+      BEANS.get(OrderBookCache.class).updatedOrderBookExecutedCache(code.getId(), orders);
+    }
+  }
+
   private NetworkTablePageData convertToTablePageData(List<Order> orders, OrderMatch match) {
     NetworkTablePageData data = new NetworkTablePageData();
+    String userId = Sessions.currentSession(ISession.class).getUserId();
+    String ownOrganization = BEANS.get(IOrganizationService.class).getOrganizationIdForUser(userId);
 
     for (Order order : orders) {
       NetworkTableRowData row = data.addRow();
       row.setExchangeRate(order.getPrice());
       row.setDealId(TypeCastUtility.castValue(order.getId(), Long.class));
-      //TODO is own order
+      String organizationId = "";
+      if (StringUtility.hasText(ownOrganization)) {
+        DealFormData dealData = BEANS.get(IDealService.class).loadByDealNr(order.getCurrencyPair(), row.getDealId());
+        if (null != dealData) {
+          organizationId = dealData.getOrganizationId();
+          row.setOwnDeal(ownOrganization.equals(dealData.getOrganizationId()));
+        }
+      }
       if (null != match && CompareUtility.isOneOf(order.getId(), match.getBuyNr(), match.getSellNr())) {
         row.setIsMatched(true);
       }
@@ -77,14 +101,18 @@ public class NetworkService implements INetworkService {
         row.setBuyerQuantity(TypeCastUtility.castValue(order.getAmount(), Long.class));
         row.setBuyerSide(TradingActionCodeType.BuyCode.ID);
         row.setSide(TradingActionCodeType.BuyCode.ID);
+        row.setBuyerOrganization(organizationId);
       }
       else {
         row.setSellerQuantity(TypeCastUtility.castValue(order.getAmount(), Long.class));
         row.setSellerSide(TradingActionCodeType.SellCode.ID);
         row.setSide(TradingActionCodeType.SellCode.ID);
+        row.setSellerOrganization(organizationId);
       }
     }
 
     return data;
+
   }
+
 }

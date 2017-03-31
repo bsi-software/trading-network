@@ -659,6 +659,13 @@ public interface SQLs {
       + "           LIMIT 1 "
       + "           INTO :organizationId ";
 
+  String USER_FOR_ORGANIZATION_SELECT = ""
+      + "           SELECT O.USER_ID "
+      + "           FROM ORGANIZATION O "
+      + "           WHERE O.ORGANIZATION_ID = :organizationId "
+      + "           LIMIT 1 "
+      + "           INTO :userId ";
+
   String PERSON_DROP_TABLE = "DROP TABLE PERSON";
   String ORGANIZATION_DROP_TABLE = "DROP TABLE ORGANIZATION";
 
@@ -729,6 +736,23 @@ public interface SQLs {
       + "             :quantity, "
       + "             :exchangeRate, "
       + "             :orderBookType, "
+      + "             :tradingActionBox, "
+      + "             :status ";
+
+  String DEAL_SELECT_BY_DEAL_NR = ""
+      + "SELECT       deal_id,"
+      + "             organization_id, "
+      + "             quantity, "
+      + "             exchange_rate, "
+      + "             trading_action , "
+      + "             status "
+      + "FROM         DEAL "
+      + "WHERE        deal_nr = :dealNr "
+      + "AND          order_book_type = :orderBookType "
+      + "INTO         :dealId, "
+      + "             :organizationId, "
+      + "             :quantity, "
+      + "             :exchangeRate, "
       + "             :tradingActionBox, "
       + "             :status ";
 
@@ -926,11 +950,13 @@ public interface SQLs {
   String EVENT_DROP_TABLE = "DROP TABLE EVENT";
 
   String DEALS_SELECT_IN_STATUS_FORM_ORDERBOOK = ""
-      + "SELECT     deal_id "
+      + "SELECT     deal_id, "
+      + "           deal_nr "
       + "FROM       deal "
       + "WHERE      order_book_type = :orderBookType "
       + "AND        status = :status "
-      + "INTO       :{dealId} ";
+      + "INTO       :{dealId}, "
+      + "           :{dealNr} ";
 
   String DEALS_UPDATE_STATUS_AND_DEAL_NR = ""
       + "UPDATE deal "

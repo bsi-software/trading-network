@@ -264,6 +264,54 @@ public class OrderBookService {
     }
   }
 
+  public List<Order> getExecutedOrders(String currencyPair) {
+    List<Order> orders = new ArrayList<Order>();
+    try {
+      orders.addAll(getExecutedOrders(getContract(currencyPair)));
+      orders.forEach((o) -> o.setCurrencyPair(currencyPair));
+    }
+    catch (InterruptedException | ExecutionException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+      throw new ProcessingException(e.getMessage());
+    }
+
+    return orders;
+  }
+
+  private List<Order> getExecutedOrders(OrderBook contract) {
+    List<Order> orders = new ArrayList<Order>();
+    boolean reachedLastOrder = false;
+    int index = 0;
+    while (!reachedLastOrder) {
+      Order orderAtIndex = getExecutedOrderAtIndex(index, contract);
+      if (null != orderAtIndex) {
+        orders.add(orderAtIndex);
+      }
+      else {
+        reachedLastOrder = true;
+      }
+      index += 1;
+    }
+    return orders;
+  }
+
+  private Order getExecutedOrderAtIndex(int index, OrderBook contract) {
+    List<Type> list = null;
+    try {
+      list = contract.executedOrders(new Uint256(BigInteger.valueOf(index))).get();
+    }
+    catch (InterruptedException | ExecutionException e) {
+      // TODO Auto-generated catch block
+      // e.printStackTrace();
+    }
+    Order order = null;
+    if (null != list && list.size() > 0) {
+      order = convertToOrder(list);
+    }
+    return order;
+  }
+
   /**
    * Returns the top buy order (or null) for the given order book
    *

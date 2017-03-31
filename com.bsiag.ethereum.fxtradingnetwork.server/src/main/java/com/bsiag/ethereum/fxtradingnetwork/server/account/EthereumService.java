@@ -8,20 +8,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
 import org.eclipse.scout.rt.platform.ApplicationScoped;
+import org.eclipse.scout.rt.platform.config.CONFIG;
 import org.eclipse.scout.rt.platform.exception.ProcessingException;
+import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.web3j.abi.datatypes.Bool;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.Utf8String;
-import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response.Error;
@@ -31,17 +27,19 @@ import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.MessageDecodingException;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.infura.InfuraHttpService;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
 
+import com.bsiag.ethereum.fxtradingnetwork.server.account.EthereumProperties.EthereumClientIpProperty;
+import com.bsiag.ethereum.fxtradingnetwork.server.account.EthereumProperties.EthereumClientPortProperty;
+import com.bsiag.ethereum.fxtradingnetwork.server.account.EthereumProperties.EthereumClientProperty;
 import com.bsiag.ethereum.fxtradingnetwork.server.account.model.Account;
 import com.bsiag.ethereum.fxtradingnetwork.server.account.model.Alice;
 import com.bsiag.ethereum.fxtradingnetwork.server.account.model.Transaction;
-import com.bsiag.ethereum.fxtradingnetwork.server.orderbook.OrderBook;
+import com.bsiag.ethereum.fxtradingnetwork.shared.account.EthereumClientCodeType;
 
 @ApplicationScoped
 public class EthereumService {
@@ -49,12 +47,7 @@ public class EthereumService {
   private static final Logger LOG = LoggerFactory.getLogger(EthereumService.class);
 
   // switch for testrpc/infura
-  private static final boolean USE_TESTRPC = true;
-
-  // testrpc coordinates
-  private static final String CLIENT_IP = "192.168.99.100";
-//  private static final String CLIENT_IP = "127.0.0.1";
-  private static final String CLIENT_PORT = "8545";
+  private static boolean m_useTestrpc;
 
   // infura coordinates
   private static final String TOKEN = "3UMFlH4jlpWx6IqttMeG";
@@ -70,7 +63,6 @@ public class EthereumService {
   // the connection to the ethereum net
   private Web3j web3j = null;
 
-  private OrderBook contract = null;
   private String rpc_coinbase;
 
   // TODO replace these with some real persistence
@@ -81,13 +73,17 @@ public class EthereumService {
 
   @PostConstruct
   private void init() {
+    String clientConfig = CONFIG.getPropertyValue(EthereumClientProperty.class);
+    if (StringUtility.compareIgnoreCase(EthereumClientCodeType.TestRpcCode.ID, clientConfig) == 0) {
+      m_useTestrpc = true;
+    }
 //		LOG.info("Poulating dummy/temp accounts ...");
 //		populateAccount("prs01", "UTC--2016-12-12T08-09-51.487000000Z--8d2ec831056c620fea2fabad8bf6548fc5810cc3.json", "123");
 //		populateAccount("prs01a", "UTC--2016-12-12T09-07-24.203000000Z--cbc12f306da804bb681aceeb34f0bc58ba2f7ad7.json", "456");
 //		LOG.info("local wallets successfully loaded ...");
 
     // move some initial funds to alice's account (only when working with testrpc)
-    if (USE_TESTRPC) {
+    if (m_useTestrpc) {
       try {
         EthCoinbase coinbase = getWeb3j().ethCoinbase().sendAsync().get();
         String from = coinbase.getAddress();
@@ -110,89 +106,10 @@ public class EthereumService {
           transferEther(rpc_coinbase, contractOwnerAdress, Convert.toWei("10", Convert.Unit.ETHER).toBigInteger());
         }
 
-        // TODO check if this is a good place
-//        contract = deployContract();
       }
       catch (Exception e) {
         LOG.error(e.getMessage());
         e.printStackTrace();
-      }
-    }
-  }
-
-  private OrderBook deployContract() throws Exception {
-    String contractOwnerAdress = Alice.ADDRESS;
-
-    if (getBalance(contractOwnerAdress).compareTo(Convert.toWei("10", Convert.Unit.ETHER)) < 0) {
-      transferEther(rpc_coinbase, contractOwnerAdress, Convert.toWei("10", Convert.Unit.ETHER).toBigInteger());
-    }
-
-    LOG.info(getBalance(contractOwnerAdress).toString());
-
-    Future<OrderBook> deploy = OrderBook.deploy(getWeb3j(), Alice.CREDENTIALS, GAS_PRICE_DEFAULT, BigInteger.valueOf(2_000_000L), BigInteger.valueOf(0), new Utf8String("CHFEUR"));
-    OrderBook contract = deploy.get();
-    System.out.println(contract.getContractAddress());
-
-    return contract;
-  }
-
-  public BigInteger createDeal(String company, boolean type, int quantity, double price) throws Exception {
-    // 			contract.createDeal(new Uint256(BigInteger.valueOf(100)), new Uint256(BigInteger.valueOf(2030)), SELL, FIRMA1).get();
-    BigInteger dealNr = null;
-
-    Utf8String owner = new Utf8String(company);
-    Bool buy = new Bool(type);
-    Uint256 dealQuantity = new Uint256(BigInteger.valueOf(quantity));
-    Uint256 dealPrice = new Uint256(BigInteger.valueOf((long) (100 * price)));
-    Uint256 extId = new Uint256(BigInteger.valueOf(0L));
-
-    TransactionReceipt receipt = contract.createOrder(dealQuantity, dealPrice, buy, extId).get();
-    LOG.info(receipt.getTransactionHash());
-
-    for (int i = 0; i < 10; i++) {
-      P_Deal deal = readDeal(type, i, contract);
-      if (null != deal) {
-        LOG.info("deal nr: " + deal.dealNr + " price: " + deal.price + " quatity: " + deal.quantity);
-      }
-      else {
-        break;
-      }
-    }
-
-    return dealNr;
-  }
-
-  private P_Deal readDeal(boolean buy, int index, OrderBook contract) throws InterruptedException, ExecutionException {
-    List<Type> list;
-    if (buy) {
-      list = contract.buyOrders(new Uint256(BigInteger.valueOf(index))).get();
-    }
-    else {
-      list = contract.sellOrders(new Uint256(BigInteger.valueOf(index))).get();
-    }
-    P_Deal deal = null;
-    if (null != list && list.size() > 0) {
-      deal = new P_Deal(list);
-    }
-    return deal;
-    //buy ? new P_Deal(contract.buyDeals(new Uint256(BigInteger.valueOf(index))).get()) : new P_Deal(contract.sellDeals(new Uint256(BigInteger.valueOf(index))).get());
-  }
-
-  class P_Deal {
-    public BigInteger quantity;
-    public BigInteger price;
-    public Boolean buy;
-    public String company;
-    public BigInteger dealNr;
-
-    P_Deal(List<Type> list) {
-      if (null != list && list.size() > 0) {
-        quantity = ((Uint256) list.get(0)).getValue();
-        price = ((Uint256) list.get(1)).getValue();
-        buy = ((Bool) list.get(2)).getValue();
-        // TODO check whats wrong here
-//			company = ((UTF8String) list.get(3)).get();// toString();
-        dealNr = ((Uint256) list.get(4)).getValue();
       }
     }
   }
@@ -302,8 +219,10 @@ public class EthereumService {
     if (web3j == null) {
       LOG.info("Trying to connect to Ethereum net ...");
 
-      if (USE_TESTRPC) {
-        String clientUrl = String.format("http://%s:%s", CLIENT_IP, CLIENT_PORT);
+      if (m_useTestrpc) {
+        String clientIp = CONFIG.getPropertyValue(EthereumClientIpProperty.class);
+        String clientPort = CONFIG.getPropertyValue(EthereumClientPortProperty.class);
+        String clientUrl = String.format("http://%s:%s", clientIp, clientPort);
         web3j = Web3j.build(new HttpService(clientUrl));
       }
       else {

@@ -96,11 +96,22 @@ public class OrganizationService implements IOrganizationService {
 
     StringHolder organizationIdHolder = new StringHolder();
 
-    SQL.selectInto(SQLs.ORGANIZATION_FOR_USER_SELECT
-    		, new NVPair("userId", userId)
-    		, new NVPair("organizationId", organizationIdHolder));
+    SQL.selectInto(SQLs.ORGANIZATION_FOR_USER_SELECT, new NVPair("userId", userId), new NVPair("organizationId", organizationIdHolder));
 
     return organizationIdHolder.getValue();
+  }
+
+  @Override
+  public String getUserIdForOrganization(String organizationId) {
+    if (!ACCESS.check(new OrganizationReadPermission())) {
+      throw new VetoException(TEXTS.get("InsufficientPrivileges"));
+    }
+
+    StringHolder userIdHolder = new StringHolder();
+
+    SQL.selectInto(SQLs.USER_FOR_ORGANIZATION_SELECT, new NVPair("userId", userIdHolder), new NVPair("organizationId", organizationId));
+
+    return userIdHolder.getValue();
   }
 }
 //end::getTableData[]
