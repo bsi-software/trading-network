@@ -26,26 +26,26 @@
     <org.eclipse.scout.rt.version>6.0.200-SNAPSHOT</org.eclipse.scout.rt.version>
   </properties>
 
-  <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-  <artifactId>com.bsiag.ethereum.fxtradingnetwork</artifactId>
+  <groupId>org.eclipse.scout.tradingnetwork</groupId>
+  <artifactId>org.eclipse.scout.tradingnetwork</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>FX Trading Network Application</name>
 
   <modules>
     <!-- FX Trading Network Application -->
-    <module>../com.bsiag.ethereum.fxtradingnetwork.client</module>
-    <module>../com.bsiag.ethereum.fxtradingnetwork.shared</module>
-    <module>../com.bsiag.ethereum.fxtradingnetwork.server</module>
-    <module>../com.bsiag.ethereum.fxtradingnetwork.server.app.war</module>
-    <module>../com.bsiag.ethereum.fxtradingnetwork.ui.html</module>
-    <module>../com.bsiag.ethereum.fxtradingnetwork.ui.html.app.war</module>
+    <module>../org.eclipse.scout.tradingnetwork.client</module>
+    <module>../org.eclipse.scout.tradingnetwork.shared</module>
+    <module>../org.eclipse.scout.tradingnetwork.server</module>
+    <module>../org.eclipse.scout.tradingnetwork.server.app.war</module>
+    <module>../org.eclipse.scout.tradingnetwork.ui.html</module>
+    <module>../org.eclipse.scout.tradingnetwork.ui.html.app.war</module>
 
     <!-- Events module -->
-    <module>../com.bsiag.ethereum.fxtradingnetwork.all.app.dev</module>
+    <module>../org.eclipse.scout.tradingnetwork.all.app.dev</module>
 
     <!-- Specific settings for the contact application -->
-    <module>../com.bsiag.ethereum.fxtradingnetwork.settings_java8</module>
+    <module>../org.eclipse.scout.tradingnetwork.settings_java8</module>
   </modules>
 
   <dependencyManagement>
@@ -60,43 +60,43 @@
 
       <!-- FX Trading Network Application -->
       <dependency>
-        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-        <artifactId>com.bsiag.ethereum.fxtradingnetwork.client</artifactId>
+        <groupId>org.eclipse.scout.tradingnetwork</groupId>
+        <artifactId>org.eclipse.scout.tradingnetwork.client</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-        <artifactId>com.bsiag.ethereum.fxtradingnetwork.shared</artifactId>
+        <groupId>org.eclipse.scout.tradingnetwork</groupId>
+        <artifactId>org.eclipse.scout.tradingnetwork.shared</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-        <artifactId>com.bsiag.ethereum.fxtradingnetwork.server</artifactId>
+        <groupId>org.eclipse.scout.tradingnetwork</groupId>
+        <artifactId>org.eclipse.scout.tradingnetwork.server</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <dependency>
-        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-        <artifactId>com.bsiag.ethereum.fxtradingnetwork.ui.html</artifactId>
+        <groupId>org.eclipse.scout.tradingnetwork</groupId>
+        <artifactId>org.eclipse.scout.tradingnetwork.ui.html</artifactId>
         <version>${project.version}</version>
       </dependency>
 
       <!-- Events module -->
       <dependency>
-        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-        <artifactId>com.bsiag.ethereum.fxtradingnetwork.events.client</artifactId>
+        <groupId>org.eclipse.scout.tradingnetwork</groupId>
+        <artifactId>org.eclipse.scout.tradingnetwork.events.client</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-        <artifactId>com.bsiag.ethereum.fxtradingnetwork.events.shared</artifactId>
+        <groupId>org.eclipse.scout.tradingnetwork</groupId>
+        <artifactId>org.eclipse.scout.tradingnetwork.events.shared</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-        <artifactId>com.bsiag.ethereum.fxtradingnetwork.events.server</artifactId>
+        <groupId>org.eclipse.scout.tradingnetwork</groupId>
+        <artifactId>org.eclipse.scout.tradingnetwork.events.server</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
@@ -126,8 +126,8 @@
               <version>${project.version}</version>
             </dependency>
             <dependency>
-              <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-              <artifactId>com.bsiag.ethereum.fxtradingnetwork-settings_java8</artifactId>
+              <groupId>org.eclipse.scout.tradingnetwork</groupId>
+              <artifactId>org.eclipse.scout.tradingnetwork-settings_java8</artifactId>
               <version>${project.version}</version>
             </dependency>
           </dependencies>

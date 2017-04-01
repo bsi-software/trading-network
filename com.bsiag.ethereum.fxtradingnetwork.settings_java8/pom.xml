@@ -16,13 +16,13 @@
 
 
   <parent>
-    <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-    <artifactId>com.bsiag.ethereum.fxtradingnetwork</artifactId>
+    <groupId>org.eclipse.scout.tradingnetwork</groupId>
+    <artifactId>org.eclipse.scout.tradingnetwork</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../com.bsiag.ethereum.fxtradingnetwork/pom.xml</relativePath>
+    <relativePath>../org.eclipse.scout.tradingnetwork/pom.xml</relativePath>
   </parent>
 
-  <artifactId>com.bsiag.ethereum.fxtradingnetwork.settings_java8</artifactId>
+  <artifactId>org.eclipse.scout.tradingnetwork.settings_java8</artifactId>
   <packaging>jar</packaging>
 
   <prerequisites>

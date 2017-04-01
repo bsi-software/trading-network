@@ -11,13 +11,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-		<artifactId>com.bsiag.ethereum.fxtradingnetwork</artifactId>
+		<groupId>org.eclipse.scout.tradingnetwork</groupId>
+		<artifactId>org.eclipse.scout.tradingnetwork</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>../com.bsiag.ethereum.fxtradingnetwork</relativePath>
+		<relativePath>../org.eclipse.scout.tradingnetwork</relativePath>
 	</parent>
 
-	<artifactId>com.bsiag.ethereum.fxtradingnetwork.all.app.dev</artifactId>
+	<artifactId>org.eclipse.scout.tradingnetwork.all.app.dev</artifactId>
 	<packaging>war</packaging>
 
 	<properties>
@@ -27,8 +27,8 @@
 	<dependencies>
 		<!-- FX Trading Network Application Client -->
 		<dependency>
-			<groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-			<artifactId>com.bsiag.ethereum.fxtradingnetwork.ui.html</artifactId>
+			<groupId>org.eclipse.scout.tradingnetwork</groupId>
+			<artifactId>org.eclipse.scout.tradingnetwork.ui.html</artifactId>
 		</dependency>
 
 		<!-- Jetty Server -->
@@ -49,8 +49,8 @@
 
 		<!-- FX Trading Network Application Server -->
 		<dependency>
-			<groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-			<artifactId>com.bsiag.ethereum.fxtradingnetwork.server</artifactId>
+			<groupId>org.eclipse.scout.tradingnetwork</groupId>
+			<artifactId>org.eclipse.scout.tradingnetwork.server</artifactId>
 		</dependency>
 
 		<dependency>

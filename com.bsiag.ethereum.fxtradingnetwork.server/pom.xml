@@ -16,13 +16,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-    <artifactId>com.bsiag.ethereum.fxtradingnetwork</artifactId>
+    <groupId>org.eclipse.scout.tradingnetwork</groupId>
+    <artifactId>org.eclipse.scout.tradingnetwork</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../com.bsiag.ethereum.fxtradingnetwork</relativePath>
+    <relativePath>../org.eclipse.scout.tradingnetwork</relativePath>
   </parent>
 
-  <artifactId>com.bsiag.ethereum.fxtradingnetwork.server</artifactId>
+  <artifactId>org.eclipse.scout.tradingnetwork.server</artifactId>
 
   <dependencies>
   <!-- end::Derby[] -->
@@ -31,8 +31,8 @@
       <artifactId>org.eclipse.scout.rt.server</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-      <artifactId>com.bsiag.ethereum.fxtradingnetwork.shared</artifactId>
+      <groupId>org.eclipse.scout.tradingnetwork</groupId>
+      <artifactId>org.eclipse.scout.tradingnetwork.shared</artifactId>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>

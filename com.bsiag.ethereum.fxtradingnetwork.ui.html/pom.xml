@@ -15,13 +15,13 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-    <artifactId>com.bsiag.ethereum.fxtradingnetwork</artifactId>
+    <groupId>org.eclipse.scout.tradingnetwork</groupId>
+    <artifactId>org.eclipse.scout.tradingnetwork</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <relativePath>../com.bsiag.ethereum.fxtradingnetwork</relativePath>
+    <relativePath>../org.eclipse.scout.tradingnetwork</relativePath>
   </parent>
 
-  <artifactId>com.bsiag.ethereum.fxtradingnetwork.ui.html</artifactId>
+  <artifactId>org.eclipse.scout.tradingnetwork.ui.html</artifactId>
 
   <dependencies>
     <dependency>
@@ -37,8 +37,8 @@
       <artifactId>javax.servlet-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.bsiag.ethereum.fxtradingnetwork</groupId>
-      <artifactId>com.bsiag.ethereum.fxtradingnetwork.client</artifactId>
+      <groupId>org.eclipse.scout.tradingnetwork</groupId>
+      <artifactId>org.eclipse.scout.tradingnetwork.client</artifactId>
     </dependency>
   </dependencies>
   <build>
