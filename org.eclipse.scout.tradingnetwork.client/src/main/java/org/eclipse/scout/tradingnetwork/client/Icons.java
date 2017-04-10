@@ -25,4 +25,6 @@ public class Icons extends AbstractIcons {
   public static final String Contacts = AbstractIcons.Category;
 
   public static final String Deal = AbstractIcons.Target;
+
+  public static final String Trash = "font:awesomeIcons \uF1F8";
 }

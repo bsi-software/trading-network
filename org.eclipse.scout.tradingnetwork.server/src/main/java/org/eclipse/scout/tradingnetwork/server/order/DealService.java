@@ -32,14 +32,12 @@ import org.eclipse.scout.rt.shared.services.common.code.ICode;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.common.security.ACCESS;
 import org.eclipse.scout.rt.shared.session.Sessions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eclipse.scout.tradingnetwork.server.orderbook.OrderBookService;
 import org.eclipse.scout.tradingnetwork.server.orderbook.model.Order;
 import org.eclipse.scout.tradingnetwork.server.orderbook.model.OrderBookCache;
 import org.eclipse.scout.tradingnetwork.server.sql.SQLs;
 import org.eclipse.scout.tradingnetwork.shared.notification.OrganizationDealMatchedNotification;
+import org.eclipse.scout.tradingnetwork.shared.notification.OrganizationDealPublishedNotification;
 import org.eclipse.scout.tradingnetwork.shared.order.CreateEventPermission;
 import org.eclipse.scout.tradingnetwork.shared.order.DealFormData;
 import org.eclipse.scout.tradingnetwork.shared.order.DealsTablePageData;
@@ -51,6 +49,8 @@ import org.eclipse.scout.tradingnetwork.shared.order.StatusCodeType;
 import org.eclipse.scout.tradingnetwork.shared.order.TradingActionCodeType;
 import org.eclipse.scout.tradingnetwork.shared.order.UpdateDealPermission;
 import org.eclipse.scout.tradingnetwork.shared.organization.IOrganizationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DealService implements IDealService {
 
@@ -222,7 +222,13 @@ public class DealService implements IDealService {
         if (CompareUtility.equals(dealId.intValue(), order.getExtId())) {
           Long dealNr = TypeCastUtility.castValue(order.getId(), Long.class);
           updateDealStatusAndSaveDealNr(dealId, dealNr, StatusCodeType.PublishedCode.ID);
-          //TODO: [uko] notify Ui, that deal is published
+          DealFormData formData = new DealFormData();
+          formData.setDealId(dealId);
+          formData = load(formData);
+          String userId = BEANS.get(IOrganizationService.class).getUserIdForOrganization(formData.getOrganizationId());
+          if (StringUtility.hasText(userId)) {
+            BEANS.get(ClientNotificationRegistry.class).putForUser(userId, new OrganizationDealPublishedNotification(formData));
+          }
         }
       }
     }
@@ -260,8 +266,8 @@ public class DealService implements IDealService {
         new NVPair("dealNr", partiallyCompletedDealNrsHolder));
 
     List<Long> dealIds = CollectionUtility.arrayList(publishedDealIdsHolder.getValue());
-    dealIds.addAll(CollectionUtility.arrayList(partiallyCompletedDealNrsHolder.getValue()));
-    List<Long> dealNrs = CollectionUtility.arrayList(publishedDealIdsHolder.getValue());
+    dealIds.addAll(CollectionUtility.arrayList(partiallyCompletedDealIdsHolder.getValue()));
+    List<Long> dealNrs = CollectionUtility.arrayList(publishedDealNrsHolder.getValue());
     dealIds.addAll(CollectionUtility.arrayList(partiallyCompletedDealNrsHolder.getValue()));
     if (null != dealNrs) {
       int numberOfDeals = dealNrs.size();
@@ -275,7 +281,7 @@ public class DealService implements IDealService {
 
             Long dealQuantity = formData.getQuantity().getValue();
             String newStatus = StatusCodeType.CompletedCode.ID;
-            if (dealQuantity < TypeCastUtility.castValue(order.getAmount(), Long.class)) {
+            if (dealQuantity > TypeCastUtility.castValue(order.getAmount(), Long.class)) {
               newStatus = StatusCodeType.PartiallyCompletedCode.ID;
             }
             formData.setStatus(newStatus);

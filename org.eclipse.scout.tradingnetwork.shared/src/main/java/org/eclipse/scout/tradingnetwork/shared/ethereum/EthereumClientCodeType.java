@@ -5,11 +5,6 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.code.AbstractCode;
 import org.eclipse.scout.rt.shared.services.common.code.AbstractCodeType;
 
-/**
- * <h3>{@link EthereumClientCodeType}</h3>
- *
- * @author uko
- */
 public class EthereumClientCodeType extends AbstractCodeType<String, String> {
 
   private static final long serialVersionUID = 1L;

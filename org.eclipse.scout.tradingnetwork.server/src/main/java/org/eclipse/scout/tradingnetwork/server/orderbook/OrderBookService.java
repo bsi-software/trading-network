@@ -13,15 +13,16 @@ import javax.annotation.PostConstruct;
 
 import org.eclipse.scout.rt.platform.ApplicationScoped;
 import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.rt.platform.config.CONFIG;
 import org.eclipse.scout.rt.platform.exception.ProcessingException;
-import org.eclipse.scout.rt.platform.holders.NVPair;
-import org.eclipse.scout.rt.platform.holders.StringHolder;
 import org.eclipse.scout.rt.platform.util.StringUtility;
-import org.eclipse.scout.rt.server.jdbc.SQL;
+import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationFormData;
+import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientProperty;
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumService;
 import org.eclipse.scout.tradingnetwork.server.ethereum.model.Alice;
 import org.eclipse.scout.tradingnetwork.server.orderbook.model.Order;
 import org.eclipse.scout.tradingnetwork.server.orderbook.model.OrderMatch;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.smartcontract.ISmartContractAdminstrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.abi.datatypes.Address;
@@ -390,38 +391,27 @@ public class OrderBookService {
     return contract;
   }
 
+  public void removeContractFromCache(String currencyPair) {
+    m_orderBookMap.remove(currencyPair);
+  }
+
   private void saveContractAddressToDatabase(String currencyPair, String address) {
-    //TODO change environment to config variable
-    int updateResult = SQL.update(""
-        + " UPDATE DEPLOYED_ORDER_BOOK "
-        + " SET ADDRESS = :address "
-        + " WHERE ORDER_BOOK_TYPE = :orderBookType "
-        + "   AND ENVIRONMENT = :environment ",
-        new NVPair("address", address),
-        new NVPair("orderBookType", currencyPair),
-        new NVPair("environment", "TESTRPC"));
-    if (updateResult == 0) {
-      SQL.insert("INSERT INTO DEPLOYED_ORDER_BOOK (ENVIRONMENT, ORDER_BOOK_TYPE, ADDRESS) "
-          + " VALUES (:environment, :orderBookType, :address) ",
-          new NVPair("address", address),
-          new NVPair("orderBookType", currencyPair),
-          new NVPair("environment", "TESTRPC"));
-    }
+    SmartContractAdministrationFormData formData = new SmartContractAdministrationFormData();
+    formData.getEnvironment().setValue(CONFIG.getPropertyValue(EthereumClientProperty.class));
+    formData.getOrderBookType().setValue(currencyPair);
+    formData.getAddress().setValue(address);
+
+    BEANS.get(ISmartContractAdminstrationService.class).store(formData, true);
   }
 
   private String loadContractAddressFromDatabase(String currencyPair) {
-    StringHolder address = new StringHolder();
-    SQL.selectInto(""
-        + " SELECT OB.ADDRESS FROM DEPLOYED_ORDER_BOOK OB "
-        + " WHERE OB.ORDER_BOOK_TYPE = :orderBookType "
-        + "   AND OB.ENVIRONMENT = :environment "
-        + " LIMIT 1 "
-        + " INTO :address ",
-        new NVPair("address", address),
-        new NVPair("orderBookType", currencyPair),
-        new NVPair("environment", "TESTRPC"));
+    SmartContractAdministrationFormData formData = new SmartContractAdministrationFormData();
+    formData.getEnvironment().setValue(CONFIG.getPropertyValue(EthereumClientProperty.class));
+    formData.getOrderBookType().setValue(currencyPair);
 
-    return address.getValue();
+    formData = BEANS.get(ISmartContractAdminstrationService.class).load(formData);
+
+    return formData.getAddress().getValue();
   }
 
   private Order convertToOrder(List<Type> list) {

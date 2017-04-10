@@ -38,7 +38,6 @@ import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
-
 import org.eclipse.scout.tradingnetwork.client.common.AbstractDirtyFormHandler;
 import org.eclipse.scout.tradingnetwork.client.order.DealForm.MainBox.CancelButton;
 import org.eclipse.scout.tradingnetwork.client.order.DealForm.MainBox.GeneralBox;
@@ -402,13 +401,8 @@ public class DealForm extends AbstractForm {
       DealFormData formData = new DealFormData();
       exportFormData(formData);
       formData = BEANS.get(IDealService.class).prepareCreate(formData);
+      formData = initFormDataValues(formData);
       importFormData(formData);
-    }
-
-    @Override
-    protected void execPostLoad() {
-      getTradingActionGroupBox().setValue(TradingActionCodeType.BuyCode.ID);
-      getOrderBookTypeField().setValue(OrderBookTypeCodeType.UsdEurCode.ID);
     }
 
     @Override
@@ -416,6 +410,13 @@ public class DealForm extends AbstractForm {
       DealFormData formData = new DealFormData();
       exportFormData(formData);
       formData = BEANS.get(IDealService.class).create(formData);
+    }
+
+    private DealFormData initFormDataValues(DealFormData formData) {
+      formData.getTradingActionBox().setValue(TradingActionCodeType.BuyCode.ID);
+      formData.getOrderBookType().setValue(OrderBookTypeCodeType.UsdEurCode.ID);
+
+      return formData;
     }
   }
 }

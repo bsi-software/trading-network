@@ -15,13 +15,14 @@ import java.util.List;
 import org.eclipse.scout.rt.client.ui.desktop.outline.AbstractOutline;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
 import org.eclipse.scout.rt.client.ui.form.IForm;
+import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
-
 import org.eclipse.scout.tradingnetwork.client.Icons;
 import org.eclipse.scout.tradingnetwork.client.organization.OrganizationOverview;
 import org.eclipse.scout.tradingnetwork.client.tradingcenter.NetworkNodePage;
 
+@Order(1000)
 public class DealOutline extends AbstractOutline {
 
   @Override

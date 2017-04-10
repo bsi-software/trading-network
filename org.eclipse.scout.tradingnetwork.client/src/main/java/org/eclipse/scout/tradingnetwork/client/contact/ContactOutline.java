@@ -14,14 +14,16 @@ import java.util.List;
 
 import org.eclipse.scout.rt.client.ui.desktop.outline.AbstractOutline;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
+import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
-
 import org.eclipse.scout.tradingnetwork.client.Icons;
 import org.eclipse.scout.tradingnetwork.client.ethereum.AccountTablePage;
+import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationTablePage;
 import org.eclipse.scout.tradingnetwork.client.order.DealsTablePage;
 import org.eclipse.scout.tradingnetwork.client.organization.OrganizationTablePage;
 import org.eclipse.scout.tradingnetwork.client.person.PersonTablePage;
 
+@Order(1500)
 public class ContactOutline extends AbstractOutline {
 
   @Override
@@ -31,6 +33,7 @@ public class ContactOutline extends AbstractOutline {
     pageList.add(new OrganizationTablePage());
     pageList.add(new AccountTablePage());
     pageList.add(new DealsTablePage());
+    pageList.add(new SmartContractAdministrationTablePage());
   }
 
   @Override

@@ -14,10 +14,6 @@ import org.eclipse.scout.rt.platform.ApplicationScoped;
 import org.eclipse.scout.rt.shared.TunnelToServer;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 
-import org.eclipse.scout.tradingnetwork.shared.person.PersonFormData;
-import org.eclipse.scout.tradingnetwork.shared.person.PersonTablePageData;
-
-//tag::all[]
 @ApplicationScoped
 @TunnelToServer
 public interface IPersonService {
@@ -30,4 +26,3 @@ public interface IPersonService {
 
   PersonFormData store(PersonFormData formData);
 }
-//end::all[]

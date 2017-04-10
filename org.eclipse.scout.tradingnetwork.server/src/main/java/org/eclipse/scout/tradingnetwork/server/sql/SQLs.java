@@ -963,4 +963,13 @@ public interface SQLs {
       + "SET    status = :status, "
       + "       deal_nr = :dealNr "
       + "WHERE  deal_id = :dealId ";
+
+  String SMART_CONTRACT_SELECT_DEPLOYED_ORDER_BOOKS = ""
+      + "SELECT dob.environment, "
+      + "       dob.order_book_type,"
+      + "       dob.address "
+      + "FROM   deployed_order_book dob "
+      + "INTO   :{environment}, "
+      + "       :{orderBookType}, "
+      + "       :{address} ";
 }
