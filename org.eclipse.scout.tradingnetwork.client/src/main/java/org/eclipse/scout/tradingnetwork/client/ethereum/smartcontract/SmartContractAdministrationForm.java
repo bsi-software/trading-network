@@ -3,16 +3,23 @@ package org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract;
 import org.eclipse.scout.rt.client.dto.FormData;
 import org.eclipse.scout.rt.client.ui.form.AbstractForm;
 import org.eclipse.scout.rt.client.ui.form.AbstractFormHandler;
+import org.eclipse.scout.rt.client.ui.form.fields.IValueField;
+import org.eclipse.scout.rt.client.ui.form.fields.booleanfield.AbstractBooleanField;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractCancelButton;
 import org.eclipse.scout.rt.client.ui.form.fields.button.AbstractOkButton;
 import org.eclipse.scout.rt.client.ui.form.fields.groupbox.AbstractGroupBox;
 import org.eclipse.scout.rt.client.ui.form.fields.smartfield.AbstractSmartField;
 import org.eclipse.scout.rt.client.ui.form.fields.stringfield.AbstractStringField;
+import org.eclipse.scout.rt.client.ui.messagebox.IMessageBox;
+import org.eclipse.scout.rt.client.ui.messagebox.MessageBoxes;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
+import org.eclipse.scout.rt.platform.util.StringUtility;
+import org.eclipse.scout.rt.platform.util.TypeCastUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
 import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.AddressField;
+import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.CreateContractField;
 import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.EnvironmentField;
 import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.OrderBookTypeField;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.EthereumClientCodeType;
@@ -34,6 +41,10 @@ public class SmartContractAdministrationForm extends AbstractForm {
 
   public AddressField getAddressField() {
     return getFieldByClass(AddressField.class);
+  }
+
+  public CreateContractField getCreateContractField() {
+    return getFieldByClass(CreateContractField.class);
   }
 
   public OrderBookTypeField getOrderBookTypeField() {
@@ -66,7 +77,7 @@ public class SmartContractAdministrationForm extends AbstractForm {
 
     @Override
     protected int getConfiguredGridColumnCount() {
-      return 2;
+      return 1;
     }
 
     @Order(1000)
@@ -119,6 +130,32 @@ public class SmartContractAdministrationForm extends AbstractForm {
 
     }
 
+    @Order(2000)
+    public class CreateContractField extends AbstractBooleanField {
+      @Override
+      protected String getConfiguredLabel() {
+        return TEXTS.get("CreateContract");
+      }
+
+      @Override
+      protected Class<? extends IValueField> getConfiguredMasterField() {
+        return AddressField.class;
+      }
+
+      @Override
+      protected void execChangedMasterValue(Object newMasterValue) {
+        String masterValue = TypeCastUtility.castValue(newMasterValue, String.class);
+        boolean enabled = false;
+        if (StringUtility.isNullOrEmpty(masterValue)) {
+          enabled = true;
+        }
+        else {
+          setValue(false);
+        }
+        setEnabled(enabled);
+      }
+    }
+
     @Order(1000)
     public class OkButton extends AbstractOkButton {
     }
@@ -136,10 +173,22 @@ public class SmartContractAdministrationForm extends AbstractForm {
     }
 
     @Override
+    protected boolean execValidate() {
+      boolean valid = true;
+      if (getCreateContractField().getValue()) {
+        int result = MessageBoxes.createYesNo().withBody(TEXTS.get("ConfirmCreateContract")).show();
+        if (IMessageBox.NO_OPTION == result) {
+          valid = false;
+        }
+      }
+      return valid;
+    }
+
+    @Override
     protected void execStore() {
       SmartContractAdministrationFormData formData = new SmartContractAdministrationFormData();
       exportFormData(formData);
-      formData = BEANS.get(ISmartContractAdminstrationService.class).store(formData);
+      formData = BEANS.get(ISmartContractAdminstrationService.class).create(formData);
       importFormData(formData);
     }
 

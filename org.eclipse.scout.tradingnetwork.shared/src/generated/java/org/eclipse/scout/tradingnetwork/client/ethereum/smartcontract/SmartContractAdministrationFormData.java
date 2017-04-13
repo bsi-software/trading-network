@@ -18,6 +18,10 @@ public class SmartContractAdministrationFormData extends AbstractFormData {
     return getFieldByClass(Address.class);
   }
 
+  public CreateContract getCreateContract() {
+    return getFieldByClass(CreateContract.class);
+  }
+
   public Environment getEnvironment() {
     return getFieldByClass(Environment.class);
   }
@@ -27,6 +31,11 @@ public class SmartContractAdministrationFormData extends AbstractFormData {
   }
 
   public static class Address extends AbstractValueFieldData<String> {
+
+    private static final long serialVersionUID = 1L;
+  }
+
+  public static class CreateContract extends AbstractValueFieldData<Boolean> {
 
     private static final long serialVersionUID = 1L;
   }

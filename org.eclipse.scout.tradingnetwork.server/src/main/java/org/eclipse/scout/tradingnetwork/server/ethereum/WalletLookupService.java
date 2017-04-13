@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.server.services.lookup.AbstractLookupService;
+import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupRow;
 import org.eclipse.scout.rt.shared.services.lookup.LookupRow;
-
-import org.eclipse.scout.tradingnetwork.server.ethereum.model.Account;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.AccountFormData;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.AccountTablePageData;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.AccountTablePageData.AccountTableRowData;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.IAccountService;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.IWalletLookupService;
 
 public class WalletLookupService extends AbstractLookupService<String> implements IWalletLookupService {
@@ -28,9 +32,9 @@ public class WalletLookupService extends AbstractLookupService<String> implement
   @Override
   public List<? extends ILookupRow<String>> getDataByKey(ILookupCall<String> call) {
     ArrayList<LookupRow<String>> rows = new ArrayList<>();
+    AccountFormData formData = BEANS.get(IAccountService.class).load(call.getKey());
 
-    Account wallet = BEANS.get(EthereumService.class).getWallet(call.getKey());
-    rows.add(new LookupRow<>(wallet.getAddress(), wallet.getName()));
+    rows.add(new LookupRow<>(formData.getAddress().getValue(), formData.getName().getValue()));
 
     return rows;
   }
@@ -45,11 +49,11 @@ public class WalletLookupService extends AbstractLookupService<String> implement
   public List<? extends ILookupRow<String>> getDataByText(ILookupCall<String> call) {
     ArrayList<LookupRow<String>> rows = new ArrayList<>();
     String searchText = getSearchText(call);
+    AccountTablePageData pageData = BEANS.get(IAccountService.class).getAccountTableData(new SearchFilter(), getPersonId());
 
-    for (String address : BEANS.get(EthereumService.class).getWallets(getPersonId())) {
-      Account wallet = BEANS.get(EthereumService.class).getWallet(address);
-      if (wallet.getName().toLowerCase().contains(searchText)) {
-        rows.add(new LookupRow<>(wallet.getAddress(), wallet.getName()));
+    for (AccountTableRowData row : pageData.getRows()) {
+      if (StringUtility.containsStringIgnoreCase(row.getAccountName(), searchText)) {
+        rows.add(new LookupRow<>(row.getAddress(), row.getAccountName()));
       }
     }
 
@@ -69,13 +73,11 @@ public class WalletLookupService extends AbstractLookupService<String> implement
   @Override
   public List<? extends ILookupRow<String>> getDataByAll(ILookupCall<String> call) {
     ArrayList<LookupRow<String>> rows = new ArrayList<>();
+    AccountTablePageData pageData = BEANS.get(IAccountService.class).getAccountTableData(new SearchFilter(), getPersonId());
 
-    BEANS.get(EthereumService.class).getWallets(getPersonId())
-        .stream()
-        .forEach(address -> {
-          Account wallet = BEANS.get(EthereumService.class).getWallet(address);
-          rows.add(new LookupRow<>(wallet.getAddress(), wallet.getName()));
-        });
+    for (AccountTableRowData row : pageData.getRows()) {
+      rows.add(new LookupRow<>(row.getAddress(), row.getAccountName()));
+    }
 
     return rows;
   }

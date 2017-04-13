@@ -1,5 +1,7 @@
 package org.eclipse.scout.tradingnetwork.server.ethereum;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
@@ -8,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -15,7 +19,16 @@ import javax.annotation.PostConstruct;
 import org.eclipse.scout.rt.platform.ApplicationScoped;
 import org.eclipse.scout.rt.platform.config.CONFIG;
 import org.eclipse.scout.rt.platform.exception.ProcessingException;
+import org.eclipse.scout.rt.platform.util.FileUtility;
 import org.eclipse.scout.rt.platform.util.StringUtility;
+import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientIpProperty;
+import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientPortProperty;
+import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientProperty;
+import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumWalletLocation;
+import org.eclipse.scout.tradingnetwork.server.ethereum.model.Account;
+import org.eclipse.scout.tradingnetwork.server.ethereum.model.Alice;
+import org.eclipse.scout.tradingnetwork.server.ethereum.model.Transaction;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.EthereumClientCodeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.protocol.Web3j;
@@ -29,17 +42,8 @@ import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.exceptions.MessageDecodingException;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.protocol.infura.InfuraHttpService;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
-
-import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientIpProperty;
-import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientPortProperty;
-import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientProperty;
-import org.eclipse.scout.tradingnetwork.server.ethereum.model.Account;
-import org.eclipse.scout.tradingnetwork.server.ethereum.model.Alice;
-import org.eclipse.scout.tradingnetwork.server.ethereum.model.Transaction;
-import org.eclipse.scout.tradingnetwork.shared.ethereum.EthereumClientCodeType;
 
 @ApplicationScoped
 public class EthereumService {
@@ -66,7 +70,7 @@ public class EthereumService {
   private String rpc_coinbase;
 
   // TODO replace these with some real persistence
-  private static Map<String, Account> wallets = new HashMap<>();
+  private static ConcurrentMap<String, Account> m_wallets = new ConcurrentHashMap<String, Account>();
   // transactions need to be persisted as well as ethereum currently does not offer an api to list all tx for an account
   // also see https://github.com/ethereum/go-ethereum/issues/1897
   private static Map<UUID, Transaction> transactions = new HashMap<>();
@@ -77,10 +81,7 @@ public class EthereumService {
     if (StringUtility.compareIgnoreCase(EthereumClientCodeType.TestRpcCode.ID, clientConfig) == 0) {
       m_useTestrpc = true;
     }
-//		LOG.info("Poulating dummy/temp accounts ...");
-//		populateAccount("prs01", "UTC--2016-12-12T08-09-51.487000000Z--8d2ec831056c620fea2fabad8bf6548fc5810cc3.json", "123");
-//		populateAccount("prs01a", "UTC--2016-12-12T09-07-24.203000000Z--cbc12f306da804bb681aceeb34f0bc58ba2f7ad7.json", "456");
-//		LOG.info("local wallets successfully loaded ...");
+
 
     // move some initial funds to alice's account (only when working with testrpc)
     if (m_useTestrpc) {
@@ -90,16 +91,6 @@ public class EthereumService {
         BigDecimal balance = getBalance(from);
         LOG.info("coinbase: " + from + ", balance: " + balance.toString());
         rpc_coinbase = from;
-//        String to = "0x8d2ec831056c620fea2fabad8bf6548fc5810cc3";
-//        BigInteger amount = Convert.toWei("10", Unit.ETHER).toBigInteger();
-//
-//        BigInteger nonce = getNonce(from);
-//
-//        org.web3j.protocol.core.methods.request.Transaction transaction =
-//            new org.web3j.protocol.core.methods.request.Transaction(from, nonce, Transaction.GAS_PRICE_DEFAULT, Transaction.GAS_LIMIT_DEFAULT, to, amount, null);
-//
-//        EthSendTransaction txRequest = getWeb3j().ethSendTransaction(transaction).sendAsync().get();
-//        LOG.info(String.format("added %d weis to account of prs01. tx hash: %s", amount, txRequest.getTransactionHash()));
 
         String contractOwnerAdress = Alice.ADDRESS;
         if (getBalance(contractOwnerAdress).compareTo(Convert.toWei("10", Convert.Unit.ETHER)) < 0) {
@@ -134,28 +125,31 @@ public class EthereumService {
     return accounts.get(i);
   }
 
-  private void populateAccount(String personId, String fileName, String password) {
-    String walletName = "Primary Account";
-    String walletPath = "C:\\Users\\mzi\\AppData\\Local\\Temp";
-    Account wallet = Account.load(walletName, password, walletPath, fileName);
-    wallet.setPersonId(personId);
-
-    save(wallet);
+  public boolean isUseTestrpc() {
+    return m_useTestrpc;
   }
 
-  public String createTransaction(String from, String to, BigInteger amountWei, String data, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit) {
+//  private void populateAccount(String personId, String fileName, String password) {
+//    String walletName = "Primary Account";
+//    String walletPath = "C:\\Users\\mzi\\AppData\\Local\\Temp";
+//    Account wallet = Account.load(walletName, password, walletPath, fileName);
+//    wallet.setPersonId(personId);
+//
+//    save(wallet);
+//  }
+
+  public String createTransaction(Account from, String to, BigInteger amountWei, String data, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit) {
 
     if (from == null || to == null || amountWei == null) {
       return null;
     }
 
-    Account wallet = getWallet(from);
-    if (wallet == null) {
+    if (from == null) {
       return null;
     }
 
     if (nonce == null) {
-      nonce = getNonce(from);
+      nonce = getNonce(from.getAddress());
     }
 
     if (gasPrice == null) {
@@ -166,36 +160,28 @@ public class EthereumService {
       gasLimit = Transaction.GAS_LIMIT_DEFAULT;
     }
 
-    Transaction tx = wallet.createSignedTransaction(to, amountWei, data, nonce, gasPrice, gasLimit);
+    Transaction tx = from.createSignedTransaction(to, amountWei, data, nonce, gasPrice, gasLimit);
     save(tx);
 
     return tx.getId().toString();
   }
 
-  public Set<String> getWallets() {
-    return wallets.keySet();
-  }
-
-  public Set<String> getWallets(String personId) {
-    if (personId == null) {
-      return getWallets();
+  public Account getWallet(String address, String password) {
+    Account wallet = m_wallets.get(address);
+    if (null == wallet) {
+      wallet = loadWalletFromConfigPath(address, password);
+      if (null == wallet) {
+        throw new ProcessingException("Could not find wallet file on disc!");
+      }
+      save(wallet);
     }
-
-    return wallets.values()
-        .stream()
-        .filter(wallet -> personId.equals(wallet.getPersonId()))
-        .map(wallet -> wallet.getAddress())
-        .collect(Collectors.toSet());
-  }
-
-  public Account getWallet(String address) {
-    return wallets.get(address);
+    return wallet;
   }
 
   public void save(Account wallet) {
     LOG.info("caching wallet '" + wallet.getFileName() + "' with address '" + wallet.getAddress() + "'");
 
-    wallets.put(wallet.getAddress(), wallet);
+    m_wallets.put(wallet.getAddress(), wallet);
   }
 
   public Set<String> getTransactions() {
@@ -219,15 +205,10 @@ public class EthereumService {
     if (web3j == null) {
       LOG.info("Trying to connect to Ethereum net ...");
 
-      if (m_useTestrpc) {
-        String clientIp = CONFIG.getPropertyValue(EthereumClientIpProperty.class);
-        String clientPort = CONFIG.getPropertyValue(EthereumClientPortProperty.class);
-        String clientUrl = String.format("http://%s:%s", clientIp, clientPort);
-        web3j = Web3j.build(new HttpService(clientUrl));
-      }
-      else {
-        web3j = Web3j.build(new InfuraHttpService(ETHEREUM_MAIN));
-      }
+      String clientIp = CONFIG.getPropertyValue(EthereumClientIpProperty.class);
+      String clientPort = CONFIG.getPropertyValue(EthereumClientPortProperty.class);
+      String clientUrl = String.format("http://%s:%s", clientIp, clientPort);
+      web3j = Web3j.build(new HttpService(clientUrl));
       LOG.info("Successfully connected");
     }
 
@@ -410,6 +391,36 @@ public class EthereumService {
     //        }
 
     return true;
+  }
+
+  private Account loadWalletFromConfigPath(String address, String password) {
+    Account wallet = null;
+    if (StringUtility.startsWith(address, "0x")) {
+      address = StringUtility.substring(address, 2);
+    }
+
+    String walletLocation = CONFIG.getPropertyValue(EthereumWalletLocation.class);
+    if (StringUtility.hasText(walletLocation)) {
+      File walletDictionary = new File(walletLocation);
+      List<File> wallets = null;
+      try {
+        wallets = FileUtility.listTree(walletDictionary, true, false);
+      }
+      catch (IOException e) {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+      }
+
+      if (null != wallets) {
+        for (File walletFile : wallets) {
+          if (StringUtility.containsStringIgnoreCase(walletFile.getName(), address)) {
+            wallet = Account.load(address, password, walletLocation, walletFile.getName());
+            break;
+          }
+        }
+      }
+    }
+    return wallet;
   }
 
 }

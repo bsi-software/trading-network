@@ -13,6 +13,8 @@ public interface ISmartContractAdminstrationService {
 
   public SmartContractAdministrationFormData load(SmartContractAdministrationFormData formData);
 
+  public SmartContractAdministrationFormData create(SmartContractAdministrationFormData formData);
+
   public SmartContractAdministrationFormData store(SmartContractAdministrationFormData formData);
 
   public SmartContractAdministrationFormData store(SmartContractAdministrationFormData formData, boolean overwrite);

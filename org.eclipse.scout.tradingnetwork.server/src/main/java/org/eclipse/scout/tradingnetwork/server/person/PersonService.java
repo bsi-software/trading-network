@@ -20,10 +20,13 @@ import org.eclipse.scout.rt.server.jdbc.SQL;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.common.security.ACCESS;
-
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumService;
 import org.eclipse.scout.tradingnetwork.server.ethereum.model.Account;
 import org.eclipse.scout.tradingnetwork.server.sql.SQLs;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.AccountFormData;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.AccountTablePageData;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.AccountTablePageData.AccountTableRowData;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.IAccountService;
 import org.eclipse.scout.tradingnetwork.shared.person.IPersonService;
 import org.eclipse.scout.tradingnetwork.shared.person.PersonCreatePermission;
 import org.eclipse.scout.tradingnetwork.shared.person.PersonFormData;
@@ -91,15 +94,18 @@ public class PersonService implements IPersonService {
     String personId = formData.getPersonId();
     Account wallet = null;
 
-    if (personId.equals("prs01")) {
-      wallet = BEANS.get(EthereumService.class).getWallet("0x8d2ec831056c620fea2fabad8bf6548fc5810cc3");
-    }
-    else if (personId.equals("prs01a")) {
-      wallet = BEANS.get(EthereumService.class).getWallet("0xcbc12f306da804bb681aceeb34f0bc58ba2f7ad7");
+    IAccountService accountService = BEANS.get(IAccountService.class);
+    AccountTablePageData pageData = accountService.getAccountTableData(new SearchFilter(), personId);
+    if (pageData.getRowCount() > 0) {
+      AccountTableRowData firstRow = pageData.rowAt(0);
+      AccountFormData accountData = accountService.load(firstRow.getAddress());
+      wallet = BEANS.get(EthereumService.class).getWallet(accountData.getAddress().getValue(), accountData.getPassword().getValue());
     }
 
-    formData.getWalletAddress().setValue(wallet.getAddress());
-    formData.getWalletPath().setValue(wallet.getFile().getAbsolutePath());
+    if (null != wallet) {
+      formData.getWalletAddress().setValue(wallet.getAddress());
+      formData.getWalletPath().setValue(wallet.getFile().getAbsolutePath());
+    }
 
     return formData;
   }

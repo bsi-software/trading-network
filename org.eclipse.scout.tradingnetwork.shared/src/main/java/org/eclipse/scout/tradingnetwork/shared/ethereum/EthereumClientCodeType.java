@@ -63,4 +63,20 @@ public class EthereumClientCodeType extends AbstractCodeType<String, String> {
     }
   }
 
+  @Order(4000)
+  public static class PrivateNetCode extends AbstractCode<String> {
+    private static final long serialVersionUID = 1L;
+    public static final String ID = "PRIVATENET";
+
+    @Override
+    protected String getConfiguredText() {
+      return TEXTS.get("PRIVATENET");
+    }
+
+    @Override
+    public String getId() {
+      return ID;
+    }
+  }
+
 }

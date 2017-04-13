@@ -18,10 +18,13 @@ import org.eclipse.scout.rt.platform.exception.ProcessingException;
 import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationFormData;
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientProperty;
+import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumDefaultAccount;
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumService;
+import org.eclipse.scout.tradingnetwork.server.ethereum.model.Account;
 import org.eclipse.scout.tradingnetwork.server.ethereum.model.Alice;
 import org.eclipse.scout.tradingnetwork.server.orderbook.model.Order;
 import org.eclipse.scout.tradingnetwork.server.orderbook.model.OrderMatch;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.IAccountService;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.smartcontract.ISmartContractAdminstrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,14 +47,10 @@ public class OrderBookService {
 
   private static final Logger LOG = LoggerFactory.getLogger(EthereumService.class);
 
-  private static final boolean USE_TESTRPC = false;
-
   public static final BigInteger GAS_PRICE_DEFAULT = BigInteger.valueOf(20_000_000_000L);
   public static final BigInteger GAS_LIMIT_DEFAULT = BigInteger.valueOf(40_000L);
 
   private ConcurrentMap<String, OrderBook> m_orderBookMap;
-  private OrderBook m_contract;
-  private int m_dealCounter = 1;
 
   @PostConstruct
   private void init() {
@@ -76,7 +75,6 @@ public class OrderBookService {
 
     LOG.info("contract successfully deployed at address" + contract.getContractAddress());
 
-    saveContractAddressToDatabase(symbol, contract.getContractAddress());
     m_orderBookMap.put(symbol, contract);
 
     return contract.getContractAddress();
@@ -96,10 +94,10 @@ public class OrderBookService {
    *          order type
    * @param amount
    * @param price
-   * @return the id of the new order. Empty String if error occurred .
+   * @return the transaction hash of the new order. Empty String if error occurred .
    */
   public String publish(Order order) {
-    //TODO return real dealNr. Check if order contains dealNr => not allowed
+    //TODO [uko] Check if order contains dealNr => not allowed
     Bool buy = new Bool(order.isBuy());
     Uint256 dealQuantity = new Uint256(BigInteger.valueOf(order.getAmount()));
     Uint256 dealPrice = new Uint256(BigInteger.valueOf((long) (100 * order.getPrice())));
@@ -115,22 +113,6 @@ public class OrderBookService {
       e.printStackTrace();
     }
     return transactionHash;
-  }
-
-  /**
-   * Gets the specified order.
-   *
-   * @param int
-   *          order id
-   * @return the order of it exists in the order book. null otherwise.
-   */
-  public Order get(String order) {
-    // TODO implement
-    if (StringUtility.hasText(order)) {
-      String currencyPair = order.substring(0, 5);
-      int dealNr = Integer.valueOf(order.substring(6));
-    }
-    return null;
   }
 
   /**
@@ -373,20 +355,28 @@ public class OrderBookService {
   }
 
   private OrderBook getContract(String currencyPair) throws InterruptedException, ExecutionException {
-    // TODO change behavior depending on environment.
+    // TODO [uko] GAS LIMIT?
     OrderBook contract = m_orderBookMap.get(currencyPair);
     if (null == contract) {
       String address = loadContractAddressFromDatabase(currencyPair);
       if (StringUtility.hasText(address)) {
-        contract = load(address, Alice.CREDENTIALS, GAS_PRICE_DEFAULT, BigInteger.valueOf(4_000_000L));
+        String accountAddress = CONFIG.getPropertyValue(EthereumDefaultAccount.class);
+        String accountPassword = BEANS.get(IAccountService.class).getPassword(accountAddress);
+        if (StringUtility.hasText(accountAddress)) {
+          Account account = BEANS.get(EthereumService.class).getWallet(accountAddress, accountPassword);
+          contract = load(address, account.getCredentials(), GAS_PRICE_DEFAULT, BigInteger.valueOf(4_000_000L));
+        }
       }
-      if (null == contract) {
-        deploy(Alice.CREDENTIALS, GAS_PRICE_DEFAULT, BigInteger.valueOf(4_000_000L), currencyPair);
+      if (BEANS.get(EthereumService.class).isUseTestrpc() && null == contract) {
+        address = deploy(Alice.CREDENTIALS, GAS_PRICE_DEFAULT, BigInteger.valueOf(4_000_000L), currencyPair);
         contract = m_orderBookMap.get(currencyPair);
+        saveContractAddressToDatabase(currencyPair, contract.getContractAddress());
       }
-      else {
-        m_orderBookMap.put(currencyPair, contract);
+
+      if (null == contract) {
+        throw new ProcessingException("could not load contract");
       }
+      m_orderBookMap.put(currencyPair, contract);
     }
     return contract;
   }

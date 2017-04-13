@@ -36,4 +36,22 @@ public class EthereumProperties {
 
   }
 
+  public static class EthereumWalletLocation extends AbstractStringConfigProperty {
+
+    @Override
+    public String getKey() {
+      return "fxtradingnetwork.ethereum.wallet.location";
+    }
+
+  }
+
+  public static class EthereumDefaultAccount extends AbstractStringConfigProperty {
+
+    @Override
+    public String getKey() {
+      return "fxtradingnetwork.ethereum.default.account";
+    }
+
+  }
+
 }

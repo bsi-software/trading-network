@@ -41,6 +41,12 @@ public interface IAccountService extends IService {
    * @param formData
    * @return
    */
+  AccountFormData load(String address);
+
+  /**
+   * @param formData
+   * @return
+   */
   AccountFormData store(AccountFormData formData);
 
   /**
@@ -48,4 +54,10 @@ public interface IAccountService extends IService {
    * @return
    */
   String getPerson(String accountTo);
+
+  /**
+   * @param address
+   * @return
+   */
+  String getPassword(String address);
 }

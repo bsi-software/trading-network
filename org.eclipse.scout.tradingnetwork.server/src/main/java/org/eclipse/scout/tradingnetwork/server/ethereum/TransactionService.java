@@ -5,18 +5,19 @@ import java.math.BigInteger;
 
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
+import org.eclipse.scout.tradingnetwork.server.ethereum.model.Account;
+import org.eclipse.scout.tradingnetwork.server.ethereum.model.Transaction;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.IAccountService;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.ITransactionService;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.TransactionFormData;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.TransactionTablePageData;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.TransactionTablePageData.TransactionTableRowData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.protocol.core.methods.request.RawTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
-
-import org.eclipse.scout.tradingnetwork.server.ethereum.model.Transaction;
-import org.eclipse.scout.tradingnetwork.shared.ethereum.ITransactionService;
-import org.eclipse.scout.tradingnetwork.shared.ethereum.TransactionFormData;
-import org.eclipse.scout.tradingnetwork.shared.ethereum.TransactionTablePageData;
-import org.eclipse.scout.tradingnetwork.shared.ethereum.TransactionTablePageData.TransactionTableRowData;
 
 public class TransactionService implements ITransactionService {
 
@@ -144,7 +145,9 @@ public class TransactionService implements ITransactionService {
   }
 
   private TransactionFormData createNew(TransactionFormData formData) {
-    String from = formData.getFrom().getValue();
+    String fromAddress = formData.getFrom().getValue();
+    String fromPassword = BEANS.get(IAccountService.class).getPassword(fromAddress);
+    Account from = BEANS.get(EthereumService.class).getWallet(fromAddress, fromPassword);
     String to = formData.getTo().getValue();
     BigInteger amountWei = convertToWei(formData.getAmount().getValue());
     String data = formData.getData().getValue();

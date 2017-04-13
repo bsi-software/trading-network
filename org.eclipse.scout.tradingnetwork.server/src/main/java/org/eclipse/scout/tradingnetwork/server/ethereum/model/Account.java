@@ -96,6 +96,11 @@ public class Account {
     return new File(pathToFile, fileName);
   }
 
+  public void setFile(File file) {
+    this.pathToFile = file.getAbsolutePath();
+    this.fileName = file.getName();
+  }
+
   public Credentials getCredentials() {
     if (credentials != null) {
       return credentials;

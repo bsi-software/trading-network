@@ -14,7 +14,6 @@ import java.util.Set;
 
 import org.eclipse.scout.rt.client.dto.PageData;
 import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
-import org.eclipse.scout.rt.client.ui.action.menu.IMenu;
 import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
 import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
@@ -34,7 +33,6 @@ import org.eclipse.scout.rt.shared.AbstractIcons;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
-
 import org.eclipse.scout.tradingnetwork.client.Icons;
 import org.eclipse.scout.tradingnetwork.client.common.CountryLookupCall;
 import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationLookupCall;
@@ -56,7 +54,7 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
 
   @Override
   protected String getConfiguredTitle() {
-    return TEXTS.get("Persons"); // <1>
+    return TEXTS.get("Persons");
   }
 
   @Override
@@ -72,7 +70,7 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
         .getPersonTableData(filter, getOrganizationId()));
   }
 
-  @Override // <3>
+  @Override
   protected boolean getConfiguredLeaf() {
     return false;
   }
@@ -86,11 +84,6 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
     @Override
     protected String getConfiguredDefaultIconId() {
       return Icons.Person;
-    }
-
-    @Override
-    protected Class<? extends IMenu> getConfiguredDefaultMenu() { // <1>
-      return EditMenu.class;
     }
 
     public CountryColumn getCountryColumn() {

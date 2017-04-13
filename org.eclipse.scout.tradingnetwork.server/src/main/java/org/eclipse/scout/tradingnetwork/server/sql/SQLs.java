@@ -972,4 +972,33 @@ public interface SQLs {
       + "INTO   :{environment}, "
       + "       :{orderBookType}, "
       + "       :{address} ";
+
+  String ACCOUNT_SELECT_ALL = ""
+      + "SELECT a.person_id, "
+      + "       a.address, "
+      + "       a.name "
+      + "FROM   account a "
+      + "INTO   :{person}, "
+      + "       :{address}, "
+      + "       :{accountName} ";
+
+  String ACCOUNT_CREATE = ""
+      + "INSERT INTO account (person_id, address, name, password) "
+      + "VALUES (:person, :address, :name, :password) ";
+
+  String ACCOUNT_SELECT = ""
+      + "SELECT a.person_id, "
+      + "       a.name, "
+      + "       a.password "
+      + "FROM   account a "
+      + "WHERE  a.address = :address "
+      + "INTO   :person, "
+      + "       :name,"
+      + "       :password ";
+
+  String ACCOUNT_UPDATE = ""
+      + "UPDATE account "
+      + "SET    person_id = :person, "
+      + "       name = :name "
+      + "WHERE  address = :address ";
 }

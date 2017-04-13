@@ -1,16 +1,30 @@
 package org.eclipse.scout.tradingnetwork.server.ethereum.smartcontract;
 
+import java.math.BigInteger;
+import java.util.concurrent.ExecutionException;
+
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.config.CONFIG;
+import org.eclipse.scout.rt.platform.exception.VetoException;
+import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.server.jdbc.SQL;
+import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationFormData;
 import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationTablePageData;
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientProperty;
+import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumDefaultAccount;
+import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumService;
+import org.eclipse.scout.tradingnetwork.server.ethereum.model.Account;
 import org.eclipse.scout.tradingnetwork.server.orderbook.OrderBookService;
 import org.eclipse.scout.tradingnetwork.server.sql.SQLs;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.IAccountService;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.smartcontract.ISmartContractAdminstrationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SmartContractAdminstrationService implements ISmartContractAdminstrationService {
+
+  private static final Logger LOG = LoggerFactory.getLogger(SmartContractAdminstrationService.class);
 
   @Override
   public SmartContractAdministrationTablePageData loadTableData() {
@@ -29,6 +43,38 @@ public class SmartContractAdminstrationService implements ISmartContractAdminstr
         + " LIMIT 1 "
         + " INTO :address ",
         formData);
+    return formData;
+  }
+
+  @Override
+  public SmartContractAdministrationFormData create(SmartContractAdministrationFormData formData) {
+    if (formData.getCreateContract().getValue()) {
+      SmartContractAdministrationFormData testFormData = load(formData);
+      if (StringUtility.hasText(testFormData.getAddress().getValue())) {
+        throw new VetoException(TEXTS.get("ContractAlreadyExists"));
+      }
+      String contractOwnerAddress = CONFIG.getPropertyValue(EthereumDefaultAccount.class);
+      if (StringUtility.isNullOrEmpty(contractOwnerAddress)) {
+        throw new VetoException(TEXTS.get("SupplyContractOwnerAddress"));
+      }
+      String address = "";
+      try {
+        Account account = BEANS.get(EthereumService.class).getWallet(contractOwnerAddress, BEANS.get(IAccountService.class).getPassword(contractOwnerAddress));
+        address = BEANS.get(OrderBookService.class).deploy(account.getCredentials(), EthereumService.GAS_PRICE_DEFAULT, BigInteger.valueOf(4_000_000L), formData.getEnvironment().getValue());
+      }
+      catch (InterruptedException | ExecutionException e) {
+        LOG.error(e.getMessage());
+      }
+
+      if (StringUtility.hasText(address)) {
+        formData.getAddress().setValue(address);
+      }
+      else {
+        throw new VetoException(TEXTS.get("CouldNotDeployContract"));
+      }
+    }
+
+    formData = store(formData);
     return formData;
   }
 
