@@ -10,8 +10,6 @@
  ******************************************************************************/
 package org.eclipse.scout.tradingnetwork.shared.order;
 
-import java.math.BigDecimal;
-
 import org.eclipse.scout.rt.platform.ApplicationScoped;
 import org.eclipse.scout.rt.platform.exception.ProcessingException;
 import org.eclipse.scout.rt.shared.TunnelToServer;
@@ -44,5 +42,5 @@ public interface IDealService {
 
   boolean publish(Long dealId) throws ProcessingException;
 
-  BigDecimal getCurrentExchangeRate(String orderBookId, String tradingActionId) throws ProcessingException;
+  Double getCurrentExchangeRate(String orderBookId, String tradingActionId) throws ProcessingException;
 }

@@ -11,13 +11,17 @@ import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractBigDecimalColu
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractLongColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractSmartColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
+import org.eclipse.scout.rt.client.ui.desktop.OpenUriAction;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
+import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
+import org.eclipse.scout.tradingnetwork.client.ClientSession;
+import org.eclipse.scout.tradingnetwork.client.Icons;
 import org.eclipse.scout.tradingnetwork.client.ethereum.TransactionTablePage.Table;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.ITransactionService;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.TransactionStatusLookupCall;
@@ -66,6 +70,10 @@ public class TransactionTablePage extends AbstractPageWithTable<Table> {
 
     public IdColumn getIdColumn() {
       return getColumnSet().getColumnByClass(IdColumn.class);
+    }
+
+    public TrackingUrlColumn getTrackingUrlColumn() {
+      return getColumnSet().getColumnByClass(TrackingUrlColumn.class);
     }
 
     public StatusColumn getStatusColumn() {
@@ -209,6 +217,36 @@ public class TransactionTablePage extends AbstractPageWithTable<Table> {
       }
     }
 
+    @Order(5000)
+    public class TrackOnlineMenu extends AbstractMenu {
+      @Override
+      protected String getConfiguredText() {
+        return TEXTS.get("TrackOnline");
+      }
+
+      @Override
+      protected Set<? extends IMenuType> getConfiguredMenuTypes() {
+        return CollectionUtility.hashSet(TableMenuType.SingleSelection);
+      }
+
+      @Override
+      protected String getConfiguredIconId() {
+        return Icons.OpenExternUri;
+      }
+
+      @Override
+      protected void execOwnerValueChanged(Object newOwnerValue) {
+        String trackingUrl = getTrackingUrlColumn().getSelectedValue();
+        setEnabled(StringUtility.hasText(trackingUrl));
+      }
+
+      @Override
+      protected void execAction() {
+        String trackingUrl = getTrackingUrlColumn().getSelectedValue();
+        ClientSession.get().getDesktop().openUri(trackingUrl, OpenUriAction.NEW_WINDOW);
+      }
+    }
+
     @Order(0)
     public class IdColumn extends AbstractStringColumn {
       @Override
@@ -304,5 +342,29 @@ public class TransactionTablePage extends AbstractPageWithTable<Table> {
         return TransactionStatusLookupCall.class;
       }
     }
+
+    @Order(9000)
+    public class TrackingUrlColumn extends AbstractStringColumn {
+      @Override
+      protected String getConfiguredHeaderText() {
+        return TEXTS.get("TrackOnline");
+      }
+
+      @Override
+      protected boolean getConfiguredVisible() {
+        return false;
+      }
+
+      @Override
+      protected boolean getConfiguredDisplayable() {
+        return false;
+      }
+
+      @Override
+      protected int getConfiguredWidth() {
+        return 100;
+      }
+    }
+
   }
 }

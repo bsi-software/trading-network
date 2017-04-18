@@ -11,7 +11,6 @@
 package org.eclipse.scout.tradingnetwork.client.order;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.Set;
 
 import org.eclipse.scout.rt.client.dto.FormData;
@@ -55,6 +54,8 @@ import org.eclipse.scout.tradingnetwork.shared.order.UpdateDealPermission;
 
 @FormData(value = DealFormData.class, sdkCommand = FormData.SdkCommand.CREATE)
 public class DealForm extends AbstractForm {
+
+  public static final int ETHER_MAX_FRACTION_DIGIT = 6;
 
   private Long dealId;
 
@@ -299,16 +300,18 @@ public class DealForm extends AbstractForm {
           }
 
           @Override
-          public int getFractionDigits() {
-            return 2;
+          protected BigDecimal getConfiguredMinValue() {
+            return new BigDecimal(10 ^ (-ETHER_MAX_FRACTION_DIGIT));
           }
 
           @Override
-          protected void execInitField() {
-            DecimalFormat format = new DecimalFormat("0.00");
-            format.setMinimumFractionDigits(0);
-            // format.setMaximumFractionDigits(19);
-            setFormat(format);
+          protected BigDecimal getConfiguredMaxValue() {
+            return new BigDecimal("100000");
+          }
+
+          @Override
+          protected int getConfiguredMaxFractionDigits() {
+            return ETHER_MAX_FRACTION_DIGIT;
           }
 
           @Override
@@ -323,9 +326,11 @@ public class DealForm extends AbstractForm {
             if (StringUtility.hasText(getTradingActionGroupBox().getValue())
                 && StringUtility.hasText(getOrderBookTypeField().getValue())) {
               try {
-                BigDecimal currentRate = BEANS.get(IDealService.class).getCurrentExchangeRate(
+                Double currentRate = BEANS.get(IDealService.class).getCurrentExchangeRate(
                     getOrderBookTypeField().getValue(), getTradingActionGroupBox().getValue());
-                setValue(currentRate);
+                if (null != currentRate) {
+                  setValue(BigDecimal.valueOf(currentRate));
+                }
               }
               catch (ProcessingException e) {
                 MessageBoxes.createOk().withBody(TEXTS.get("CouldNotLoadExchangeRate")).withSeverity(IStatus.ERROR).show();
@@ -355,9 +360,7 @@ public class DealForm extends AbstractForm {
               getExchangeRateField().loadCurrentExchangeRate();
             }
           }
-
         }
-
       }
     }
 

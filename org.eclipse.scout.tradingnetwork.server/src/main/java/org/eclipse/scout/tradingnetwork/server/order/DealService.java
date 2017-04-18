@@ -10,7 +10,6 @@
  ******************************************************************************/
 package org.eclipse.scout.tradingnetwork.server.order;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -178,7 +177,7 @@ public class DealService implements IDealService {
   }
 
   @Override
-  public BigDecimal getCurrentExchangeRate(String orderBookId, String tradingActionId) throws ProcessingException {
+  public Double getCurrentExchangeRate(String orderBookId, String tradingActionId) throws ProcessingException {
     Order topOrderInverse = null;
     OrderBookService service = BEANS.get(OrderBookService.class);
     if (TradingActionCodeType.BuyCode.ID.equals(tradingActionId)) {
@@ -187,9 +186,9 @@ public class DealService implements IDealService {
     else if (TradingActionCodeType.SellCode.ID.equals(tradingActionId)) {
       topOrderInverse = service.getTopBuyOrder(orderBookId);
     }
-    BigDecimal exchangeRate = null;
+    Double exchangeRate = null;
     if (null != topOrderInverse) {
-      exchangeRate = new BigDecimal(topOrderInverse.getPrice());
+      exchangeRate = topOrderInverse.getPrice();
     }
     return exchangeRate;
   }

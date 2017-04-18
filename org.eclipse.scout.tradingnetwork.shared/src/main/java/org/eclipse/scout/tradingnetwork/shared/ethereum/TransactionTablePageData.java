@@ -60,6 +60,7 @@ public class TransactionTablePageData extends AbstractTablePageData {
     public static final String to = "to";
     public static final String value = "value";
     public static final String status = "status";
+    public static final String trackingUrl = "trackingUrl";
     private String m_id;
     private Long m_block;
     private String m_hash;
@@ -67,6 +68,7 @@ public class TransactionTablePageData extends AbstractTablePageData {
     private String m_to;
     private BigDecimal m_value;
     private Integer m_status;
+    private String m_trackingUrl;
 
     public String getId() {
       return m_id;
@@ -122,6 +124,14 @@ public class TransactionTablePageData extends AbstractTablePageData {
 
     public void setStatus(Integer newStatus) {
       m_status = newStatus;
+    }
+
+    public String getTrackingUrl() {
+      return m_trackingUrl;
+    }
+
+    public void setTrackingUrl(String newTrackingUrl) {
+      m_trackingUrl = newTrackingUrl;
     }
   }
 }

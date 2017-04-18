@@ -4,12 +4,18 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.eclipse.scout.rt.platform.BEANS;
+import org.eclipse.scout.rt.platform.config.CONFIG;
+import org.eclipse.scout.rt.platform.util.CompareUtility;
+import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
+import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientProperty;
 import org.eclipse.scout.tradingnetwork.server.ethereum.model.Account;
 import org.eclipse.scout.tradingnetwork.server.ethereum.model.Transaction;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.EthereumClientCodeType;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.IAccountService;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.ITransactionService;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.TransactionFormData;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.TransactionStatusLookupCall;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.TransactionTablePageData;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.TransactionTablePageData.TransactionTableRowData;
 import org.slf4j.Logger;
@@ -46,6 +52,17 @@ public class TransactionService implements ITransactionService {
     rowData.setValue(valueEther);
     rowData.setStatus(tx.getStatus());
     rowData.setHash(tx.getHash());
+    if (CompareUtility.isOneOf(CONFIG.getPropertyValue(EthereumClientProperty.class), EthereumClientCodeType.MainNetCode.ID, EthereumClientCodeType.TestnetCode.ID) &&
+        tx.getStatus() > TransactionStatusLookupCall.OFFLINE
+        && StringUtility.hasText(tx.getHash())) {
+      StringBuilder url = new StringBuilder("https://");
+      if (EthereumClientCodeType.TestnetCode.ID.equals(CONFIG.getPropertyValue(EthereumClientProperty.class))) {
+        url.append("rinkeby.");
+      }
+      url.append("etherscan.io/tx/");
+      url.append(tx.getHash());
+      rowData.setTrackingUrl(url.toString());
+    }
     TransactionReceipt receipt = tx.getTransactionReceipt();
     if (receipt != null) {
       try {

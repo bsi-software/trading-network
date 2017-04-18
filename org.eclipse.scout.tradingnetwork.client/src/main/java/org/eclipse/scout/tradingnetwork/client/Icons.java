@@ -27,4 +27,6 @@ public class Icons extends AbstractIcons {
   public static final String Deal = AbstractIcons.Target;
 
   public static final String Trash = "font:awesomeIcons \uF1F8";
+
+  public static final String OpenExternUri = "font:awesomeIcons \uF08E";
 }
