@@ -1,6 +1,11 @@
 package org.eclipse.scout.tradingnetwork.client.organization;
 
+import java.util.Set;
+
 import org.eclipse.scout.rt.client.dto.FormData;
+import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
+import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
+import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractLongColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
@@ -11,13 +16,14 @@ import org.eclipse.scout.rt.client.ui.form.fields.labelfield.AbstractLabelField;
 import org.eclipse.scout.rt.client.ui.form.fields.tablefield.AbstractTableField;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
+import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupRow;
-
 import org.eclipse.scout.tradingnetwork.client.ClientSession;
 import org.eclipse.scout.tradingnetwork.client.Icons;
 import org.eclipse.scout.tradingnetwork.client.common.AbstractUrlImageField;
 import org.eclipse.scout.tradingnetwork.client.common.CountryLookupCall;
+import org.eclipse.scout.tradingnetwork.client.common.ListenerObjectEnum;
 import org.eclipse.scout.tradingnetwork.client.organization.OrganizationOverview.MainBox.AccountBalanceBox;
 import org.eclipse.scout.tradingnetwork.client.organization.OrganizationOverview.MainBox.AccountBalanceBox.AccountBalanceTableField;
 import org.eclipse.scout.tradingnetwork.client.organization.OrganizationOverview.MainBox.GeneralBox;
@@ -91,6 +97,17 @@ public class OrganizationOverview extends AbstractForm {
   public void start() {
     setUserId(ClientSession.get().getUserId());
     startInternal(new DefaultHandler());
+  }
+
+  @Override
+  protected void execFormActivated() {
+	  //TODO: [uko] activate
+//    registerDataChangeListener(ListenerObjectEnum.ORGANIZATION_OVERVIEW);
+  }
+
+  @Override
+  protected void execDataChanged(Object... dataTypes) {
+	  //TODO: [uko] reload form
   }
 
   public class MainBox extends AbstractGroupBox {
@@ -231,6 +248,25 @@ public class OrganizationOverview extends AbstractForm {
       public class AccountBalanceTableField extends AbstractTableField<AccountBalanceTableField.Table> {
 
         public class Table extends AbstractOrganizationBankAccountTable {
+
+          @Order(1000)
+          public class ReloadMenu extends AbstractMenu {
+            @Override
+            protected String getConfiguredText() {
+              return TEXTS.get("Refresh");
+            }
+
+            @Override
+            protected Set<? extends IMenuType> getConfiguredMenuTypes() {
+              return CollectionUtility.hashSet(TableMenuType.Header);
+            }
+
+            @Override
+            protected void execAction() {
+              
+            }
+          }
+
         }
 
         @Override

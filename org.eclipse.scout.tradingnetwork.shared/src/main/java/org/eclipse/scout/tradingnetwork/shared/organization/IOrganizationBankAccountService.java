@@ -3,8 +3,6 @@ package org.eclipse.scout.tradingnetwork.shared.organization;
 import org.eclipse.scout.rt.platform.service.IService;
 import org.eclipse.scout.rt.shared.TunnelToServer;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
-import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationBankAccountFormData;
-import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationBankAccountTablePageData;
 
 /**
  * <h3>{@link IOrganizationBankAccountService}</h3>
@@ -43,4 +41,13 @@ public interface IOrganizationBankAccountService extends IService {
    * @return
    */
   OrganizationBankAccountFormData store(OrganizationBankAccountFormData formData);
+
+  /**
+   * @param organizationId
+   * @param currencyId
+   * @param actionId
+   * @param amount
+   * @return
+   */
+  Double updateBankAccountBalance(String organizationId, String currencyId, String actionId, Double amount);
 }

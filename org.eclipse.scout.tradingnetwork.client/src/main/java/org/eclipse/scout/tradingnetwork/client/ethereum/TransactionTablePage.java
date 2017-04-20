@@ -47,7 +47,7 @@ public class TransactionTablePage extends AbstractPageWithTable<Table> {
 
   @Override
   protected void execLoadData(SearchFilter filter) {
-    importPageData(BEANS.get(ITransactionService.class).getTransactionTableData(filter));
+    importPageData(BEANS.get(ITransactionService.class).getTransactionTableData(filter, getAddress()));
   }
 
   /**

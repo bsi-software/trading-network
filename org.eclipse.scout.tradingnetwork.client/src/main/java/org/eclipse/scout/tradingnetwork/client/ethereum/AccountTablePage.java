@@ -19,7 +19,6 @@ import org.eclipse.scout.rt.platform.util.CollectionUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
-
 import org.eclipse.scout.tradingnetwork.client.Icons;
 import org.eclipse.scout.tradingnetwork.client.ethereum.AccountTablePage.Table;
 import org.eclipse.scout.tradingnetwork.client.person.PersonNodePage;
@@ -198,6 +197,10 @@ public class AccountTablePage extends AbstractPageWithTable<Table> {
         }
 
         form.startNew();
+        form.waitFor();
+        if (form.isFormStored()) {
+          reloadPage();
+        }
       }
     }
 

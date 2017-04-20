@@ -31,13 +31,24 @@ public class TransactionService implements ITransactionService {
 
   @Override
   public TransactionTablePageData getTransactionTableData(SearchFilter filter) {
+    return getTransactionTableData(filter, null);
+  }
+
+  @Override
+  public TransactionTablePageData getTransactionTableData(SearchFilter filter, String address) {
     TransactionTablePageData pageData = new TransactionTablePageData();
 
     BEANS.get(EthereumService.class).getTransactions()
         .stream()
         .forEach(txId -> {
           Transaction tx = BEANS.get(EthereumService.class).getTransaction(txId);
-          addRow(txId, tx, pageData);
+          boolean addRow = true;
+          if (StringUtility.hasText(address) && !StringUtility.equalsIgnoreCase(address, tx.getFromAddress())) {
+            addRow = false;
+          }
+          if (addRow) {
+            addRow(txId, tx, pageData);
+          }
         });
 
     return pageData;

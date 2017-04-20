@@ -11,6 +11,8 @@ public interface ITransactionService extends IService {
 
   TransactionTablePageData getTransactionTableData(SearchFilter filter);
 
+  TransactionTablePageData getTransactionTableData(SearchFilter filter, String address);
+
   void refresh(String transactionId);
 
   TransactionFormData prepareCreate(TransactionFormData formData);

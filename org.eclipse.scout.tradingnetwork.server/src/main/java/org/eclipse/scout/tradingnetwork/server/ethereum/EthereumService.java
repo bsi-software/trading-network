@@ -82,7 +82,6 @@ public class EthereumService {
       m_useTestrpc = true;
     }
 
-
     // move some initial funds to alice's account (only when working with testrpc)
     if (m_useTestrpc) {
       try {
@@ -141,10 +140,6 @@ public class EthereumService {
   public String createTransaction(Account from, String to, BigInteger amountWei, String data, BigInteger nonce, BigInteger gasPrice, BigInteger gasLimit) {
 
     if (from == null || to == null || amountWei == null) {
-      return null;
-    }
-
-    if (from == null) {
       return null;
     }
 

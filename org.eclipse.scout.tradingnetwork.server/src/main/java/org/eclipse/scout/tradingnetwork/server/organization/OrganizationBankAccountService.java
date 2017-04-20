@@ -1,10 +1,12 @@
 package org.eclipse.scout.tradingnetwork.server.organization;
 
+import java.math.BigDecimal;
+
 import org.eclipse.scout.rt.platform.holders.NVPair;
 import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.server.jdbc.SQL;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
-
+import org.eclipse.scout.tradingnetwork.shared.order.TradingActionCodeType;
 import org.eclipse.scout.tradingnetwork.shared.organization.IOrganizationBankAccountService;
 import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationBankAccountFormData;
 import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationBankAccountTablePageData;
@@ -64,4 +66,22 @@ public class OrganizationBankAccountService implements IOrganizationBankAccountS
     }
     return formData;
   }
+
+  @Override
+  public Double updateBankAccountBalance(String organizationId, String currencyId, String actionId, Double amount) {
+	  //TODO: [uko] activate
+//    OrganizationBankAccountFormData formData = new OrganizationBankAccountFormData();
+//    formData.getOrganizationId().setValue(organizationId);
+//    formData.getCurrency().setValue(currencyId);
+//    formData = load(formData);
+//    if (TradingActionCodeType.SellCode.ID.equals(actionId)) {
+//      amount = (-1) * amount;
+//    }
+//    Double oldAmount = formData.getBalance().getValue().doubleValue();
+//    Double newAmount = oldAmount + amount;
+//    formData.getBalance().setValue(BigDecimal.valueOf(newAmount));
+//    return newAmount;
+	  return 0.0;
+  }
+
 }

@@ -9,7 +9,6 @@ import org.eclipse.scout.rt.platform.status.Status;
 import org.eclipse.scout.rt.platform.util.concurrent.IRunnable;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.notification.INotificationHandler;
-
 import org.eclipse.scout.tradingnetwork.client.ClientSession;
 import org.eclipse.scout.tradingnetwork.shared.notification.OrganizationDealMatchedNotification;
 import org.eclipse.scout.tradingnetwork.shared.order.DealFormData;
@@ -31,6 +30,8 @@ public class OrganizationDealMatchedNotificationHandler implements INotification
         Status status = new Status(statusMessage, IStatus.OK);
         DesktopNotification desktopNotification = new DesktopNotification(status, IDesktopNotification.INFINITE_DURATION, true);
         ClientSession.get().getDesktop().addNotification(desktopNotification);
+        //TODO: [uko] activate
+//        Desktop.get().dataChanged(ListenerObjectEnum.ORGANIZATION_OVERVIEW);
       }
     }, ModelJobs.newInput(ClientRunContexts.copyCurrent()));
   }
