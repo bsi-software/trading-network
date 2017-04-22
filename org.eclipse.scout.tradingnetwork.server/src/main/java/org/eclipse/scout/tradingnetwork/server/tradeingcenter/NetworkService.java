@@ -11,9 +11,6 @@ import org.eclipse.scout.rt.shared.ISession;
 import org.eclipse.scout.rt.shared.services.common.code.ICode;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.session.Sessions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eclipse.scout.tradingnetwork.server.order.DealService;
 import org.eclipse.scout.tradingnetwork.server.orderbook.OrderBookService;
 import org.eclipse.scout.tradingnetwork.server.orderbook.model.Order;
@@ -28,6 +25,8 @@ import org.eclipse.scout.tradingnetwork.shared.organization.IOrganizationService
 import org.eclipse.scout.tradingnetwork.shared.tradingcenter.INetworkService;
 import org.eclipse.scout.tradingnetwork.shared.tradingcenter.NetworkTablePageData;
 import org.eclipse.scout.tradingnetwork.shared.tradingcenter.NetworkTablePageData.NetworkTableRowData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NetworkService implements INetworkService {
 
@@ -61,19 +60,31 @@ public class NetworkService implements INetworkService {
 
   public void synchronizeOrderBooks() {
     for (ICode<String> code : BEANS.get(OrderBookTypeCodeType.class).getCodes()) {
-      OrderBookService orderBookService = BEANS.get(OrderBookService.class);
-      List<Order> orders = orderBookService.getOrders(code.getId());
-      OrderMatch match = orderBookService.getMatch(code.getId());
-      BEANS.get(OrderBookCache.class).updateOrderBookCache(code.getId(), orders, match);
-      BEANS.get(ClientNotificationRegistry.class).putForAllSessions(new OrderBookSynchronizedNotification(code.getId()));
+      try {
+        OrderBookService orderBookService = BEANS.get(OrderBookService.class);
+        List<Order> orders = orderBookService.getOrders(code.getId());
+        OrderMatch match = orderBookService.getMatch(code.getId());
+        BEANS.get(OrderBookCache.class).updateOrderBookCache(code.getId(), orders, match);
+        BEANS.get(ClientNotificationRegistry.class).putForAllSessions(new OrderBookSynchronizedNotification(code.getId()));
+      }
+      catch (Exception e) {
+    	  // nop
+        LOG.error(e.getMessage());
+      }
     }
   }
 
   public void synchronizeExecutedOrdersFromOrderBooks() {
     for (ICode<String> code : BEANS.get(OrderBookTypeCodeType.class).getCodes()) {
-      OrderBookService orderBookService = BEANS.get(OrderBookService.class);
-      List<Order> orders = orderBookService.getExecutedOrders(code.getId());
-      BEANS.get(OrderBookCache.class).updatedOrderBookExecutedCache(code.getId(), orders);
+      try {
+        OrderBookService orderBookService = BEANS.get(OrderBookService.class);
+        List<Order> orders = orderBookService.getExecutedOrders(code.getId());
+        BEANS.get(OrderBookCache.class).updatedOrderBookExecutedCache(code.getId(), orders);
+      }
+      catch (Exception e) {
+        // nop
+    	  LOG.error(e.getMessage());
+      }
     }
   }
 

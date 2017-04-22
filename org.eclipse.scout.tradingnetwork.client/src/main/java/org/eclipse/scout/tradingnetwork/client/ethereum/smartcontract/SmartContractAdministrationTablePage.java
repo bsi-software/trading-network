@@ -2,21 +2,30 @@ package org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.scout.rt.client.dto.Data;
+import org.eclipse.scout.rt.client.ui.action.menu.AbstractMenu;
+import org.eclipse.scout.rt.client.ui.action.menu.IMenuType;
+import org.eclipse.scout.rt.client.ui.action.menu.TableMenuType;
 import org.eclipse.scout.rt.client.ui.basic.table.AbstractTable;
 import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractSmartColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
+import org.eclipse.scout.rt.client.ui.desktop.OpenUriAction;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.messagebox.IMessageBox;
 import org.eclipse.scout.rt.client.ui.messagebox.MessageBoxes;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
+import org.eclipse.scout.rt.platform.util.CollectionUtility;
+import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.platform.util.TypeCastUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
+import org.eclipse.scout.tradingnetwork.client.ClientSession;
+import org.eclipse.scout.tradingnetwork.client.Icons;
 import org.eclipse.scout.tradingnetwork.client.common.AbstractDeleteMenu;
 import org.eclipse.scout.tradingnetwork.client.common.AbstractEditMenu;
 import org.eclipse.scout.tradingnetwork.client.common.AbstractNewMenu;
@@ -42,6 +51,10 @@ public class SmartContractAdministrationTablePage extends AbstractPageWithTable<
 
     public AddressColumn getAddressColumn() {
       return getColumnSet().getColumnByClass(AddressColumn.class);
+    }
+
+    public TrackingUrlColumn getTrackingUrlColumn() {
+      return getColumnSet().getColumnByClass(TrackingUrlColumn.class);
     }
 
     public OrderBookTypeColumn getOrderBookTypeColumn() {
@@ -117,6 +130,29 @@ public class SmartContractAdministrationTablePage extends AbstractPageWithTable<
 
     }
 
+    @Order(4000)
+    public class TrackingUrlColumn extends AbstractStringColumn {
+      @Override
+      protected String getConfiguredHeaderText() {
+        return TEXTS.get("TrackOnline");
+      }
+
+      @Override
+      protected boolean getConfiguredVisible() {
+        return false;
+      }
+
+      @Override
+      protected boolean getConfiguredDisplayable() {
+        return false;
+      }
+
+      @Override
+      protected int getConfiguredWidth() {
+        return 100;
+      }
+    }
+
     @Order(2000)
     public class EditMenu extends AbstractEditMenu {
 
@@ -160,6 +196,36 @@ public class SmartContractAdministrationTablePage extends AbstractPageWithTable<
         }
       }
 
+    }
+
+    @Order(4000)
+    public class TrackOnlineMenu extends AbstractMenu {
+      @Override
+      protected String getConfiguredText() {
+        return TEXTS.get("TrackOnline");
+      }
+
+      @Override
+      protected Set<? extends IMenuType> getConfiguredMenuTypes() {
+        return CollectionUtility.hashSet(TableMenuType.SingleSelection);
+      }
+
+      @Override
+      protected String getConfiguredIconId() {
+        return Icons.OpenExternUri;
+      }
+
+      @Override
+      protected void execOwnerValueChanged(Object newOwnerValue) {
+        String trackingUrl = getTrackingUrlColumn().getSelectedValue();
+        setEnabled(StringUtility.hasText(trackingUrl));
+      }
+
+      @Override
+      protected void execAction() {
+        String trackingUrl = getTrackingUrlColumn().getSelectedValue();
+        ClientSession.get().getDesktop().openUri(trackingUrl, OpenUriAction.NEW_WINDOW);
+      }
     }
 
   }

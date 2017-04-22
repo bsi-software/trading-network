@@ -11,12 +11,14 @@ import org.eclipse.scout.rt.server.jdbc.SQL;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationFormData;
 import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationTablePageData;
+import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationTablePageData.SmartContractAdministrationTableRowData;
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientProperty;
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumDefaultAccount;
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumService;
 import org.eclipse.scout.tradingnetwork.server.ethereum.model.Account;
 import org.eclipse.scout.tradingnetwork.server.orderbook.OrderBookService;
 import org.eclipse.scout.tradingnetwork.server.sql.SQLs;
+import org.eclipse.scout.tradingnetwork.shared.ethereum.EthereumClientCodeType;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.IAccountService;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.smartcontract.ISmartContractAdminstrationService;
 import org.slf4j.Logger;
@@ -30,6 +32,16 @@ public class SmartContractAdminstrationService implements ISmartContractAdminstr
   public SmartContractAdministrationTablePageData loadTableData() {
     SmartContractAdministrationTablePageData pageData = new SmartContractAdministrationTablePageData();
     SQL.selectInto(SQLs.SMART_CONTRACT_SELECT_DEPLOYED_ORDER_BOOKS, pageData);
+
+    for (SmartContractAdministrationTableRowData row : pageData.getRows()) {
+      StringBuilder url = new StringBuilder("https://");
+      if (EthereumClientCodeType.TestnetCode.ID.equals(CONFIG.getPropertyValue(EthereumClientProperty.class))) {
+        url.append("rinkeby.");
+      }
+      url.append("etherscan.io/address/");
+      url.append(row.getAddress());
+      row.setTrackingUrl(url.toString());
+    }
 
     return pageData;
   }

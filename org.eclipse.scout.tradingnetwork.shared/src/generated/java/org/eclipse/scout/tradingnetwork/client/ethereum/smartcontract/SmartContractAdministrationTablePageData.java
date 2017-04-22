@@ -54,9 +54,11 @@ public class SmartContractAdministrationTablePageData extends AbstractTablePageD
     public static final String environment = "environment";
     public static final String orderBookType = "orderBookType";
     public static final String address = "address";
+    public static final String trackingUrl = "trackingUrl";
     private String m_environment;
     private String m_orderBookType;
     private String m_address;
+    private String m_trackingUrl;
 
     public String getEnvironment() {
       return m_environment;
@@ -80,6 +82,14 @@ public class SmartContractAdministrationTablePageData extends AbstractTablePageD
 
     public void setAddress(String newAddress) {
       m_address = newAddress;
+    }
+
+    public String getTrackingUrl() {
+      return m_trackingUrl;
+    }
+
+    public void setTrackingUrl(String newTrackingUrl) {
+      m_trackingUrl = newTrackingUrl;
     }
   }
 }
