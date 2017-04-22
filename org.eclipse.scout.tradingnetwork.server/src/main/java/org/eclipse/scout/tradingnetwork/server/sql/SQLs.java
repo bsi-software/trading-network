@@ -690,7 +690,8 @@ public interface SQLs {
       + "             d.exchange_rate, "
       + "             d.order_book_type, "
       + "             d.trading_action, "
-      + "             d.status "
+      + "             d.status, "
+      + "             d.order_book_type || ' ' || d.deal_nr "
       + "FROM         DEAL d";
 
   String DEAL_PAGE_DATA_WHERE_CLAUSE = ""
@@ -703,7 +704,8 @@ public interface SQLs {
       + "             :{page.exchangeRate}, "
       + "             :{page.orderBookType}, "
       + "             :{page.tradingAction}, "
-      + "             :{page.status} ";
+      + "             :{page.status}, "
+      + "             :{page.displayedDealNr} ";
   //TODO remove organizationId/_id from DEAL_INSERT
   String DEAL_INSERT = ""
       + "INSERT     INTO "

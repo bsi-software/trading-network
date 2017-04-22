@@ -11,7 +11,6 @@ import org.eclipse.scout.rt.client.ui.form.fields.decimalfield.IDecimalField;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
-
 import org.eclipse.scout.tradingnetwork.client.Icons;
 import org.eclipse.scout.tradingnetwork.shared.order.OrderBookTypeCodeType;
 import org.eclipse.scout.tradingnetwork.shared.order.StatusCodeType;
@@ -34,6 +33,10 @@ public abstract class AbstractDealsTable extends AbstractTable {
 
   public QuantityColumn getQuantityColumn() {
     return getColumnSet().getColumnByClass(QuantityColumn.class);
+  }
+
+  public DisplayedDealNrColumn getDisplaiedDealNrColumn() {
+    return getColumnSet().getColumnByClass(DisplayedDealNrColumn.class);
   }
 
   public OrderBookTypeColumn getOrderBookTypeColumn() {
@@ -211,6 +214,19 @@ public abstract class AbstractDealsTable extends AbstractTable {
     }
   }
 
+  @Order(6500)
+  public class DisplayedDealNrColumn extends AbstractStringColumn {
+    @Override
+    protected String getConfiguredHeaderText() {
+      return TEXTS.get("Deal-Nr");
+    }
+
+    @Override
+    protected int getConfiguredWidth() {
+      return 100;
+    }
+  }
+
   @Order(7000)
   public class DealNrColumn extends AbstractStringColumn {
 
@@ -227,6 +243,11 @@ public abstract class AbstractDealsTable extends AbstractTable {
     @Override
     protected int getConfiguredHorizontalAlignment() {
       return 0;
+    }
+
+    @Override
+    protected boolean getConfiguredDisplayable() {
+      return false;
     }
   }
 }

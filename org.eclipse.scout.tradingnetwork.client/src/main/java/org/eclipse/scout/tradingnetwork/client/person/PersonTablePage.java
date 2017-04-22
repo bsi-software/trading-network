@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.scout.tradingnetwork.client.person;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.scout.rt.client.dto.PageData;
@@ -21,6 +23,7 @@ import org.eclipse.scout.rt.client.ui.basic.table.ITableRow;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractLongColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractSmartColumn;
 import org.eclipse.scout.rt.client.ui.basic.table.columns.AbstractStringColumn;
+import org.eclipse.scout.rt.client.ui.basic.table.userfilter.TextColumnUserFilterState;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.AbstractPageWithTable;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.ISearchForm;
@@ -29,12 +32,17 @@ import org.eclipse.scout.rt.client.ui.form.FormListener;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.Order;
 import org.eclipse.scout.rt.platform.util.CollectionUtility;
+import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.AbstractIcons;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
+import org.eclipse.scout.rt.shared.services.lookup.ILookupRow;
+import org.eclipse.scout.tradingnetwork.client.ClientSession;
 import org.eclipse.scout.tradingnetwork.client.Icons;
 import org.eclipse.scout.tradingnetwork.client.common.CountryLookupCall;
+import org.eclipse.scout.tradingnetwork.shared.organization.IOrganizationLookupService;
+import org.eclipse.scout.tradingnetwork.shared.organization.IOrganizationService;
 import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationLookupCall;
 import org.eclipse.scout.tradingnetwork.shared.person.IPersonService;
 import org.eclipse.scout.tradingnetwork.shared.person.PersonTablePageData;
@@ -108,6 +116,25 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
 
     public PersonIdColumn getPersonIdColumn() {
       return getColumnSet().getColumnByClass(PersonIdColumn.class);
+    }
+
+    @Override
+    protected void execInitTable() {
+      String orgaId = organizationId;
+      if (StringUtility.isNullOrEmpty(orgaId)) {
+        orgaId = BEANS.get(IOrganizationService.class).getOrganizationIdForUser(ClientSession.get().getUserId());
+      }
+
+      if (StringUtility.hasText(orgaId)) {
+        OrganizationLookupCall call = new OrganizationLookupCall();
+        call.setKey(orgaId);
+        List<? extends ILookupRow<String>> organizationRows = BEANS.get(IOrganizationLookupService.class).getDataByKey(call);
+        if (organizationRows.size() > 0) {
+          String organizationName = organizationRows.get(0).getText();
+          OrganizationColumnFilter filter = new OrganizationColumnFilter(organizationName);
+          getUserFilterManager().addFilter(filter);
+        }
+      }
     }
 
     @Order(10)
@@ -333,6 +360,12 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
       protected int getConfiguredWidth() {
         return 200;
       }
+
+      @Override
+      protected void execInitColumn() {
+
+        super.execInitColumn();
+      }
     }
 
     @Order(10)
@@ -346,6 +379,25 @@ public class PersonTablePage extends AbstractPageWithTable<PersonTablePage.Table
       @Override
       protected int getConfiguredWidth() {
         return 100;
+      }
+    }
+
+    private class OrganizationColumnFilter extends TextColumnUserFilterState {
+
+      private static final long serialVersionUID = 1L;
+
+      public OrganizationColumnFilter(String organizationName) {
+        super(getOrganizationColumn());
+        setOrganizationAsSelectedValues(organizationName);
+        setFreeText("");
+      }
+
+      private void setOrganizationAsSelectedValues(String organizationName) {
+
+        Set<Object> selectedValues = new HashSet<Object>();
+        selectedValues.add(organizationName);
+        setSelectedValues(selectedValues);
+
       }
     }
   }

@@ -55,6 +55,7 @@ public abstract class AbstractDealsTablePageData extends AbstractTablePageData {
     public static final String exchangeRate = "exchangeRate";
     public static final String dealId = "dealId";
     public static final String status = "status";
+    public static final String displayedDealNr = "displayedDealNr";
     public static final String dealNr = "dealNr";
     private String m_orderBookType;
     private String m_tradingAction;
@@ -62,6 +63,7 @@ public abstract class AbstractDealsTablePageData extends AbstractTablePageData {
     private Double m_exchangeRate;
     private Long m_dealId;
     private String m_status;
+    private String m_displayedDealNr;
     private String m_dealNr;
 
     public String getOrderBookType() {
@@ -110,6 +112,14 @@ public abstract class AbstractDealsTablePageData extends AbstractTablePageData {
 
     public void setStatus(String newStatus) {
       m_status = newStatus;
+    }
+
+    public String getDisplayedDealNr() {
+      return m_displayedDealNr;
+    }
+
+    public void setDisplayedDealNr(String newDisplayedDealNr) {
+      m_displayedDealNr = newDisplayedDealNr;
     }
 
     public String getDealNr() {
