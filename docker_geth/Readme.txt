@@ -9,6 +9,10 @@ a24250f58021        ethereum_geth       "/geth --password Loc"
 
 $ docker exec -it a24250f58021 bash
 
+root@ae64747b4999:/# solc --version
+solc, the solidity compiler commandline interface
+Version: 0.4.11+commit.68ef5810.Linux.g++
+
 root@a24250f58021:/# /geth attach
 Welcome to the Geth JavaScript console!
 
