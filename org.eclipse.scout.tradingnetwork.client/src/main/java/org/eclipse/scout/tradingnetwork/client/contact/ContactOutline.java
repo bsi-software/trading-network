@@ -29,8 +29,8 @@ public class ContactOutline extends AbstractOutline {
   @Override
   protected void execCreateChildPages(List<IPage<?>> pageList) {
     // pages to be shown in the navigation area of this outline
-    pageList.add(new PersonTablePage());
     pageList.add(new OrganizationTablePage());
+    pageList.add(new PersonTablePage());
     pageList.add(new AccountTablePage());
     pageList.add(new DealsTablePage());
     pageList.add(new SmartContractAdministrationTablePage());

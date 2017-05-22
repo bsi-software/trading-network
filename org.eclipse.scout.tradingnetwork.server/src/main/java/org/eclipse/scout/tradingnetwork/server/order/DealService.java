@@ -290,7 +290,7 @@ public class DealService implements IDealService {
 
             String userId = BEANS.get(IOrganizationService.class).getUserIdForOrganization(formData.getOrganizationId());
             if (StringUtility.hasText(userId)) {
-            	//TODO: [uko] activate
+              //TODO: [uko] activate
 //              updateBankAccountForExecutedOrder(formData, order);
               BEANS.get(ClientNotificationRegistry.class).putForUser(userId, new OrganizationDealMatchedNotification(formData));
             }

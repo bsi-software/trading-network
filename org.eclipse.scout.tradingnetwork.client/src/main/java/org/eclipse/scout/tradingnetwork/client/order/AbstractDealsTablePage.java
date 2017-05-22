@@ -99,7 +99,7 @@ public abstract class AbstractDealsTablePage<T extends AbstractDealsTablePage<T>
 
       @Override
       protected Set<? extends IMenuType> getConfiguredMenuTypes() {
-        return CollectionUtility.hashSet(TableMenuType.SingleSelection);
+        return CollectionUtility.hashSet(TableMenuType.SingleSelection, TableMenuType.MultiSelection);
       }
 
       @Override
@@ -113,8 +113,9 @@ public abstract class AbstractDealsTablePage<T extends AbstractDealsTablePage<T>
 
       @Override
       protected void execAction() {
-        Long dealId = getDealIdColumn().getSelectedValue();
-        BEANS.get(IDealService.class).publish(dealId);
+        for (Long dealId : getDealIdColumn().getSelectedValues()) {
+          BEANS.get(IDealService.class).publish(dealId);
+        }
         reloadPage();
       }
     }

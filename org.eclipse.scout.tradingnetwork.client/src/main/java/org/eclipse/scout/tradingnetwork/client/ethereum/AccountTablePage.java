@@ -248,6 +248,11 @@ public class AccountTablePage extends AbstractPageWithTable<Table> {
       }
 
       @Override
+      protected boolean getConfiguredSummary() {
+        return true;
+      }
+
+      @Override
       protected int getConfiguredWidth() {
         return 100;
       }

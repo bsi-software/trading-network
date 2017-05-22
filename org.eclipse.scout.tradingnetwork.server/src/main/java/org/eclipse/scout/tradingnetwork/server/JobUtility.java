@@ -6,14 +6,13 @@ import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.platform.exception.ExceptionHandler;
 import org.eclipse.scout.rt.platform.job.FixedDelayScheduleBuilder;
 import org.eclipse.scout.rt.platform.job.Jobs;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eclipse.scout.tradingnetwork.server.jobs.FindExectuedMatchesJob;
 import org.eclipse.scout.tradingnetwork.server.jobs.ReloadExecutedOrdersFromOrderBook;
 import org.eclipse.scout.tradingnetwork.server.jobs.ReloadOrdersFromOrderBookJob;
 import org.eclipse.scout.tradingnetwork.server.jobs.UpdatePendingOrderStatusJob;
 import org.eclipse.scout.tradingnetwork.server.sql.SuperUserRunContextProducer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JobUtility {
   private static final Logger LOG = LoggerFactory.getLogger(JobUtility.class);

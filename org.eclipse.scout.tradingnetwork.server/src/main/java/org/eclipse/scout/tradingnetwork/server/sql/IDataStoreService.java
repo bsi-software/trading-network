@@ -15,4 +15,6 @@ public interface IDataStoreService {
   void dropDataStore();
 
   void createDataStore();
+
+  public boolean dataStoreIsReady();
 }

@@ -24,6 +24,13 @@ import org.slf4j.LoggerFactory;
 public class DatabaseSetupService implements IDataStoreService {
   private static final Logger LOG = LoggerFactory.getLogger(DatabaseSetupService.class);
 
+  private static boolean databaseReady = false;
+
+  @Override
+  public boolean dataStoreIsReady() {
+    return databaseReady;
+  }
+
   @PostConstruct
   public void autoCreateDatabase() {
     if (CONFIG.getPropertyValue(DatabaseProperties.DatabaseAutoCreateProperty.class)) {
@@ -33,8 +40,8 @@ public class DatabaseSetupService implements IDataStoreService {
 
           @Override
           public void run() throws Exception {
-            createOrganizationTable();
-            createPersonTable();
+            dropDataStore();
+            createDataStore();
           }
         };
 
@@ -44,6 +51,8 @@ public class DatabaseSetupService implements IDataStoreService {
         BEANS.get(ExceptionHandler.class).handle(e);
       }
     }
+
+    databaseReady = true;
   }
 
   public void createOrganizationTable() {
@@ -54,53 +63,99 @@ public class DatabaseSetupService implements IDataStoreService {
       if (CONFIG.getPropertyValue(DatabaseProperties.DatabaseAutoPopulateProperty.class)) {
         SQL.insert(SQLs.ORGANIZATION_INSERT_SAMPLE + SQLs.ORGANIZATION_VALUES_01);
         SQL.insert(SQLs.ORGANIZATION_INSERT_SAMPLE + SQLs.ORGANIZATION_VALUES_02);
+        SQL.insert(SQLs.ORGANIZATION_INSERT_SAMPLE + SQLs.ORGANIZATION_VALUES_03);
+        SQL.insert(SQLs.ORGANIZATION_INSERT_SAMPLE + SQLs.ORGANIZATION_VALUES_04);
+        SQL.insert(SQLs.ORGANIZATION_INSERT_SAMPLE + SQLs.ORGANIZATION_VALUES_05);
+
+        // connect userid with organizations
+        SQL.update("update ORGANIZATION set user_id = 'abb' where organization_id='org02'");
+        SQL.update("update ORGANIZATION set user_id = 'nestle' where organization_id='org03'");
+        SQL.update("update ORGANIZATION set user_id = 'roche' where organization_id='org04'");
+        SQL.update("update ORGANIZATION set user_id = 'swissre' where organization_id='org05'");
+
         LOG.info("Database table 'ORGANIZATION' populated with sample data");
       }
     }
   }
 
-  public void createPersonTable() {
+  private void createPersonTable() {
     if (!getExistingTables().contains("PERSON")) {
       SQL.insert(SQLs.PERSON_CREATE_TABLE);
       LOG.info("Database table 'PERSON' created");
 
       if (CONFIG.getPropertyValue(DatabaseProperties.DatabaseAutoPopulateProperty.class)) {
         SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_01);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_01A);
         SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_02);
-        // end::service[]
-        /*
         SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_03);
         SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_04);
         SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_05);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_06);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_07);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_08);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_09);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_10);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_11);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_12);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_13);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_14);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_15);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_16);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_17);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_18);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_19);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_20);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_21);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_22);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_23);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_24);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_25);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_26);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_27);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_28);
-        SQL.insert(SQLs.PERSON_INSERT_SAMPLE + SQLs.PERSON_VALUES_29);
-        */
-        // tag::service[]
         LOG.info("Database table 'PERSON' populated with sample data");
       }
+    }
+  }
+
+  private void createDealTable() {
+    if (!getExistingTables().contains("DEAL")) {
+      SQL.insert(SQLs.DEAL_CREATE_TABLE);
+      LOG.info("Database table 'DEAL' created");
+    }
+
+//    TransactionReceipt receipt = getContract(order.getCurrencyPair())
+//        .createOrder(
+//            dealQuantity,
+//            dealPrice,
+//            buy,
+//            extId)
+//        .get();
+
+    if (CONFIG.getPropertyValue(DatabaseProperties.DatabaseAutoPopulateProperty.class)) {
+      SQL.insert(SQLs.DEAL_INSERT_SAMPLE + SQLs.DEAL_VALUES_01);
+      SQL.insert(SQLs.DEAL_INSERT_SAMPLE + SQLs.DEAL_VALUES_02);
+      SQL.insert(SQLs.DEAL_INSERT_SAMPLE + SQLs.DEAL_VALUES_03);
+      SQL.insert(SQLs.DEAL_INSERT_SAMPLE + SQLs.DEAL_VALUES_04);
+      LOG.info("Database table 'DEAL' populated with sample data");
+    }
+
+  }
+
+  private void createDeployedOrderBookTable() {
+    if (!getExistingTables().contains("DEPLOYED_ORDER_BOOK")) {
+      SQL.insert(SQLs.DEPLOYED_ORDER_BOOK_CREATE);
+      LOG.info("Database table 'DEPLOYED_ORDER_BOOK' created");
+    }
+  }
+
+  private void createBankAccountTable() {
+    if (!getExistingTables().contains("BANK_ACCOUNT")) {
+      SQL.insert(SQLs.BANK_ACCOUNT_CREATE);
+      LOG.info("Database table 'BANK_ACCOUNT' created");
+    }
+  }
+
+  private void createAccountTable() {
+    if (!getExistingTables().contains("ACCOUNT")) {
+      SQL.insert(SQLs.ACCOUNT_CREATE_TABLE);
+      LOG.info("Database table 'ACCOUNT' created");
+    }
+  }
+
+  private void createDealSequence() {
+    try {
+      SQL.insert(SQLs.DEAL_SEQUENCE_CREATE);
+      LOG.info("Database sequence created: " + SQLs.DEAL_SEQUENCE_CREATE);
+    }
+    catch (Exception e) {
+      LOG.error("Creating sequence failed: " + SQLs.DEAL_SEQUENCE_CREATE);
+    }
+  }
+
+  private void dropDealSequence() {
+    try {
+      SQL.update(SQLs.DEAL_SEQUENCE_DROP);
+      LOG.info("Database sequence created: " + SQLs.DEAL_SEQUENCE_DROP);
+    }
+    catch (Exception e) {
+      LOG.error("Dropping sequence failed: " + SQLs.DEAL_SEQUENCE_DROP);
     }
   }
 
@@ -113,15 +168,42 @@ public class DatabaseSetupService implements IDataStoreService {
 
   @Override
   public void dropDataStore() {
-    SQL.update(SQLs.PERSON_DROP_TABLE);
-    SQL.update(SQLs.ORGANIZATION_DROP_TABLE);
+    Set<String> tables = getExistingTables();
+
+    if (tables.contains("BANK_ACCOUNT")) {
+      SQL.update(SQLs.BANK_ACCOUNT_DROP);
+    }
+    if (tables.contains("DEAL")) {
+      SQL.update(SQLs.DEAL_DROP_TABLE);
+    }
+    if (tables.contains("DEPLOYED_ORDER_BOOK")) {
+      SQL.update(SQLs.DEPLOYED_ORDER_BOOK_DROP_TABLE);
+    }
+    if (tables.contains("ACCOUNT")) {
+      SQL.update(SQLs.ACCOUNT_DROP_TABLE);
+    }
+    if (tables.contains("PERSON")) {
+      SQL.update(SQLs.PERSON_DROP_TABLE);
+    }
+    if (tables.contains("ORGANIZATION")) {
+      SQL.update(SQLs.ORGANIZATION_DROP_TABLE);
+    }
+
+    dropDealSequence();
   }
 
   @Override
   public void createDataStore() {
     createOrganizationTable();
     createPersonTable();
+    createAccountTable();
+    createDealTable();
+    createDeployedOrderBookTable();
+    createBankAccountTable();
+
+    createDealSequence();
   }
   // tag::service[]
+
 }
 // end::service[]

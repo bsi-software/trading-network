@@ -12,9 +12,17 @@ package org.eclipse.scout.tradingnetwork.server.sql;
 
 public interface SQLs {
 
+//  String SELECT_TABLE_NAMES = ""
+//      + "SELECT   UPPER(tablename) "
+//      + "FROM     sys.systables "
+//      + "INTO     :result";
+
+  // Postgresql
   String SELECT_TABLE_NAMES = ""
-      + "SELECT   UPPER(tablename) "
-      + "FROM     sys.systables "
+      + "SELECT   UPPER(table_name) "
+      + "FROM     information_schema.tables "
+      + "WHERE    table_schema='public' "
+      + "AND      table_type='BASE TABLE' "
       + "INTO     :result";
 
   String ORGANIZATION_CREATE_TABLE = ""
@@ -232,21 +240,51 @@ public interface SQLs {
       + "         url, "
       + "         logo_url) ";
 
+//  String ORGANIZATION_VALUES_01 = ""
+//      + "VALUES  ('org01', "
+//      + "         'Alice''s Adventures in Wonderland', "
+//      + "         'London', "
+//      + "         'GB', "
+//      + "         'http://en.wikipedia.org/wiki/Alice%27s_Adventures_in_Wonderland', "
+//      + "         'https://upload.wikimedia.org/wikipedia/en/3/3f/Alice_in_Wonderland%2C_cover_1865.jpg')";
+
   String ORGANIZATION_VALUES_01 = ""
       + "VALUES  ('org01', "
-      + "         'Alice''s Adventures in Wonderland', "
-      + "         'London', "
-      + "         'GB', "
-      + "         'http://en.wikipedia.org/wiki/Alice%27s_Adventures_in_Wonderland', "
-      + "         'https://upload.wikimedia.org/wikipedia/en/3/3f/Alice_in_Wonderland%2C_cover_1865.jpg')";
-
-  String ORGANIZATION_VALUES_02 = ""
-      + "VALUES  ('org02', "
       + "         'BSI Business Systems Integration AG', "
       + "         'Daettwil, Baden', "
       + "         'CH', "
       + "         'https://www.bsi-software.com', "
       + "         'https://wiki.eclipse.org/images/4/4f/Bsiag.png')";
+
+  String ORGANIZATION_VALUES_02 = ""
+      + "VALUES  ('org02', "
+      + "         'ABB Ltd', "
+      + "         'Zurich', "
+      + "         'CH', "
+      + "         'http://new.abb.com/', "
+      + "         'http://www02.abb.com/global/abbzh/abbzh252.nsf/bf177942f19f4a98c1257148003b7a0a/8f503a1b9869cc4dc1256b0400552aa9/$FILE/ABB_standard.jpg.2/ABB_standard.jpg')";
+
+  String ORGANIZATION_VALUES_03 = ""
+      + "VALUES  ('org03', "
+      + "         'Nestlé', "
+      + "         'Vevey', "
+      + "         'CH', "
+      + "         'http://www.nestle.com/', "
+      + "         'http://logodatabases.com/wp-content/uploads/2012/03/nestle-logo.png')";
+  String ORGANIZATION_VALUES_04 = ""
+      + "VALUES  ('org04', "
+      + "         'Roche', "
+      + "         'Basel', "
+      + "         'CH', "
+      + "         'http://www.roche.com/', "
+      + "         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Roche_Logo.svg/2000px-Roche_Logo.svg.png')";
+  String ORGANIZATION_VALUES_05 = ""
+      + "VALUES  ('org05', "
+      + "         'Swiss RE', "
+      + "         'Zurich', "
+      + "         'CH', "
+      + "         'http://www.swissre.com/', "
+      + "         'http://media.swissre.com/designimages/sr_lake.jpg')";
 
   String PERSON_INSERT_SAMPLE = ""
       + "INSERT   INTO PERSON "
@@ -262,83 +300,122 @@ public interface SQLs {
       + "          position, "
       + "          organization_id) ";
 
+//  String PERSON_VALUES_01 = ""
+//      + "VALUES   ('prs01', "
+//      + "          'Alice', "
+//      + "          null, "
+//      + "          'http://www.uergsel.de/uploads/Alice.png', "
+//      + "          '11/26/1865', "
+//      + "          'F', "
+//      + "          null, "
+//      + "          'Daresbury, Cheshire', "
+//      + "          'GB', "
+//      + "          'The curious girl', "
+//      + "          'org01')";
+//
   String PERSON_VALUES_01 = ""
       + "VALUES   ('prs01', "
-      + "          'Alice', "
-      + "          null, "
-      + "          'http://www.uergsel.de/uploads/Alice.png', "
-      + "          '26.11.1865', "
-      + "          'F', "
-      + "          null, "
-      + "          'Daresbury, Cheshire', "
-      + "          'GB', "
-      + "          'The curious girl', "
-      + "          'org01')";
-
-  String PERSON_VALUES_01A = ""
-      + "VALUES   ('prs01a', "
       + "          'Lena', "
       + "          'Meier', "
       + "          '/images/local_lena.png', "
-      + "          '26.11.1865', "
+      + "          '10/30/1995', "
       + "          'F', "
       + "          null, "
       + "          'Baden', "
       + "          'CH', "
       + "          null, "
-      + "          'org02')";
+      + "          'org01')";
 
   String PERSON_VALUES_02 = ""
       + "VALUES   ('prs02', "
-      + "          'Rabbit', "
-      + "          'White', "
-      + "          'https://upload.wikimedia.org/wikipedia/commons/4/42/The_White_Rabbit_%28Tenniel%29_-_The_Nursery_Alice_%281890%29_-_BL.jpg', "
-      + "          '26.11.1865', "
-      + "          'M', "
+      + "          'Anna', "
+      + "          '', "
       + "          null, "
-      + "          'Daresbury, Cheshire', "
-      + "          'GB', "
+      + "          '11/26/1865', "
+      + "          'F', "
       + "          null, "
-      + "          'org01')";
+      + "          'Winterthur', "
+      + "          'CH', "
+      + "          null, "
+      + "          'org02')";
 
   String PERSON_VALUES_03 = ""
       + "VALUES   ('prs03', "
-      + "          'Gegor', "
-      + "          'Bauer', "
-      + "          'https://wiki.eclipse.org/images/5/54/Scout_contacts_112.png', "
+      + "          'Nicole', "
+      + "          '', "
       + "          null, "
-      + "          'M', "
+      + "          '11/26/1865', "
+      + "          'F', "
       + "          null, "
-      + "          'Aarau', "
+      + "          'Montreux', "
       + "          'CH', "
       + "          null, "
-      + "          'org02')";
+      + "          'org03')";
 
   String PERSON_VALUES_04 = ""
       + "VALUES   ('prs04', "
-      + "          'Alexandre', "
-      + "          'Schroder', "
-      + "          'https://wiki.eclipse.org/images/5/54/Scout_contacts_105.png', "
-      + "          '30.05.1976', "
+      + "          'Reto', "
+      + "          '', "
+      + "          null, "
+      + "          '11/26/1865', "
       + "          'M', "
-      + "          'Zypressenstrasse 60', "
-      + "          'Zürich', "
+      + "          null, "
+      + "          'Basel', "
       + "          'CH', "
       + "          null, "
-      + "          'org02')";
+      + "          'org04')";
 
   String PERSON_VALUES_05 = ""
       + "VALUES   ('prs05', "
-      + "          'André', "
-      + "          'Wegmüller', "
-      + "          'https://wiki.eclipse.org/images/f/ff/Scout_contacts_103.png', "
-      + "          '04.11.1975', "
+      + "          'Stefan', "
+      + "          '', "
+      + "          null, "
+      + "          '11/26/1865', "
       + "          'M', "
-      + "          'Rüttihubel 29', "
-      + "          'Walkringen', "
+      + "          null, "
+      + "          'Thalwil', "
       + "          'CH', "
       + "          null, "
-      + "          'org02')";
+      + "          'org05')";
+
+//  String PERSON_VALUES_03 = ""
+//      + "VALUES   ('prs03', "
+//      + "          'Gegor', "
+//      + "          'Bauer', "
+//      + "          'https://wiki.eclipse.org/images/5/54/Scout_contacts_112.png', "
+//      + "          null, "
+//      + "          'M', "
+//      + "          null, "
+//      + "          'Aarau', "
+//      + "          'CH', "
+//      + "          null, "
+//      + "          'org02')";
+//
+//  String PERSON_VALUES_04 = ""
+//      + "VALUES   ('prs04', "
+//      + "          'Alexandre', "
+//      + "          'Schroder', "
+//      + "          'https://wiki.eclipse.org/images/5/54/Scout_contacts_105.png', "
+//      + "          '30.05.1976', "
+//      + "          'M', "
+//      + "          'Zypressenstrasse 60', "
+//      + "          'Zürich', "
+//      + "          'CH', "
+//      + "          null, "
+//      + "          'org02')";
+//
+//  String PERSON_VALUES_05 = ""
+//      + "VALUES   ('prs05', "
+//      + "          'André', "
+//      + "          'Wegmüller', "
+//      + "          'https://wiki.eclipse.org/images/f/ff/Scout_contacts_103.png', "
+//      + "          '04.11.1975', "
+//      + "          'M', "
+//      + "          'Rüttihubel 29', "
+//      + "          'Walkringen', "
+//      + "          'CH', "
+//      + "          null, "
+//      + "          'org02')";
 
   String PERSON_VALUES_06 = ""
       + "VALUES   ('prs06', "
@@ -668,6 +745,47 @@ public interface SQLs {
 
   String PERSON_DROP_TABLE = "DROP TABLE PERSON";
   String ORGANIZATION_DROP_TABLE = "DROP TABLE ORGANIZATION";
+  String ACCOUNT_DROP_TABLE = "DROP TABLE ACCOUNT";
+  String DEAL_DROP_TABLE = "DROP TABLE DEAL";
+  String DEPLOYED_ORDER_BOOK_DROP_TABLE = "DROP TABLE DEPLOYED_ORDER_BOOK";
+
+  String BANK_ACCOUNT_CREATE = ""
+      + "CREATE       "
+      + "TABLE        BANK_ACCOUNT "
+      + "            (organization_id VARCHAR(64) NOT NULL, "
+      + "             currency_uid VARCHAR(3) NOT NULL, "
+      + "             balance numeric(15,2), "
+      + "             CONSTRAINT ORGANIZATION_FK FOREIGN KEY (organization_id) REFERENCES ORGANIZATION(organization_id))";
+
+  String BANK_ACCOUNT_INSERT = ""
+      + " INSERT "
+      + " INTO BANK_ACCOUNT (ORGANIZATION_ID, CURRENCY_UID, BALANCE)"
+      + " VALUES (:organizationId, :currency, :balance) ";
+
+  String BANK_ACCOUNT_SELECT = ""
+      + " SELECT "
+      + "     ORGANIZATION_ID, "
+      + "     CURRENCY_UID, "
+      + "     BALANCE "
+      + " FROM BANK_ACCOUNT "
+      + " WHERE ORGANIZATION_ID = :orgId "
+      + " INTO "
+      + "     :{organizationId}, "
+      + "     :{currency}, "
+      + "     :{balance} ";
+
+  String BANK_ACCOUNT_SELECT_BALANCE = ""
+      + " SELECT BALANCE "
+      + " FROM   BANK_ACCOUNT BA "
+      + " WHERE  ORGANIZATION_ID = :organizationId "
+      + " AND    CURRENCY_UID = :currency "
+      + " INTO   :balance ";
+
+  String BANK_ACCOUNT_UPDATE = ""
+      + " UPDATE BANK_ACCOUNT SET BALANCE = :balance "
+      + " WHERE ORGANIZATION_ID = :organizationId AND CURRENCY_UID = :currency ";
+
+  String BANK_ACCOUNT_DROP = "DROP TABLE BANK_ACCOUNT";
 
   String DEAL_CREATE_TABLE = ""
       + "CREATE       "
@@ -722,6 +840,57 @@ public interface SQLs {
       + "             status = :status,"
       + "             publish_transaction_hash = :publishTransactionHash "
       + "WHERE        deal_id = :dealId";
+
+  String DEAL_INSERT_SAMPLE = ""
+      + "INSERT     INTO "
+      + "DEAL      (deal_id, "
+      + "           deal_nr, "
+      + "           quantity, "
+      + "           exchange_rate, "
+      + "           order_book_type, "
+      + "           trading_action, "
+      + "           status, "
+      + "           organization_id) ";
+
+  String DEAL_VALUES_01 = ""
+      + "VALUES    (10,"
+      + "           null, "
+      + "           500000, "
+      + "           0.85, "
+      + "           'USDEUR', "
+      + "           'BUY', "
+      + "           'INACTIVE', "
+      + "           'org03')";
+
+  String DEAL_VALUES_02 = ""
+      + "VALUES    (11,"
+      + "           null, "
+      + "           1000000, "
+      + "           0.80, "
+      + "           'USDEUR', "
+      + "           'BUY', "
+      + "           'INACTIVE', "
+      + "           'org03')";
+
+  String DEAL_VALUES_03 = ""
+      + "VALUES    (12,"
+      + "           null, "
+      + "           200000, "
+      + "           0.9, "
+      + "           'USDEUR', "
+      + "           'SELL', "
+      + "           'INACTIVE', "
+      + "           'org04')";
+
+  String DEAL_VALUES_04 = ""
+      + "VALUES    (13,"
+      + "           null, "
+      + "           400000, "
+      + "           1.0, "
+      + "           'USDEUR', "
+      + "           'SELL', "
+      + "           'INACTIVE', "
+      + "           'org04')";
 
   String DEAL_SELECT = ""
       + "SELECT       deal_nr,"
@@ -819,7 +988,7 @@ public interface SQLs {
   String PARTICIPANT_INSERT_VALUES_03 = "VALUES ('evt01', 'prs02')";
 
   String DEPLOYED_ORDER_BOOK_CREATE = ""
-      + " CREATE TABLE deployed_order_book"
+      + " CREATE TABLE DEPLOYED_ORDER_BOOK"
       + " ( "
       + "   ENVIRONMENT VARCHAR(15) NOT NULL, "
       + "   ORDER_BOOK_TYPE VARCHAR(15) NOT NULL, "
@@ -975,6 +1144,14 @@ public interface SQLs {
       + "       :{orderBookType}, "
       + "       :{address} ";
 
+  String ACCOUNT_CREATE_TABLE = ""
+      + "CREATE       "
+      + "TABLE        ACCOUNT "
+      + "            (address VARCHAR(255) NOT NULL CONSTRAINT ACCOUNT_PK PRIMARY KEY, "
+      + "             password VARCHAR(64) NOT NULL, "
+      + "             person_id VARCHAR(64) NOT NULL, "
+      + "             name VARCHAR(64))";
+
   String ACCOUNT_SELECT_ALL = ""
       + "SELECT a.person_id, "
       + "       LOWER(a.address), "
@@ -1003,4 +1180,9 @@ public interface SQLs {
       + "SET    person_id = :person, "
       + "       name = :name "
       + "WHERE  LOWER(address) = LOWER(:address) ";
+
+  String DEAL_SEQUENCE_CREATE = "CREATE SEQUENCE deal_deal_id_seq START WITH 20";
+
+  String DEAL_SEQUENCE_DROP = "DROP SEQUENCE IF EXISTS deal_deal_id_seq";
+
 }

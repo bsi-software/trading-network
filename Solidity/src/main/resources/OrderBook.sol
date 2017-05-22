@@ -11,30 +11,120 @@ contract OrderBook {
     uint256 externId;
   }
 
+  // id of the order book, eg. EURUSD for an Euro/USD exchange
+  string public symbol;
+  
+  // creation time of this contract
+  uint public creationTime;
+
+  // owner of this contract
+  address owner;
+  
+  // participants that are allowed to change state
+  mapping (address => bool) participants;
+  
+  // active buy and sell order
   Order [] public buyOrders;
   Order [] public sellOrders;
+  
+  // executed orders
   Order [] public executedOrders;
-
-  string public symbol;
-
-  mapping (address => bool) participants;
-  address owner;
 
   // order id (number) to increment
   uint256 orderId;
+  
+  // restricts function access to contract owner
+  modifier onlyOwner() {
+  	require(msg.sender == owner);
+  	_;
+  }
+  
+  // restricts function access to participants
+  modifier onlyParticipant() {
+  	require(participants[msg.sender]);
+  	_;
+  }
 
+  // constructor function
   function OrderBook(string _symbol) {
+    symbol = _symbol;
+    creationTime = now;
     owner = msg.sender;
     participants[owner] = true;
-
-    symbol = _symbol;
     orderId = 1;
   }
 
-  function kill() {
-    if (msg.sender == owner) {
-      selfdestruct(owner);
+  // destructor function
+  function kill() onlyOwner() {
+    selfdestruct(owner);
+  }
+
+  function addParticipant(address _participant) onlyOwner() {
+    participants[_participant] = true;
+  }
+
+  function removeParticipant(address _participant) onlyOwner() {
+    participants[_participant] = false;
+  }
+
+  // create a new order
+  function createOrder (uint256 _quantity, uint256 _price, bool _buy, uint256 _externId)
+    onlyParticipant()
+    returns (uint256)
+  {
+    Order memory order = Order(_quantity, _price, _buy, msg.sender, orderId++, _externId);
+
+    if (_buy) {
+      buyOrders.push(order);
+      sortOrders(true);
+    } 
+    else {
+      sellOrders.push(order);
+      sortOrders(false);
     }
+
+    return order.id;
+  }
+
+  // cancel an existing order
+  function cancelOrder(int256 _orderId, bool _buy) onlyParticipant() {
+    bool found = false;
+    Order [] arrayToRemove = _buy ? buyOrders : sellOrders;
+    
+    for (uint i = 0; i < arrayToRemove.length; i++) {
+      if (arrayToRemove[i].id == uint256(_orderId)) {
+        found = true;
+      }
+      if (found) {
+        if (i < arrayToRemove.length - 1) {
+          arrayToRemove[i] = arrayToRemove[i+1];
+        } 
+        else {
+          delete arrayToRemove[i];
+          arrayToRemove.length = arrayToRemove.length - 1;
+        }
+      }
+    }
+  }
+
+  function isPending(uint256 _orderId) constant returns (bool) {
+    if(_orderId <= 0) {
+      return false;
+    }
+
+  	for(uint i = 0; i < buyOrders.length; i++) {
+  	  if(_orderId == buyOrders[i].id) {
+  	    return true;
+      }
+  	}
+
+  	for(i = 0; i < sellOrders.length; i++) {
+  	  if(_orderId == sellOrders[i].id) {
+  	    return true;
+  	  }
+  	}
+
+  	return false;
   }
 
   function getNumberOfBuyOrders() constant returns (uint256) {
@@ -47,18 +137,6 @@ contract OrderBook {
 
   function getNumberOfExecutedOrders() constant returns (uint256) {
     return executedOrders.length;
-  }
-
-  function isParticipant(address _participant) constant returns (bool) {
-    return participants[_participant];
-  }
-
-  function addParticipant(address _participant) {
-    participants[_participant] = true;
-  }
-
-  function removeParticipant(address _participant) {
-    participants[_participant] = false;
   }
 
   function matchExists() constant returns (bool) {
@@ -93,7 +171,10 @@ contract OrderBook {
     return int256(sellOrders[sellOrders.length - 1].id);
   }
 
-  function executeMatch(int256 _buyOrderId, int256 _sellOrderId) returns (int8) {
+  function executeMatch(int256 _buyOrderId, int256 _sellOrderId) 
+    onlyParticipant() 
+    returns (int8) 
+  {
 
     // no matching buy order
     if(buyOrders.length == 0 || uint256(_buyOrderId) != buyOrders[buyOrders.length - 1].id) {
@@ -152,69 +233,6 @@ contract OrderBook {
     executedOrders.push(_order);
   }
 
-  function isPending(uint256 _orderId) constant returns (bool) {
-
-    if(_orderId <= 0) {
-      return false;
-    }
-
-  	for(uint i = 0; i < buyOrders.length; i++) {
-  	  if(_orderId == buyOrders[i].id) {
-  	    return true;
-      }
-  	}
-
-  	for(i = 0; i < sellOrders.length; i++) {
-  	  if(_orderId == sellOrders[i].id) {
-  	    return true;
-  	  }
-  	}
-
-  	return false;
-  }
-
-  function cancelOrder(int256 _orderId, bool _buy) returns (string _errorMessage) {
-    bool found = false;
-    Order [] arrayToRemove = _buy ? buyOrders : sellOrders;
-    for (uint i = 0; i < arrayToRemove.length; i++) {
-      if (arrayToRemove[i].id == uint256(_orderId)) {
-        found = true;
-      }
-      if (found) {
-        if (i < arrayToRemove.length -1) {
-          arrayToRemove[i] = arrayToRemove[i+1];
-        } else {
-          delete arrayToRemove[i];
-          arrayToRemove.length = arrayToRemove.length - 1;
-        }
-      }
-    }
-  }
-
-  function createOrder (
-    uint256 _quantity,
-    uint256 _price,
-    bool _buy,
-    uint256 _externId)
-    returns (uint256)
-  {
-    if(!participants[msg.sender]) {
-      throw;
-    }
-
-    Order memory order = Order(_quantity, _price, _buy, msg.sender, orderId++, _externId);
-
-    if (_buy) {
-      buyOrders.push(order);
-      sortOrders(true);
-    } else {
-      sellOrders.push(order);
-      sortOrders(false);
-    }
-
-    return order.id;
-  }
-
   function sortOrders(bool _buy) private {
     uint256 arrayLength;
     Order memory tmp;
@@ -230,7 +248,8 @@ contract OrderBook {
           buyOrders[i] = tmp;
         }
       }
-    } else {
+    } 
+    else {
       arrayLength = sellOrders.length;
 
       for (i = arrayLength - 1; i > 0; i--) {

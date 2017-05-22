@@ -270,3 +270,7 @@
 @view-tab-active-background-color: @form-background-color;
 @view-tab-active-color: @active-color;
 @view-tab-background-color: @panel-background-color;
+
+.messagebox {
+  max-width: 830px;
+}

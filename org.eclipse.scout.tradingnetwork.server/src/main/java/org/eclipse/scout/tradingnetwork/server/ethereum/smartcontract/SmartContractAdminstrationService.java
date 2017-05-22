@@ -16,6 +16,7 @@ import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.Ether
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumDefaultAccount;
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumService;
 import org.eclipse.scout.tradingnetwork.server.ethereum.model.Account;
+import org.eclipse.scout.tradingnetwork.server.ethereum.model.Alice;
 import org.eclipse.scout.tradingnetwork.server.orderbook.OrderBookService;
 import org.eclipse.scout.tradingnetwork.server.sql.SQLs;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.EthereumClientCodeType;
@@ -65,14 +66,22 @@ public class SmartContractAdminstrationService implements ISmartContractAdminstr
       if (StringUtility.hasText(testFormData.getAddress().getValue())) {
         throw new VetoException(TEXTS.get("ContractAlreadyExists"));
       }
-      String contractOwnerAddress = CONFIG.getPropertyValue(EthereumDefaultAccount.class);
+
+      String contractOwnerAddress = StringUtility.nvl(formData.getOwnerAddress().getValue(),
+          CONFIG.getPropertyValue(EthereumDefaultAccount.class));
+
       if (StringUtility.isNullOrEmpty(contractOwnerAddress)) {
         throw new VetoException(TEXTS.get("SupplyContractOwnerAddress"));
       }
       String address = "";
       try {
-        Account account = BEANS.get(EthereumService.class).getWallet(contractOwnerAddress, BEANS.get(IAccountService.class).getPassword(contractOwnerAddress));
-        address = BEANS.get(OrderBookService.class).deploy(account.getCredentials(), EthereumService.GAS_PRICE_DEFAULT, BigInteger.valueOf(4_000_000L), formData.getEnvironment().getValue());
+        if (Alice.ADDRESS == contractOwnerAddress) {
+          address = BEANS.get(OrderBookService.class).deploy(Alice.CREDENTIALS, EthereumService.GAS_PRICE_DEFAULT, BigInteger.valueOf(4_000_000L), formData.getOrderBookType().getValue());
+        }
+        else {
+          Account account = BEANS.get(EthereumService.class).getWallet(contractOwnerAddress, BEANS.get(IAccountService.class).getPassword(contractOwnerAddress));
+          address = BEANS.get(OrderBookService.class).deploy(account.getCredentials(), EthereumService.GAS_PRICE_DEFAULT, BigInteger.valueOf(4_000_000L), formData.getOrderBookType().getValue());
+        }
       }
       catch (InterruptedException | ExecutionException e) {
         LOG.error(e.getMessage());

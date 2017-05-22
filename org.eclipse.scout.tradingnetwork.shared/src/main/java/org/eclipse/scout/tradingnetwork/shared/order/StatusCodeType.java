@@ -18,7 +18,7 @@ public class StatusCodeType extends AbstractCodeType<String, String> {
   @Order(1000)
   public static class InactiveCode extends AbstractCode<String> {
     private static final long serialVersionUID = 1L;
-    public static final String ID = "7edf08d0-1423-400f-8e20-b022694aa0ea";
+    public static final String ID = "INACTIVE";
 
     @Override
     protected String getConfiguredText() {
@@ -34,7 +34,7 @@ public class StatusCodeType extends AbstractCodeType<String, String> {
   @Order(2000)
   public static class PendingCode extends AbstractCode<String> {
     private static final long serialVersionUID = 1L;
-    public static final String ID = "dc010b18-9598-4031-89e6-70924d0589b5";
+    public static final String ID = "PENDING";
 
     @Override
     protected String getConfiguredText() {
@@ -50,7 +50,7 @@ public class StatusCodeType extends AbstractCodeType<String, String> {
   @Order(3000)
   public static class PublishedCode extends AbstractCode<String> {
     private static final long serialVersionUID = 1L;
-    public static final String ID = "9750ea5d-cec9-48a8-a837-522f4395c800";
+    public static final String ID = "PUBLISHED";
 
     @Override
     protected String getConfiguredText() {
@@ -66,7 +66,7 @@ public class StatusCodeType extends AbstractCodeType<String, String> {
   @Order(4000)
   public static class PartiallyCompletedCode extends AbstractCode<String> {
     private static final long serialVersionUID = 1L;
-    public static final String ID = "ce83dd7a-be69-4679-8bf5-f39e96971b0b";
+    public static final String ID = "PARTIALLY";
 
     @Override
     protected String getConfiguredText() {
@@ -82,7 +82,7 @@ public class StatusCodeType extends AbstractCodeType<String, String> {
   @Order(5000)
   public static class CompletedCode extends AbstractCode<String> {
     private static final long serialVersionUID = 1L;
-    public static final String ID = "3ca92b83-3b67-4e10-aedb-56cf0d8a2fd3";
+    public static final String ID = "COMPLETED";
 
     @Override
     protected String getConfiguredText() {

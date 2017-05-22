@@ -14,9 +14,6 @@ import org.eclipse.scout.rt.platform.ApplicationScoped;
 import org.eclipse.scout.rt.platform.exception.ProcessingException;
 import org.eclipse.scout.rt.shared.TunnelToServer;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
-import org.eclipse.scout.tradingnetwork.shared.order.DealFormData;
-import org.eclipse.scout.tradingnetwork.shared.order.DealsTablePageData;
-import org.eclipse.scout.tradingnetwork.shared.order.OwnDealsTablePageData;
 
 @ApplicationScoped
 @TunnelToServer

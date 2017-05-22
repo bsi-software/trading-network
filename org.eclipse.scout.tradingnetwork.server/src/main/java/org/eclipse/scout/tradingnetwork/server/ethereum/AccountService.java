@@ -50,7 +50,6 @@ public class AccountService implements IAccountService {
 
   @Override
   public AccountFormData prepareCreate(AccountFormData formData) {
-    // TODO [mzi] add business logic here.
     return formData;
   }
 

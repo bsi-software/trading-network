@@ -68,7 +68,7 @@ public class NetworkService implements INetworkService {
         BEANS.get(ClientNotificationRegistry.class).putForAllSessions(new OrderBookSynchronizedNotification(code.getId()));
       }
       catch (Exception e) {
-    	  // nop
+        // nop
         LOG.error(e.getMessage());
       }
     }
@@ -83,7 +83,7 @@ public class NetworkService implements INetworkService {
       }
       catch (Exception e) {
         // nop
-    	  LOG.error(e.getMessage());
+        LOG.error(e.getMessage());
       }
     }
   }
@@ -124,6 +124,11 @@ public class NetworkService implements INetworkService {
 
     return data;
 
+  }
+
+  @Override
+  public String getContractAddress(String orderBookTypeId) {
+    return BEANS.get(OrderBookService.class).getContractAddress(orderBookTypeId);
   }
 
 }

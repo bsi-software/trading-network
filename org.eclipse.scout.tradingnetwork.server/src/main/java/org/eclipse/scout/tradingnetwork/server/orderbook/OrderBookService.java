@@ -1,5 +1,6 @@
 package org.eclipse.scout.tradingnetwork.server.orderbook;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import org.eclipse.scout.rt.platform.config.CONFIG;
 import org.eclipse.scout.rt.platform.exception.ProcessingException;
 import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationFormData;
+import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientContractAddressUsdEur;
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumClientProperty;
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumProperties.EthereumDefaultAccount;
 import org.eclipse.scout.tradingnetwork.server.ethereum.EthereumService;
@@ -26,6 +28,7 @@ import org.eclipse.scout.tradingnetwork.server.orderbook.model.Order;
 import org.eclipse.scout.tradingnetwork.server.orderbook.model.OrderMatch;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.IAccountService;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.smartcontract.ISmartContractAdminstrationService;
+import org.eclipse.scout.tradingnetwork.shared.order.OrderBookTypeCodeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.abi.datatypes.Address;
@@ -37,6 +40,7 @@ import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.utils.Convert.Unit;
 
 /**
  * Wrapper class for generated contract class. Keeps app code separate from smart contract code.
@@ -73,7 +77,7 @@ public class OrderBookService {
         .deploy(getWeb3j(), credentials, gasPrice, gasLimit, BigInteger.valueOf(0), new Utf8String(symbol))
         .get();
 
-    LOG.info("contract successfully deployed at address" + contract.getContractAddress());
+    LOG.info(String.format("contract for '%s' successfully deployed at address %s", symbol, contract.getContractAddress()));
 
     m_orderBookMap.put(symbol, contract);
 
@@ -105,7 +109,14 @@ public class OrderBookService {
 
     String transactionHash = "";
     try {
-      TransactionReceipt receipt = getContract(order.getCurrencyPair()).createOrder(dealQuantity, dealPrice, buy, extId).get();
+      TransactionReceipt receipt = getContract(order.getCurrencyPair())
+          .createOrder(
+              dealQuantity,
+              dealPrice,
+              buy,
+              extId)
+          .get();
+
       transactionHash = receipt.getTransactionHash();
     }
     catch (InterruptedException | ExecutionException e) {
@@ -354,31 +365,66 @@ public class OrderBookService {
     return BEANS.get(EthereumService.class).getWeb3j();
   }
 
+  public String getContractAddress(String currencyPair) {
+    return m_orderBookMap.get(currencyPair).getContractAddress();
+  }
+
   private OrderBook getContract(String currencyPair) throws InterruptedException, ExecutionException {
     // TODO [uko] GAS LIMIT?
-    OrderBook contract = m_orderBookMap.get(currencyPair);
-    if (null == contract) {
-      String address = loadContractAddressFromDatabase(currencyPair);
-      if (StringUtility.hasText(address)) {
+    OrderBook orderBookContract = m_orderBookMap.get(currencyPair);
+
+    // no order book: try to load order book via address stored in data base
+    if (null == orderBookContract) {
+      String contractAddress = loadContractAddressFromDatabase(currencyPair);
+      BigInteger gasLimit = BigInteger.valueOf(4_000_000L);
+
+      if (StringUtility.hasText(contractAddress)) {
         String accountAddress = CONFIG.getPropertyValue(EthereumDefaultAccount.class);
         String accountPassword = BEANS.get(IAccountService.class).getPassword(accountAddress);
+
         if (StringUtility.hasText(accountAddress)) {
           Account account = BEANS.get(EthereumService.class).getWallet(accountAddress, accountPassword);
-          contract = load(address, account.getCredentials(), GAS_PRICE_DEFAULT, BigInteger.valueOf(4_000_000L));
+          BigDecimal gasCost = new BigDecimal(GAS_PRICE_DEFAULT.multiply(gasLimit));
+
+          try {
+            BEANS.get(EthereumService.class).ensureFunds(accountAddress, gasCost, Unit.WEI);
+          }
+          catch (Exception e) {
+            throw new ExecutionException(e);
+          }
+
+          orderBookContract = load(contractAddress, account.getCredentials(), GAS_PRICE_DEFAULT, gasLimit);
         }
       }
-      if (BEANS.get(EthereumService.class).isUseTestrpc() && null == contract) {
-        address = deploy(Alice.CREDENTIALS, GAS_PRICE_DEFAULT, BigInteger.valueOf(4_000_000L), currencyPair);
-        contract = m_orderBookMap.get(currencyPair);
-        saveContractAddressToDatabase(currencyPair, contract.getContractAddress());
+
+      // check if loading via address from db was successful
+      if (null == orderBookContract) {
+
+        // still no order book: deploy a new contract for the testrpc case
+        if (BEANS.get(EthereumService.class).isUseTestrpc()) {
+          BigDecimal gasCost = new BigDecimal(GAS_PRICE_DEFAULT.multiply(gasLimit));
+
+          try {
+            BEANS.get(EthereumService.class).ensureFunds(Alice.CREDENTIALS.getAddress(), gasCost, Unit.WEI);
+          }
+          catch (Exception e) {
+            throw new ExecutionException(e);
+          }
+
+          contractAddress = deploy(Alice.CREDENTIALS, GAS_PRICE_DEFAULT, gasLimit, currencyPair);
+          orderBookContract = m_orderBookMap.get(currencyPair);
+          saveContractAddressToDatabase(currencyPair, orderBookContract.getContractAddress());
+        }
+
+        // failed to deploy -> give up ...
+        if (null == orderBookContract) {
+          throw new ProcessingException("Could not load order book contract (currency pair=" + currencyPair + ")");
+        }
       }
 
-      if (null == contract) {
-        throw new ProcessingException("could not load contract");
-      }
-      m_orderBookMap.put(currencyPair, contract);
+      m_orderBookMap.put(currencyPair, orderBookContract);
     }
-    return contract;
+    return orderBookContract;
   }
 
   public void removeContractFromCache(String currencyPair) {
@@ -395,6 +441,17 @@ public class OrderBookService {
   }
 
   private String loadContractAddressFromDatabase(String currencyPair) {
+
+    // check in config properties first
+    if (OrderBookTypeCodeType.UsdEurCode.ID.equals(currencyPair)) {
+      String contractAddress = CONFIG.getPropertyValue(EthereumClientContractAddressUsdEur.class);
+
+      if (StringUtility.hasText(contractAddress)) {
+        return contractAddress;
+      }
+    }
+
+    // no default specified in config properties: check in database
     SmartContractAdministrationFormData formData = new SmartContractAdministrationFormData();
     formData.getEnvironment().setValue(CONFIG.getPropertyValue(EthereumClientProperty.class));
     formData.getOrderBookType().setValue(currencyPair);

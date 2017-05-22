@@ -18,10 +18,12 @@ import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.platform.util.TypeCastUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
-import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.AddressField;
-import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.CreateContractField;
-import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.EnvironmentField;
-import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.OrderBookTypeField;
+import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.TopBox;
+import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.TopBox.AddressField;
+import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.TopBox.CreateContractField;
+import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.TopBox.EnvironmentField;
+import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.TopBox.OrderBookTypeField;
+import org.eclipse.scout.tradingnetwork.client.ethereum.smartcontract.SmartContractAdministrationForm.MainBox.TopBox.OwnerAddressField;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.EthereumClientCodeType;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.smartcontract.ISmartContractAdminstrationService;
 import org.eclipse.scout.tradingnetwork.shared.order.OrderBookTypeCodeType;
@@ -47,6 +49,14 @@ public class SmartContractAdministrationForm extends AbstractForm {
     return getFieldByClass(CreateContractField.class);
   }
 
+  public TopBox getTopBox() {
+    return getFieldByClass(TopBox.class);
+  }
+
+  public OwnerAddressField getOwnerAddressField() {
+    return getFieldByClass(OwnerAddressField.class);
+  }
+
   public OrderBookTypeField getOrderBookTypeField() {
     return getFieldByClass(OrderBookTypeField.class);
   }
@@ -65,94 +75,110 @@ public class SmartContractAdministrationForm extends AbstractForm {
 
   public class MainBox extends AbstractGroupBox {
 
-    @Override
-    protected int getConfiguredGridW() {
-      return 2;
-    }
+    @Order(0)
+    public class TopBox extends AbstractGroupBox {
 
-    @Override
-    protected int getConfiguredGridH() {
-      return 1;
-    }
-
-    @Override
-    protected int getConfiguredGridColumnCount() {
-      return 1;
-    }
-
-    @Order(1000)
-    public class EnvironmentField extends AbstractSmartField<String> {
       @Override
-      protected String getConfiguredLabel() {
-        return TEXTS.get("Environment");
+      protected int getConfiguredGridW() {
+        return 2;
       }
 
       @Override
-      protected Class<? extends ICodeType<?, String>> getConfiguredCodeType() {
-        return EthereumClientCodeType.class;
+      protected int getConfiguredGridH() {
+        return 1;
       }
 
       @Override
-      protected boolean getConfiguredMandatory() {
-        return true;
-      }
-    }
-
-    @Order(2000)
-    public class OrderBookTypeField extends AbstractSmartField<String> {
-      @Override
-      protected String getConfiguredLabel() {
-        return TEXTS.get("OrderBookType");
+      protected int getConfiguredGridColumnCount() {
+        return 1;
       }
 
-      @Override
-      protected Class<? extends ICodeType<?, String>> getConfiguredCodeType() {
-        return OrderBookTypeCodeType.class;
-      }
-
-      @Override
-      protected boolean getConfiguredMandatory() {
-        return true;
-      }
-    }
-
-    @Order(3000)
-    public class AddressField extends AbstractStringField {
-      @Override
-      protected String getConfiguredLabel() {
-        return TEXTS.get("ContractAddress");
-      }
-
-      @Override
-      protected int getConfiguredMaxLength() {
-        return 256;
-      }
-
-    }
-
-    @Order(2000)
-    public class CreateContractField extends AbstractBooleanField {
-      @Override
-      protected String getConfiguredLabel() {
-        return TEXTS.get("CreateContract");
-      }
-
-      @Override
-      protected Class<? extends IValueField> getConfiguredMasterField() {
-        return AddressField.class;
-      }
-
-      @Override
-      protected void execChangedMasterValue(Object newMasterValue) {
-        String masterValue = TypeCastUtility.castValue(newMasterValue, String.class);
-        boolean enabled = false;
-        if (StringUtility.isNullOrEmpty(masterValue)) {
-          enabled = true;
+      @Order(1000)
+      public class EnvironmentField extends AbstractSmartField<String> {
+        @Override
+        protected String getConfiguredLabel() {
+          return TEXTS.get("Environment");
         }
-        else {
-          setValue(false);
+
+        @Override
+        protected Class<? extends ICodeType<?, String>> getConfiguredCodeType() {
+          return EthereumClientCodeType.class;
         }
-        setEnabled(enabled);
+
+        @Override
+        protected boolean getConfiguredMandatory() {
+          return true;
+        }
+      }
+
+      @Order(2000)
+      public class OrderBookTypeField extends AbstractSmartField<String> {
+        @Override
+        protected String getConfiguredLabel() {
+          return TEXTS.get("OrderBookType");
+        }
+
+        @Override
+        protected Class<? extends ICodeType<?, String>> getConfiguredCodeType() {
+          return OrderBookTypeCodeType.class;
+        }
+
+        @Override
+        protected boolean getConfiguredMandatory() {
+          return true;
+        }
+      }
+
+      @Order(3000)
+      public class CreateContractField extends AbstractBooleanField {
+        @Override
+        protected String getConfiguredLabel() {
+          return TEXTS.get("CreateContract");
+        }
+
+        @Override
+        protected Class<? extends IValueField> getConfiguredMasterField() {
+          return AddressField.class;
+        }
+
+        @Override
+        protected void execChangedMasterValue(Object newMasterValue) {
+          String masterValue = TypeCastUtility.castValue(newMasterValue, String.class);
+          boolean enabled = false;
+          if (StringUtility.isNullOrEmpty(masterValue)) {
+            enabled = true;
+          }
+          else {
+            setValue(false);
+          }
+          setEnabled(enabled);
+        }
+      }
+
+      @Order(4000)
+      public class OwnerAddressField extends AbstractStringField {
+        @Override
+        protected String getConfiguredLabel() {
+          return TEXTS.get("OwnerAddress");
+        }
+
+        @Override
+        protected int getConfiguredMaxLength() {
+          return 256;
+        }
+      }
+
+      @Order(5000)
+      public class AddressField extends AbstractStringField {
+        @Override
+        protected String getConfiguredLabel() {
+          return TEXTS.get("ContractAddress");
+        }
+
+        @Override
+        protected int getConfiguredMaxLength() {
+          return 256;
+        }
       }
     }
 

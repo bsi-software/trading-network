@@ -1,5 +1,9 @@
 package org.eclipse.scout.tradingnetwork.client.tradingcenter;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
@@ -30,9 +34,6 @@ import org.eclipse.scout.rt.shared.services.common.code.ICode;
 import org.eclipse.scout.rt.shared.services.common.code.ICodeType;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
 import org.eclipse.scout.rt.shared.services.lookup.ILookupCall;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import org.eclipse.scout.tradingnetwork.client.tradingcenter.NetworkTablePage.Table;
 import org.eclipse.scout.tradingnetwork.shared.order.OrderBookTypeCodeType;
 import org.eclipse.scout.tradingnetwork.shared.order.OrderBookTypeCodeType.NotificationEnum;
@@ -40,10 +41,14 @@ import org.eclipse.scout.tradingnetwork.shared.order.TradingActionCodeType;
 import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationLookupCall;
 import org.eclipse.scout.tradingnetwork.shared.tradingcenter.INetworkService;
 import org.eclipse.scout.tradingnetwork.shared.tradingcenter.NetworkTablePageData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Data(NetworkTablePageData.class)
 public class NetworkTablePage extends AbstractPageWithTable<Table> {
   private static final Logger LOG = LoggerFactory.getLogger(NetworkTablePage.class);
+
+  public static final String CONTRACT_ABI_FILE = "C:\\Users\\mzi\\Desktop\\oss\\github\\trading-network\\Solidity\\src\\main\\resources\\OrderBook.abi";
 
   private boolean m_dataChangeListenerActive;
   private String m_organizationId;
@@ -86,6 +91,8 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
     if (StringUtility.hasText(m_orderBookId)) {
       ICode<String> code = BEANS.get(OrderBookTypeCodeType.class).getCode(m_orderBookId);
       if (null != code) {
+//        String contractAddress = BEANS.get(INetworkService.class).getContractAddress(m_orderBookId);
+//        title = code.getText() + " (" + contractAddress + ")";
         title = code.getText();
       }
     }
@@ -146,6 +153,72 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
   }
 
   public class Table extends AbstractTable {
+
+    @Order(-1000)
+    public class RefreshMenu extends AbstractMenu {
+
+      @Override
+      protected String getConfiguredIconId() {
+        return "font:awesomeIcons \uf021";
+      }
+
+      @Override
+      protected Set<? extends IMenuType> getConfiguredMenuTypes() {
+        return CollectionUtility.hashSet(TableMenuType.SingleSelection, TableMenuType.MultiSelection, TableMenuType.EmptySpace);
+      }
+
+      @Override
+      protected void execAction() {
+        reloadPage();
+      }
+    }
+
+    @Order(0)
+    public class ContractInfoMenu extends AbstractMenu {
+
+      @Override
+      protected String getConfiguredIconId() {
+        return "font:awesomeIcons \uf05a";
+      }
+
+      @Override
+      protected Set<? extends IMenuType> getConfiguredMenuTypes() {
+        return CollectionUtility.hashSet(TableMenuType.SingleSelection, TableMenuType.MultiSelection, TableMenuType.EmptySpace);
+      }
+
+      @Override
+      protected void execAction() {
+        String contractAbi = readResourceFile(CONTRACT_ABI_FILE);
+        String contractAddress = BEANS.get(INetworkService.class).getContractAddress(m_orderBookId);
+        String obVariableName = m_orderBookId;
+
+        StringBuffer web3code = new StringBuffer();
+
+        web3code.append("// attach to testrpc container\n");
+        web3code.append("docker ps\n");
+        web3code.append("docker exec -it <container-id> bash\n\n");
+        web3code.append("// inside docker container\n");
+        web3code.append("cd /usr/lib/node_modules/ethereumjs-testrpc\rnode\n\n");
+        web3code.append("// javascript \n");
+        web3code.append("var Web3 = require('web3')\n");
+        web3code.append("var web3 = new Web3()\n");
+        web3code.append("web3.setProvider(new Web3.providers.HttpProvider('http://localhost:8545'))\n");
+        web3code.append("var OrderBook = web3.eth.contract(");
+        web3code.append(contractAbi).append(")\n");
+        web3code.append("var ").append(obVariableName).append(" = ");
+        web3code.append("OrderBook.at('").append(contractAddress).append("')").append("\n");
+        web3code.append(obVariableName).append(".symbol()").append("\n");
+        web3code.append(obVariableName).append(".getNumberOfBuyOrders()").append("\n");
+        web3code.append(obVariableName).append(".getNumberOfSellOrders()").append("\n");
+        web3code.append(obVariableName).append(".matchExists()").append("\n");
+        web3code.append(obVariableName).append(".topBuyOrderId()").append("\n");
+        web3code.append(obVariableName).append(".topSellOrderId()").append("\n");
+
+        ContractWeb3Form infoForm = new ContractWeb3Form();
+        infoForm.getWeb3InfoField().setValue(web3code.toString());
+        infoForm.start();
+      }
+    }
 
     @Override
     protected boolean getConfiguredSortEnabled() {
@@ -580,7 +653,37 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
         scrollToSelection();
       }
     }
+  }
 
+  private String readResourceFile(String fileName) {
+    try {
+      File file = new File(fileName);
+      FileInputStream fis = new FileInputStream(file);
+      InputStreamReader isr = new InputStreamReader(fis);
+      BufferedReader br = new BufferedReader(isr);
+      StringBuffer text = new StringBuffer();
+
+      br.lines().forEach(line -> {
+        if (text.length() > 0) {
+          text.append(" ");
+        }
+
+        if (line.contains("//")) {
+          line = line.substring(0, line.indexOf("//"));
+        }
+
+        text.append(line);
+      });
+
+      br.close();
+
+      String sourceCode = text.toString();
+      return sourceCode.replaceAll("\\s+", " ");
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return "";
+    }
   }
 
 }

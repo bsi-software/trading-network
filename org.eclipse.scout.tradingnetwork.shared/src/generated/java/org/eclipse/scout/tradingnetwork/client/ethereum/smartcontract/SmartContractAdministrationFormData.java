@@ -30,6 +30,10 @@ public class SmartContractAdministrationFormData extends AbstractFormData {
     return getFieldByClass(OrderBookType.class);
   }
 
+  public OwnerAddress getOwnerAddress() {
+    return getFieldByClass(OwnerAddress.class);
+  }
+
   public static class Address extends AbstractValueFieldData<String> {
 
     private static final long serialVersionUID = 1L;
@@ -46,6 +50,11 @@ public class SmartContractAdministrationFormData extends AbstractFormData {
   }
 
   public static class OrderBookType extends AbstractValueFieldData<String> {
+
+    private static final long serialVersionUID = 1L;
+  }
+
+  public static class OwnerAddress extends AbstractValueFieldData<String> {
 
     private static final long serialVersionUID = 1L;
   }

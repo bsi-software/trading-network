@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +30,7 @@ import org.eclipse.scout.tradingnetwork.server.ethereum.model.Account;
 import org.eclipse.scout.tradingnetwork.server.ethereum.model.Alice;
 import org.eclipse.scout.tradingnetwork.server.ethereum.model.Transaction;
 import org.eclipse.scout.tradingnetwork.shared.ethereum.EthereumClientCodeType;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.web3j.protocol.Web3j;
@@ -40,6 +42,7 @@ import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.EthGetTransactionCount;
 import org.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.MessageDecodingException;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Convert;
@@ -63,6 +66,10 @@ public class EthereumService {
 
   public static final BigInteger GAS_PRICE_DEFAULT = BigInteger.valueOf(20_000_000_000L);
   public static final BigInteger GAS_LIMIT_DEFAULT = BigInteger.valueOf(40_000L);
+
+  // constants for method wait for tx receipt
+  private static final int SLEEP_DURATION = 15000;
+  private static final int ATTEMPTS = 40;
 
   // the connection to the ethereum net
   private Web3j web3j = null;
@@ -115,6 +122,10 @@ public class EthereumService {
     System.out.println(String.format("amount: %d from: %s to %s", amount, from, to));
 
     return txHash;
+  }
+
+  public String getCoinbase() throws Exception {
+    return getAccount(0);
   }
 
   private String getAccount(int i) throws Exception {
@@ -208,6 +219,62 @@ public class EthereumService {
     }
 
     return web3j;
+  }
+
+  TransactionReceipt waitForTransactionReceipt(
+      String transactionHash) throws Exception {
+
+    Optional<TransactionReceipt> transactionReceiptOptional =
+        getTransactionReceipt(transactionHash, SLEEP_DURATION, ATTEMPTS);
+
+    if (!transactionReceiptOptional.isPresent()) {
+      Assert.fail("Transaction receipt not generated after " + ATTEMPTS + " attempts");
+    }
+
+    TransactionReceipt txReceipt = transactionReceiptOptional.get();
+
+    return txReceipt;
+  }
+
+  private Optional<TransactionReceipt> getTransactionReceipt(
+      String transactionHash, int sleepDuration, int attempts) throws Exception {
+    Optional<TransactionReceipt> receiptOptional = sendTransactionReceiptRequest(transactionHash);
+
+    for (int i = 0; i < attempts; i++) {
+      if (!receiptOptional.isPresent()) {
+        Thread.sleep(sleepDuration);
+        receiptOptional = sendTransactionReceiptRequest(transactionHash);
+      }
+      else {
+        break;
+      }
+    }
+
+    return receiptOptional;
+  }
+
+  private Optional<TransactionReceipt> sendTransactionReceiptRequest(
+      String transactionHash) throws Exception {
+    EthGetTransactionReceipt transactionReceipt =
+        web3j.ethGetTransactionReceipt(transactionHash).sendAsync().get();
+
+    return transactionReceipt.getTransactionReceipt();
+  }
+
+  public void ensureFunds(String address, BigDecimal amount, Unit unit) throws Exception {
+    BigInteger balance = getBalanceWei(address);
+    BigInteger amountWei = Convert.toWei(amount.toString(), unit).toBigInteger();
+    BigInteger missingWei = amountWei.subtract(balance);
+
+    if (balance.compareTo(missingWei) >= 0) {
+      return;
+    }
+
+    System.out.println(String.format("Insufficient funds. transfer %d to %s from coinbase", missingWei, address));
+
+    String txHash = transferEther(getCoinbase(), address, missingWei);
+
+    waitForTransactionReceipt(txHash);
   }
 
   public BigDecimal getBalance(String address) {

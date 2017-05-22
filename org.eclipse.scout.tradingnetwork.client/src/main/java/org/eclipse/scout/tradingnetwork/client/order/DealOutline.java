@@ -21,6 +21,8 @@ import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.tradingnetwork.client.Icons;
 import org.eclipse.scout.tradingnetwork.client.organization.OrganizationOverview;
 import org.eclipse.scout.tradingnetwork.client.tradingcenter.NetworkNodePage;
+import org.eclipse.scout.tradingnetwork.client.tradingcenter.NetworkTablePage;
+import org.eclipse.scout.tradingnetwork.shared.order.OrderBookTypeCodeType;
 
 @Order(1000)
 public class DealOutline extends AbstractOutline {
@@ -49,7 +51,12 @@ public class DealOutline extends AbstractOutline {
   @Override
   protected void execCreateChildPages(List<IPage<?>> pageList) {
     OwnDealsTablePage dealsTablePage = new OwnDealsTablePage();
+    String organizationId = ((OrganizationOverview) getDefaultDetailForm()).getUserId();
+
+    NetworkTablePage usdEuroTablePage = new NetworkTablePage(organizationId, OrderBookTypeCodeType.UsdEurCode.ID);
+
     pageList.add(dealsTablePage);
+    pageList.add(usdEuroTablePage);
     NetworkNodePage networkNodePage = new NetworkNodePage();
     pageList.add(networkNodePage);
   }
