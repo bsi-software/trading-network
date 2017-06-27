@@ -24,6 +24,8 @@
   <properties>
     <jdk.source.version>1.8</jdk.source.version>
     <org.eclipse.scout.rt.version>6.0.200-SNAPSHOT</org.eclipse.scout.rt.version>
+    <org.web3j.version>2.0.2</org.web3j.version>
+    <postgresql.version>9.1-901-1.jdbc4</postgresql.version>
   </properties>
 
   <groupId>org.eclipse.scout.tradingnetwork</groupId>
