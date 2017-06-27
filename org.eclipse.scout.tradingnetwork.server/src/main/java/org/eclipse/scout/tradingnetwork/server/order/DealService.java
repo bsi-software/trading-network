@@ -47,7 +47,6 @@ import org.eclipse.scout.tradingnetwork.shared.order.ReadEventPermission;
 import org.eclipse.scout.tradingnetwork.shared.order.StatusCodeType;
 import org.eclipse.scout.tradingnetwork.shared.order.TradingActionCodeType;
 import org.eclipse.scout.tradingnetwork.shared.order.UpdateDealPermission;
-import org.eclipse.scout.tradingnetwork.shared.organization.IOrganizationBankAccountService;
 import org.eclipse.scout.tradingnetwork.shared.organization.IOrganizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -331,19 +330,20 @@ public class DealService implements IDealService {
     return successfull;
   }
 
-  private void updateBankAccountForExecutedOrder(DealFormData formData, Order order) {
-    String currencyIdA = StringUtility.substring(order.getCurrencyPair(), 0, 4);
-    String currencyIdB = StringUtility.substring(order.getCurrencyPair(), 3);
-    String tradingActionA = TradingActionCodeType.BuyCode.ID;
-    String tradingActionB = TradingActionCodeType.SellCode.ID;
-    if (!order.isBuy()) {
-      tradingActionA = TradingActionCodeType.SellCode.ID;
-      tradingActionB = TradingActionCodeType.BuyCode.ID;
-    }
-    Double amountA = (double) order.getAmount();
-    Double amountB = order.getPrice() * amountA;
-    BEANS.get(IOrganizationBankAccountService.class).updateBankAccountBalance(formData.getOrganizationId(), currencyIdA, tradingActionA, amountA);
-    BEANS.get(IOrganizationBankAccountService.class).updateBankAccountBalance(formData.getOrganizationId(), currencyIdB, tradingActionB, amountB);
-  }
+  // TODO cleanup
+//  private void updateBankAccountForExecutedOrder(DealFormData formData, Order order) {
+//    String currencyIdA = StringUtility.substring(order.getCurrencyPair(), 0, 4);
+//    String currencyIdB = StringUtility.substring(order.getCurrencyPair(), 3);
+//    String tradingActionA = TradingActionCodeType.BuyCode.ID;
+//    String tradingActionB = TradingActionCodeType.SellCode.ID;
+//    if (!order.isBuy()) {
+//      tradingActionA = TradingActionCodeType.SellCode.ID;
+//      tradingActionB = TradingActionCodeType.BuyCode.ID;
+//    }
+//    Double amountA = (double) order.getAmount();
+//    Double amountB = order.getPrice() * amountA;
+//    BEANS.get(IOrganizationBankAccountService.class).updateBankAccountBalance(formData.getOrganizationId(), currencyIdA, tradingActionA, amountA);
+//    BEANS.get(IOrganizationBankAccountService.class).updateBankAccountBalance(formData.getOrganizationId(), currencyIdB, tradingActionB, amountB);
+//  }
 
 }

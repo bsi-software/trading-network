@@ -23,7 +23,6 @@ import org.eclipse.scout.tradingnetwork.client.ClientSession;
 import org.eclipse.scout.tradingnetwork.client.Icons;
 import org.eclipse.scout.tradingnetwork.client.common.AbstractUrlImageField;
 import org.eclipse.scout.tradingnetwork.client.common.CountryLookupCall;
-import org.eclipse.scout.tradingnetwork.client.common.ListenerObjectEnum;
 import org.eclipse.scout.tradingnetwork.client.organization.OrganizationOverview.MainBox.AccountBalanceBox;
 import org.eclipse.scout.tradingnetwork.client.organization.OrganizationOverview.MainBox.AccountBalanceBox.AccountBalanceTableField;
 import org.eclipse.scout.tradingnetwork.client.organization.OrganizationOverview.MainBox.GeneralBox;
@@ -101,13 +100,13 @@ public class OrganizationOverview extends AbstractForm {
 
   @Override
   protected void execFormActivated() {
-	  //TODO: [uko] activate
+    //TODO: [uko] activate
 //    registerDataChangeListener(ListenerObjectEnum.ORGANIZATION_OVERVIEW);
   }
 
   @Override
   protected void execDataChanged(Object... dataTypes) {
-	  //TODO: [uko] reload form
+    //TODO: [uko] reload form
   }
 
   public class MainBox extends AbstractGroupBox {
@@ -263,7 +262,7 @@ public class OrganizationOverview extends AbstractForm {
 
             @Override
             protected void execAction() {
-              
+
             }
           }
 

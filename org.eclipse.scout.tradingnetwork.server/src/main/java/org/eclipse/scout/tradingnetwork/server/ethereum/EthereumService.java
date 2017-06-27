@@ -57,8 +57,8 @@ public class EthereumService {
   private static boolean m_useTestrpc;
 
   // infura coordinates
-  private static final String TOKEN = "3UMFlH4jlpWx6IqttMeG";
-  private static final String ETHEREUM_MAIN = "https://mainnet.infura.io/" + TOKEN;
+//  private static final String TOKEN = "3UMFlH4jlpWx6IqttMeG";
+//  private static final String ETHEREUM_MAIN = "https://mainnet.infura.io/" + TOKEN;
   // private static final String ETHEREUM_TEST = "https://ropsten.infura.io/" + TOKEN;
 
   // copied from org.web3j.protocol.core.methods.response.Numeric
