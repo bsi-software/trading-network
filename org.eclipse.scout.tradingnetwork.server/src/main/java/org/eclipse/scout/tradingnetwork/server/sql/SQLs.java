@@ -264,20 +264,38 @@ public interface SQLs {
       + "         'http://new.abb.com/', "
       + "         'http://www02.abb.com/global/abbzh/abbzh252.nsf/bf177942f19f4a98c1257148003b7a0a/8f503a1b9869cc4dc1256b0400552aa9/$FILE/ABB_standard.jpg.2/ABB_standard.jpg')";
 
+//  String ORGANIZATION_VALUES_03 = ""
+//      + "VALUES  ('org03', "
+//      + "         'Nestlé', "
+//      + "         'Vevey', "
+//      + "         'CH', "
+//      + "         'http://www.nestle.com/', "
+//      + "         'http://logodatabases.com/wp-content/uploads/2012/03/nestle-logo.png')";
+//
+//  String ORGANIZATION_VALUES_04 = ""
+//      + "VALUES  ('org04', "
+//      + "         'Roche', "
+//      + "         'Basel', "
+//      + "         'CH', "
+//      + "         'http://www.roche.com/', "
+//      + "         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Roche_Logo.svg/2000px-Roche_Logo.svg.png')";
+
   String ORGANIZATION_VALUES_03 = ""
       + "VALUES  ('org03', "
-      + "         'Nestlé', "
-      + "         'Vevey', "
-      + "         'CH', "
+      + "         'Munich RE', "
+      + "         'Munich', "
+      + "         'DE', "
       + "         'http://www.nestle.com/', "
-      + "         'http://logodatabases.com/wp-content/uploads/2012/03/nestle-logo.png')";
+      + "         'https://upload.wikimedia.org/wikipedia/en/thumb/b/b8/Munich_Re.svg/250px-Munich_Re.svg.png')";
+
   String ORGANIZATION_VALUES_04 = ""
       + "VALUES  ('org04', "
-      + "         'Roche', "
-      + "         'Basel', "
-      + "         'CH', "
-      + "         'http://www.roche.com/', "
-      + "         'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Roche_Logo.svg/2000px-Roche_Logo.svg.png')";
+      + "         'BMW', "
+      + "         'Munich', "
+      + "         'DE', "
+      + "         'https://www.bmw.com/en/index.html', "
+      + "         'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/BMW.svg/150px-BMW.svg.png')";
+
   String ORGANIZATION_VALUES_05 = ""
       + "VALUES  ('org05', "
       + "         'Swiss RE', "

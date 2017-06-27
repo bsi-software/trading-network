@@ -69,8 +69,10 @@ public class DatabaseSetupService implements IDataStoreService {
 
         // connect userid with organizations
         SQL.update("update ORGANIZATION set user_id = 'abb' where organization_id='org02'");
-        SQL.update("update ORGANIZATION set user_id = 'nestle' where organization_id='org03'");
-        SQL.update("update ORGANIZATION set user_id = 'roche' where organization_id='org04'");
+//        SQL.update("update ORGANIZATION set user_id = 'nestle' where organization_id='org03'");
+//        SQL.update("update ORGANIZATION set user_id = 'roche' where organization_id='org04'");
+        SQL.update("update ORGANIZATION set user_id = 'munichre' where organization_id='org03'");
+        SQL.update("update ORGANIZATION set user_id = 'bmw' where organization_id='org04'");
         SQL.update("update ORGANIZATION set user_id = 'swissre' where organization_id='org05'");
 
         LOG.info("Database table 'ORGANIZATION' populated with sample data");
