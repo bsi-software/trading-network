@@ -18,10 +18,6 @@ public class OrganizationOverviewData extends AbstractFormData {
 
   private static final long serialVersionUID = 1L;
 
-  public AccountBalanceTable getAccountBalanceTable() {
-    return getFieldByClass(AccountBalanceTable.class);
-  }
-
   public Country getCountry() {
     return getFieldByClass(Country.class);
   }
@@ -72,80 +68,6 @@ public class OrganizationOverviewData extends AbstractFormData {
 
   public UserIdProperty getUserIdProperty() {
     return getPropertyByClass(UserIdProperty.class);
-  }
-
-  public static class AccountBalanceTable extends AbstractTableFieldBeanData {
-
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    public AccountBalanceTableRowData addRow() {
-      return (AccountBalanceTableRowData) super.addRow();
-    }
-
-    @Override
-    public AccountBalanceTableRowData addRow(int rowState) {
-      return (AccountBalanceTableRowData) super.addRow(rowState);
-    }
-
-    @Override
-    public AccountBalanceTableRowData createRow() {
-      return new AccountBalanceTableRowData();
-    }
-
-    @Override
-    public Class<? extends AbstractTableRowData> getRowType() {
-      return AccountBalanceTableRowData.class;
-    }
-
-    @Override
-    public AccountBalanceTableRowData[] getRows() {
-      return (AccountBalanceTableRowData[]) super.getRows();
-    }
-
-    @Override
-    public AccountBalanceTableRowData rowAt(int index) {
-      return (AccountBalanceTableRowData) super.rowAt(index);
-    }
-
-    public void setRows(AccountBalanceTableRowData[] rows) {
-      super.setRows(rows);
-    }
-
-    public static class AccountBalanceTableRowData extends AbstractTableRowData {
-
-      private static final long serialVersionUID = 1L;
-      public static final String organizationId = "organizationId";
-      public static final String currency = "currency";
-      public static final String balance = "balance";
-      private String m_organizationId;
-      private String m_currency;
-      private Double m_balance;
-
-      public String getOrganizationId() {
-        return m_organizationId;
-      }
-
-      public void setOrganizationId(String newOrganizationId) {
-        m_organizationId = newOrganizationId;
-      }
-
-      public String getCurrency() {
-        return m_currency;
-      }
-
-      public void setCurrency(String newCurrency) {
-        m_currency = newCurrency;
-      }
-
-      public Double getBalance() {
-        return m_balance;
-      }
-
-      public void setBalance(Double newBalance) {
-        m_balance = newBalance;
-      }
-    }
   }
 
   public static class Country extends AbstractValueFieldData<String> {

@@ -91,9 +91,7 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
     if (StringUtility.hasText(m_orderBookId)) {
       ICode<String> code = BEANS.get(OrderBookTypeCodeType.class).getCode(m_orderBookId);
       if (null != code) {
-//        String contractAddress = BEANS.get(INetworkService.class).getContractAddress(m_orderBookId);
-//        title = code.getText() + " (" + contractAddress + ")";
-        title = code.getText();
+        title = "FX Trading " + code.getText();
       }
     }
     return title;
@@ -190,7 +188,7 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
       protected void execAction() {
         String contractAbi = readResourceFile(CONTRACT_ABI_FILE);
         String contractAddress = BEANS.get(INetworkService.class).getContractAddress(m_orderBookId);
-        String obVariableName = m_orderBookId;
+        String obVariableName = "FxTrading"; //m_orderBookId;
 
         StringBuffer web3code = new StringBuffer();
 

@@ -4,7 +4,6 @@ import org.eclipse.scout.rt.client.dto.Data;
 import org.eclipse.scout.rt.platform.BEANS;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.rt.shared.services.common.jdbc.SearchFilter;
-
 import org.eclipse.scout.tradingnetwork.client.ClientSession;
 import org.eclipse.scout.tradingnetwork.shared.order.IDealService;
 import org.eclipse.scout.tradingnetwork.shared.order.OwnDealsTablePageData;
@@ -14,7 +13,7 @@ import org.eclipse.scout.tradingnetwork.shared.organization.IOrganizationService
 public class OwnDealsTablePage extends AbstractDealsTablePage<OwnDealsTablePage.Table> {
   @Override
   protected String getConfiguredTitle() {
-    return TEXTS.get("OwnDeals");
+    return TEXTS.get("LocalDeals");
   }
 
   @Override

@@ -120,7 +120,8 @@ public class SmartContractAdminstrationService implements ISmartContractAdminstr
 
     if (updateResult == 0) {
       SQL.insert("INSERT INTO DEPLOYED_ORDER_BOOK (ENVIRONMENT, ORDER_BOOK_TYPE, ADDRESS) "
-          + " VALUES (:environment, :orderBookType, :address) ",
+          + " VALUES (:environment, :orderBookType, :address)"
+          + " ON CONFLICT DO NOTHING",
           formData);
     }
 

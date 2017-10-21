@@ -13,13 +13,8 @@ import org.eclipse.scout.rt.shared.services.common.code.ICode;
 import org.eclipse.scout.tradingnetwork.shared.order.OrderBookTypeCodeType;
 import org.eclipse.scout.tradingnetwork.shared.order.StatusCodeType;
 import org.eclipse.scout.tradingnetwork.shared.order.TradingActionCodeType;
-import org.eclipse.scout.tradingnetwork.shared.organization.IOrganizationBankAccountService;
 import org.eclipse.scout.tradingnetwork.shared.organization.IOrganizationOverviewPageService;
-import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationBankAccountTablePageData;
-import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationBankAccountTablePageData.OrganizationBankAccountTableRowData;
 import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationOverviewData;
-import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationOverviewData.AccountBalanceTable;
-import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationOverviewData.AccountBalanceTable.AccountBalanceTableRowData;
 import org.eclipse.scout.tradingnetwork.shared.organization.OrganizationOverviewData.OverviewTable.OverviewTableRowData;
 
 public class OrganizationOverviewPageService implements IOrganizationOverviewPageService {
@@ -46,14 +41,14 @@ public class OrganizationOverviewPageService implements IOrganizationOverviewPag
         + "             :organizationLogo.url ", overviewData, new NVPair("organizationId", organizationIdHolder));
 
     if (StringUtility.hasText(organizationIdHolder.getValue())) {
-      OrganizationBankAccountTablePageData accountBalanceTableData = BEANS.get(IOrganizationBankAccountService.class).getOrganizationBankAccountTableData(null, organizationIdHolder.getValue());
-      for (OrganizationBankAccountTableRowData row : accountBalanceTableData.getRows()) {
-        AccountBalanceTable table = overviewData.getAccountBalanceTable();
-        AccountBalanceTableRowData addedRow = table.addRow();
-        addedRow.setOrganizationId(row.getOrganizationId());
-        addedRow.setCurrency(row.getCurrency());
-        addedRow.setBalance(row.getBalance());
-      }
+//      OrganizationBankAccountTablePageData accountBalanceTableData = BEANS.get(IOrganizationBankAccountService.class).getOrganizationBankAccountTableData(null, organizationIdHolder.getValue());
+//      for (OrganizationBankAccountTableRowData row : accountBalanceTableData.getRows()) {
+//        AccountBalanceTable table = overviewData.getAccountBalanceTable();
+//        AccountBalanceTableRowData addedRow = table.addRow();
+//        addedRow.setOrganizationId(row.getOrganizationId());
+//        addedRow.setCurrency(row.getCurrency());
+//        addedRow.setBalance(row.getBalance());
+//      }
 
       OverviewTableRowData[] overviewRows = loadOverviewTableRowData(organizationIdHolder.getValue());
       overviewData.getOverviewTable().setRows(overviewRows);

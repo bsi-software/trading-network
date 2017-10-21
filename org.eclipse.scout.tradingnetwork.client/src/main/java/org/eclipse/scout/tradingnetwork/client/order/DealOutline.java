@@ -12,6 +12,7 @@ package org.eclipse.scout.tradingnetwork.client.order;
 
 import java.util.List;
 
+import org.eclipse.scout.rt.client.ui.basic.tree.ITreeNode;
 import org.eclipse.scout.rt.client.ui.desktop.outline.AbstractOutline;
 import org.eclipse.scout.rt.client.ui.desktop.outline.pages.IPage;
 import org.eclipse.scout.rt.client.ui.form.IForm;
@@ -20,7 +21,6 @@ import org.eclipse.scout.rt.platform.util.StringUtility;
 import org.eclipse.scout.rt.shared.TEXTS;
 import org.eclipse.scout.tradingnetwork.client.Icons;
 import org.eclipse.scout.tradingnetwork.client.organization.OrganizationOverview;
-import org.eclipse.scout.tradingnetwork.client.tradingcenter.NetworkNodePage;
 import org.eclipse.scout.tradingnetwork.client.tradingcenter.NetworkTablePage;
 import org.eclipse.scout.tradingnetwork.shared.order.OrderBookTypeCodeType;
 
@@ -49,6 +49,11 @@ public class DealOutline extends AbstractOutline {
   }
 
   @Override
+  protected void execNodeAction(ITreeNode node) {
+    super.execNodeAction(node);
+  }
+
+  @Override
   protected void execCreateChildPages(List<IPage<?>> pageList) {
     OwnDealsTablePage dealsTablePage = new OwnDealsTablePage();
     String organizationId = ((OrganizationOverview) getDefaultDetailForm()).getUserId();
@@ -57,8 +62,10 @@ public class DealOutline extends AbstractOutline {
 
     pageList.add(dealsTablePage);
     pageList.add(usdEuroTablePage);
-    NetworkNodePage networkNodePage = new NetworkNodePage();
-    pageList.add(networkNodePage);
+
+    // not needed for quick demo
+//    NetworkNodePage networkNodePage = new NetworkNodePage();
+//    pageList.add(networkNodePage);
   }
 
   @Override

@@ -65,7 +65,7 @@ public class ContractWeb3Form extends AbstractForm {
 
         @Override
         protected boolean getConfiguredEnabled() {
-          return false;
+          return true;
         }
 
         @Override
