@@ -26,9 +26,9 @@ The PostgreSQL image corresponds to the official Docker image. For development V
 ## Start the Trading Application
 
 Start the server and the client of the application from within the Eclipse IDE using the corresponding launchers.
+Open Maven module org.eclipse.scout.tradingnetwork.all.app.dev and start application with launcher
 
-- [org.eclipse.scout.tradingnetwork] dev server
-- [org.eclipse.scout.tradingnetwork] dev ui
+- [org.eclipse.scout.tradingnetwork] dev server+ui
 
 ## Check State of Smart Contract
 
