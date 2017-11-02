@@ -192,8 +192,10 @@ public class NetworkTablePage extends AbstractPageWithTable<Table> {
 
         StringBuffer web3code = new StringBuffer();
 
-        web3code.append("// attach to testrpc container\n");
+        web3code.append("// show live transactions\n");
         web3code.append("docker ps\n");
+        web3code.append("docker logs <container-id> -f | grep -v eth_call\n\n");
+        web3code.append("// attach to testrpc container\n");
         web3code.append("docker exec -it <container-id> bash\n\n");
         web3code.append("// inside docker container\n");
         web3code.append("cd /usr/lib/node_modules/ethereumjs-testrpc\rnode\n\n");
