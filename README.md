@@ -7,9 +7,13 @@
 3. Start application
 4. Check state of smart contract
 
-## Run TestRPC Container
+## Build and Run TestRPC Container
 
 ```
+docker build docker_testrpc
+docker images -> image id
+docker tag <image-id> ethereum_testrpc:latest
+
 docker run -p 8545:8545 -d ethereum_testrpc
 ```
 
